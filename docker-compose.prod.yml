@@ -1,0 +1,46 @@
+# MyCTF — production stack for a small VPS.
+#
+#   cp .env.prod.example .env.prod   # then edit every value
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#
+# No ports are published: the API is reachable only through the Cloudflare
+# Tunnel (outbound connection), so there is nothing to attack on the VPS's
+# public IP.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    env_file: .env.prod
+    volumes:
+      - myctf_instance:/app/instance
+    restart: unless-stopped
+    # Hardening: read-only root filesystem, no extra privileges, resource caps.
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 768m
+    cpus: 1.5
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+    depends_on:
+      - app
+    restart: unless-stopped
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  myctf_instance:

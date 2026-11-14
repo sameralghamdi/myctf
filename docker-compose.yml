@@ -1,0 +1,20 @@
+# MyCTF: LOCAL Docker setup (one machine, not for the internet).
+# For a public server use docker-compose.prod.yml (see docs/DEPLOYMENT.md).
+#
+#   MYCTF_SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))") docker compose up --build
+#
+# The admin password is printed once in the logs unless MYCTF_ADMIN_PASSWORD is set.
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"     # this computer only
+    environment:
+      MYCTF_SECRET_KEY: "${MYCTF_SECRET_KEY:?Set MYCTF_SECRET_KEY (see the comment at the top of this file)}"
+      MYCTF_ADMIN_PASSWORD: "${MYCTF_ADMIN_PASSWORD:-}"
+    volumes:
+      - myctf_instance:/app/instance
+    restart: unless-stopped
+
+volumes:
+  myctf_instance:

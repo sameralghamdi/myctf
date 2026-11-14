@@ -1,0 +1,41 @@
+slug: reflected-xss
+name: Reflected XSS
+category: web
+difficulty: easy
+lab_kind: reflected_xss
+dynamic_flag: true
+est_minutes: 20
+sort: 4
+description: >
+  SearchHub echoes your query back into the page without escaping it. Craft a
+  payload that executes JavaScript in the page and calls the benign proof
+  function myctfSolve(). When it would run, the lab reveals the flag. (No cookie
+  theft — this is a harmless proof of execution.)
+objectives:
+  - Spot an unescaped reflection point
+  - Break out of the HTML context
+  - Execute script via a tag or an event handler
+hints:
+  - level: 1
+    cost: 0
+    body: Search for something like  <b>hi</b>  and view source — is it rendered as HTML?
+  - level: 2
+    cost: 10
+    body: The page defines a function myctfSolve(). Your payload needs to call it.
+  - level: 3
+    cost: 20
+    body: "Try  q=<script>myctfSolve()</script>  or  <img src=x onerror=myctfSolve()>"
+remediation: >
+  Contextually escape all output (HTML-encode by default), prefer templating that
+  auto-escapes, and deploy a strict Content-Security-Policy that forbids inline
+  script so a reflection cannot execute.
+walkthrough: >
+  The q parameter is reflected verbatim. Supplying
+  <img src=x onerror=myctfSolve()> (or a <script> tag) creates an executing
+  context that calls the proof function; the server-side checker recognises the
+  working payload and returns the flag.
+references:
+  - title: OWASP — Cross Site Scripting (XSS)
+    url: https://owasp.org/www-community/attacks/xss/
+  - title: OWASP — XSS Prevention Cheat Sheet
+    url: https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
