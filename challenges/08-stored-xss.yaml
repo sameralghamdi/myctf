@@ -1,0 +1,39 @@
+slug: stored-xss
+name: Stored XSS
+category: web
+difficulty: medium
+lab_kind: stored_xss
+dynamic_flag: true
+est_minutes: 25
+sort: 8
+description: >
+  DevBoard renders comments as raw HTML. Store a comment that executes script in
+  the moderator's browser (calling the benign myctfSolve() proof), then trigger
+  the moderator review to reveal the flag. Harmless proof of execution — no cookie
+  theft.
+objectives:
+  - Identify a stored, unescaped output sink
+  - Persist a payload that executes for another user
+  - Understand the impact of stored vs reflected XSS
+hints:
+  - level: 1
+    cost: 0
+    body: Post a comment containing HTML like <b>hi</b> and view the page source.
+  - level: 2
+    cost: 10
+    body: The page defines myctfSolve(). Store a comment that calls it, then open /admin.
+  - level: 3
+    cost: 20
+    body: "Post <img src=x onerror=myctfSolve()> then visit the moderator review (/admin)."
+remediation: >
+  Escape on output, sanitise stored HTML with an allow-list, and set a strict
+  Content-Security-Policy so inline script cannot run.
+walkthrough: >
+  Comments are rendered unescaped. Storing <img src=x onerror=myctfSolve()> means
+  that when the moderator views comments, the payload executes; the server-side
+  checker recognises the executing payload and reveals the flag.
+references:
+  - title: OWASP — Stored XSS
+    url: https://owasp.org/www-community/attacks/xss/
+  - title: PortSwigger — Stored XSS
+    url: https://portswigger.net/web-security/cross-site-scripting/stored

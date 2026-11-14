@@ -1,0 +1,37 @@
+slug: path-traversal
+name: Path Traversal
+category: web
+difficulty: easy
+lab_kind: path_traversal
+dynamic_flag: true
+est_minutes: 15
+sort: 6
+description: >
+  DocuView serves files from its docs/ directory by joining your input to the
+  base path. Escape that directory and read the flag file stored outside it.
+objectives:
+  - Identify a file parameter passed to a path join
+  - Use ../ sequences to traverse out of the base directory
+  - Locate and read a file outside the intended root
+hints:
+  - level: 1
+    cost: 0
+    body: The viewer reads docs/<file>. The file parameter is fully under your control.
+  - level: 2
+    cost: 5
+    body: Use ../ to climb above docs/. There is a secret/ directory next to it.
+  - level: 3
+    cost: 10
+    body: "Request  ?file=../secret/flag.txt"
+remediation: >
+  Canonicalise the resolved path and verify it stays within the intended root
+  (realpath + prefix check), or avoid filesystem paths entirely by mapping an
+  allow-list of ids to known files.
+walkthrough: >
+  The viewer does normpath(join('docs', file)). Supplying ../secret/flag.txt
+  resolves to secret/flag.txt, outside docs/, revealing the flag.
+references:
+  - title: OWASP — Path Traversal
+    url: https://owasp.org/www-community/attacks/Path_Traversal
+  - title: PortSwigger — Directory traversal
+    url: https://portswigger.net/web-security/file-path-traversal

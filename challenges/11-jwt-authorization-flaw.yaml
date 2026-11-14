@@ -1,0 +1,38 @@
+slug: jwt-authorization-flaw
+name: JWT Authorization Flaw
+category: web
+difficulty: medium
+lab_kind: jwt_flaw
+dynamic_flag: true
+est_minutes: 25
+sort: 11
+description: >
+  SecureApp gives you a signed JWT as the guest user. The admin endpoint's token
+  verifier trusts the token's own "alg" header. Forge an admin token using the
+  "alg: none" trick and access the admin console to capture the flag.
+objectives:
+  - Decode a JWT's header and payload
+  - Understand algorithm-confusion / alg=none
+  - Forge a token to escalate privileges
+hints:
+  - level: 1
+    cost: 0
+    body: A JWT is header.payload.signature, each Base64url. Decode the payload.
+  - level: 2
+    cost: 10
+    body: The verifier honours the header's alg. What if alg is "none"?
+  - level: 3
+    cost: 20
+    body: 'Build header {"alg":"none"} . payload {"role":"admin"} . (empty signature) and send it to /admin.'
+remediation: >
+  Never trust the token's alg header. Pin the algorithm server-side, reject
+  "none", and verify signatures with a vetted library and a strong key.
+walkthrough: >
+  Re-encode the token with header {"alg":"none"} and payload {"role":"admin"}, and
+  an empty signature. The flawed verifier accepts it without checking a signature,
+  granting admin and revealing the flag.
+references:
+  - title: Auth0 — Critical JWT vulnerabilities (alg=none)
+    url: https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/
+  - title: PortSwigger — JWT attacks
+    url: https://portswigger.net/web-security/jwt

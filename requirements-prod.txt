@@ -1,0 +1,30 @@
+# MyCTF — production stack target (see docs/ARCHITECTURE.md).
+#
+# The dev build (requirements.txt) runs the SAME application logic on Flask +
+# SQLite so it is fully runnable and testable without infrastructure. For a
+# production deployment, the data-access layer (app/models.py) and lab
+# orchestrator (app/labs/__init__.py) are the two seams designed to be swapped
+# to the components below. This file documents the intended versions.
+
+# --- API / app server ---
+# FastAPI is the production API framework; the Flask app maps 1:1 onto it.
+fastapi>=0.110
+uvicorn[standard]>=0.29
+gunicorn>=21.2
+
+# --- database ---
+SQLAlchemy>=2.0
+alembic>=1.13              # migrations (schema.sql is the dev equivalent)
+psycopg[binary]>=3.1       # PostgreSQL driver
+
+# --- cache / queues / rate limiting ---
+redis>=5.0
+
+# --- auth / crypto (production-grade) ---
+argon2-cffi>=23.1          # Argon2id password hashing (replaces PBKDF2)
+pyotp>=2.9                 # TOTP (dev uses a stdlib implementation)
+python-multipart>=0.0.9
+
+# --- lab orchestration ---
+docker>=7.0                # Docker SDK for ephemeral container labs
+# microVM isolation (Firecracker) is driven out-of-process; see ARCHITECTURE.md

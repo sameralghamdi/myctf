@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Achievements{% endblock %}
+{% block heading %}Achievements{% endblock %}
+{% block content %}
+<div class="grid cols-4">
+  {% for a in achievements %}
+  <div class="card" style="text-align:center;{{ '' if a['slug'] in earned else 'opacity:.45' }}">
+    <div style="font-size:30px">{{ '★' if a['slug'] in earned else '☆' }}</div>
+    <div style="font-weight:700;margin:6px 0 2px">{{ a['name'] }}</div>
+    <div class="muted tiny">{{ a['description'] }}</div>
+    {% if a['slug'] in earned %}<div class="badge solved" style="margin-top:8px">earned</div>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ code }} — MyCTF</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head><body>
+<div class="auth-wrap"><div class="auth-card card" style="text-align:center">
+  <div style="font-size:52px;font-family:var(--mono);color:var(--accent-text)">{{ code }}</div>
+  <p class="muted">{{ message or 'Something went wrong.' }}</p>
+  <a class="btn ghost" href="{{ url_for('core.index') }}">Go home</a>
+</div></div>
+</body></html>

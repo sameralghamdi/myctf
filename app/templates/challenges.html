@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% from "_components.html" import diff_badge, status_badge, empty_state %}
+{% block title %}Challenges{% endblock %}
+{% block heading %}Challenges{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('core.dashboard') }}">MyCTF</a>
+  <span class="sep">/</span> Challenges{% endblock %}
+{% block content %}
+
+<div class="toolbar">
+  <input class="search" id="f-search" placeholder="Search challenges…" oninput="applyFilters()">
+  <select id="f-cat" onchange="applyFilters()">
+    <option value="all">All categories</option>
+    {% for c in categories %}<option value="{{ c['slug'] }}">{{ c['name'] }}</option>{% endfor %}
+  </select>
+  <select id="f-diff" onchange="applyFilters()">
+    <option value="all">All difficulties</option>
+    <option value="very_easy">Very Easy</option><option value="easy">Easy</option>
+    <option value="medium">Medium</option><option value="hard">Hard</option>
+    <option value="insane">Insane</option>
+  </select>
+  <select id="f-status" onchange="applyFilters()">
+    <option value="all">All status</option>
+    <option value="new">New</option>
+    <option value="progress">In progress</option>
+    <option value="solved">Solved</option>
+  </select>
+</div>
+
+<div class="grid cols-3" id="chal-grid">
+  {% for c in challenges|sort(attribute='category') %}
+  <a class="card hover chal" style="display:block"
+     data-cat="{{ c.category }}" data-diff="{{ c.difficulty }}"
+     data-status="{{ c.status }}" data-name="{{ c.name|lower }}"
+     href="{{ url_for('core.challenge_page', slug=c.slug) }}">
+    <div class="spread" style="margin-bottom:var(--space-2)">
+      <span class="badge cat">{{ c.category_name }}</span>
+      {{ status_badge(c.status) }}
+    </div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:var(--space-2)">{{ c.name }}</div>
+    <div class="spread">
+      <div class="row" style="gap:var(--space-2)">
+        {{ diff_badge(c.difficulty, DIFFICULTY_LABELS) }}
+        {% if c.has_lab %}<span class="badge">live lab</span>{% endif %}
+      </div>
+      <span class="flag mono">{{ c.points }} pts</span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+
+<div id="empty" style="display:none">
+  {{ empty_state('🔍', 'No challenges match', 'Try clearing a filter or search term.') }}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function applyFilters(){
+  const q=document.getElementById('f-search').value.toLowerCase().trim();
+  const cat=document.getElementById('f-cat').value;
+  const diff=document.getElementById('f-diff').value;
+  const status=document.getElementById('f-status').value;
+  let shown=0;
+  document.querySelectorAll('#chal-grid .chal').forEach(el=>{
+    const ok = (cat==='all'||el.dataset.cat===cat)
+            && (diff==='all'||el.dataset.diff===diff)
+            && (status==='all'||el.dataset.status===status)
+            && (!q || el.dataset.name.includes(q));
+    el.style.display = ok ? '' : 'none';
+    if(ok) shown++;
+  });
+  document.getElementById('empty').style.display = shown ? 'none' : 'block';
+  document.getElementById('chal-grid').style.display = shown ? '' : 'none';
+}
+</script>
+{% endblock %}

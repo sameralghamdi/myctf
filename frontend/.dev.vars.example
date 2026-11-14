@@ -1,0 +1,12 @@
+# SERVER-SIDE variables for the Cloudflare Pages Function (functions/[[path]].ts).
+# They never reach the browser.
+#
+# Production: do NOT use a file. Enter both in the Cloudflare dashboard:
+#   Workers & Pages -> your project -> Settings -> Variables and Secrets
+#   (add ORIGIN_SECRET as type "Secret").
+# Local `wrangler pages dev` only: copy this file to .dev.vars (it is git-ignored).
+
+# Your Cloudflare Tunnel hostname for the Flask API.
+ORIGIN_URL=https://api.example.com
+# Must be identical to MYCTF_ORIGIN_SECRET in the server's .env.prod.
+ORIGIN_SECRET=

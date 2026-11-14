@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% from "_components.html" import stat_card, empty_state %}
+{% block title %}Admin{% endblock %}
+{% block heading %}Admin Panel{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('core.dashboard') }}">MyCTF</a>
+  <span class="sep">/</span> Admin{% endblock %}
+{% block content %}
+
+<div class="grid cols-4" style="margin-bottom:var(--space-6)">
+  {{ stat_card(stats.users, 'Users', icon='◉') }}
+  {{ stat_card(stats.challenges, 'Published', tone='accent', icon='⚑') }}
+  {{ stat_card(stats.solves, 'Solves', tone='success', icon='✓') }}
+  {{ stat_card(stats.running_labs, 'Running labs', icon='⌁') }}
+</div>
+
+<div class="tabs" id="admin-tabs">
+  <button class="active" onclick="showTab('t-challenges',this)">Challenges</button>
+  <button onclick="showTab('t-users',this)">Users</button>
+  <button onclick="showTab('t-labs',this)">Labs monitor</button>
+  <button onclick="showTab('t-audit',this)">Audit log</button>
+  <button onclick="showTab('t-analytics',this)">Analytics</button>
+</div>
+
+<!-- Challenges -->
+<div class="tab-panel active" id="t-challenges">
+  <div class="card">
+    <div class="spread">
+      <div><b>Challenge management</b>
+        <div class="muted small">Create, publish and validate challenges from manifests.</div></div>
+      <a class="btn" href="{{ url_for('admin.challenges') }}">Open manager →</a>
+    </div>
+  </div>
+</div>
+
+<!-- Users -->
+<div class="tab-panel" id="t-users">
+  <div class="card">
+    <table class="data">
+      <thead><tr><th>User</th><th>Role</th><th>Set role</th></tr></thead>
+      <tbody>
+      {% for u in users %}
+        <tr><td>{{ u['username'] }}<div class="tiny muted">{{ u['email'] }}</div></td>
+          <td><span class="badge cat">{{ u['role'] }}</span></td>
+          <td><select onchange="setRole({{ u['id'] }}, this.value)" style="width:auto">
+            {% for r in ['student','instructor','administrator'] %}
+            <option value="{{ r }}" {{ 'selected' if u['role']==r }}>{{ r }}</option>{% endfor %}
+          </select></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Labs monitor -->
+<div class="tab-panel" id="t-labs">
+  <div class="card">
+    <div class="spread" style="margin-bottom:var(--space-3)">
+      <b>Running labs</b>
+      <button class="btn secondary sm" onclick="sweep()">Sweep expired</button>
+    </div>
+    <table class="data">
+      <thead><tr><th>User</th><th>Challenge</th><th>Expires</th><th></th></tr></thead>
+      <tbody>
+      {% for l in running %}
+        <tr><td>{{ l['username'] }}</td><td>{{ l['challenge_name'] }}</td>
+          <td class="tiny muted">{{ l['expires_at'] }}</td>
+          <td><button class="btn secondary sm" onclick="restart('{{ l['id'] }}')">Restart</button></td></tr>
+      {% else %}<tr><td colspan="4"><div class="muted small">No running labs.</div></td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Audit -->
+<div class="tab-panel" id="t-audit">
+  <div class="card">
+    <table class="data">
+      <thead><tr><th>When</th><th>User</th><th>Action</th><th>Detail</th></tr></thead>
+      <tbody>
+      {% for a in audit %}
+        <tr><td class="tiny muted">{{ a['created_at'] }}</td><td>{{ a['username'] or '—' }}</td>
+          <td><span class="mono small">{{ a['action'] }}</span></td>
+          <td class="muted tiny">{{ a['detail'] }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Analytics -->
+<div class="tab-panel" id="t-analytics">
+  <div class="grid cols-2">
+    <div class="card"><b>Solves by category</b><div id="an-cat" class="muted small" style="margin-top:var(--space-3)">Loading…</div></div>
+    <div class="card"><b>Least-solved challenges</b><div id="an-hard" class="muted small" style="margin-top:var(--space-3)">Loading…</div></div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function showTab(id, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('#admin-tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(id==='t-analytics') loadAnalytics();
+}
+async function setRole(id, role){ await api(`/admin/api/users/${id}/role`,{method:'POST',body:{role}}); toast('Role updated','ok'); }
+async function restart(id){ const {ok,data}=await api(`/admin/api/labs/${id}/restart`,{method:'POST'}); toast(ok?'Lab restarted':'Error '+(data?.error||''), ok?'ok':'err'); if(ok) setTimeout(()=>location.reload(),600); }
+async function sweep(){ const {data}=await api('/admin/api/labs/sweep',{method:'POST'}); toast('Cleaned '+(data?.cleaned||0)+' labs','ok'); setTimeout(()=>location.reload(),600); }
+let _anLoaded=false;
+async function loadAnalytics(){
+  if(_anLoaded) return; _anLoaded=true;
+  const {data}=await api('/admin/api/analytics');
+  if(!data) return;
+  document.getElementById('an-cat').innerHTML = (data.solves_by_category||[])
+    .map(r=>`<div class="spread" style="padding:4px 0"><span>${r.category}</span><b class="mono">${r.solves}</b></div>`).join('')||'No data';
+  document.getElementById('an-hard').innerHTML = (data.least_solved||[])
+    .map(r=>`<div class="spread" style="padding:4px 0"><span>${r.name}</span><b class="mono">${r.solves}</b></div>`).join('')||'No data';
+}
+</script>
+{% endblock %}

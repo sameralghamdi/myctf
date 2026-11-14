@@ -1,0 +1,37 @@
+slug: linux-privesc
+name: Linux Permission Misconfiguration
+category: privesc
+difficulty: medium
+lab_kind: linux_privesc
+dynamic_flag: true
+est_minutes: 20
+sort: 15
+description: >
+  You have a shell as the low-privileged 'ops' user. A sudo misconfiguration lets
+  you run a command as root without a password. Use it to read a root-only file
+  and capture the flag.
+objectives:
+  - Enumerate sudo privileges
+  - Recognise a dangerous NOPASSWD rule
+  - Read a root-only file via the permitted command
+hints:
+  - level: 1
+    cost: 0
+    body: Try to `cat /root/flag.txt` directly — what happens? Then enumerate sudo.
+  - level: 2
+    cost: 10
+    body: Run `sudo -l` to see what you can run as root without a password.
+  - level: 3
+    cost: 20
+    body: "sudo allows cat as root — `sudo cat /root/flag.txt`."
+remediation: >
+  Grant sudo narrowly and avoid NOPASSWD for file-reading binaries. Any command
+  that can read arbitrary files as root is equivalent to full root access.
+walkthrough: >
+  `sudo -l` shows NOPASSWD for /usr/bin/cat. Although `cat /root/flag.txt` is
+  denied as ops, `sudo cat /root/flag.txt` runs as root and prints the flag.
+references:
+  - title: GTFOBins — sudo
+    url: https://gtfobins.github.io/
+  - title: Linux privilege escalation — sudo
+    url: https://book.hacktricks.xyz/linux-hardening/privilege-escalation

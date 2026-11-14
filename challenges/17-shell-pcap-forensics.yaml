@@ -1,0 +1,40 @@
+slug: shell-pcap-forensics
+name: "Terminal: Packet Forensics"
+category: forensics
+difficulty: medium
+lab_kind: shell_pcap_forensics
+dynamic_flag: true
+est_minutes: 20
+sort: 17
+description: |
+  Incident **IR-2291**: a workstation sent data to an unknown server, and the
+  network team captured the traffic.
+
+  From the analyst terminal, inspect `evidence/capture.pcap` with `tshark`, find
+  the stolen data and the key that protects it, then run the provided
+  `decode.py` script to recover the flag.
+objectives:
+  - Read a packet capture from the command line and filter by protocol
+  - Spot cleartext credentials in legacy protocols such as FTP
+  - Reverse a simple XOR + base64 exfiltration encoding with a script
+hints:
+  - level: 1
+    cost: 0
+    body: "`cat case-notes.txt` first. Then `tshark -r evidence/capture.pcap` shows every packet."
+  - level: 2
+    cost: 10
+    body: "Filter with `-Y http`: one POST request carries a `data=` value. That is the stolen, encoded text."
+  - level: 3
+    cost: 15
+    body: "The key is the FTP password (`-Y ftp`). Run `./decode.py <data> <key>`."
+remediation: >
+  FTP sends passwords in cleartext: replace it with SFTP. Do not reuse
+  passwords as encryption keys, and remember XOR with a short repeating key is
+  encoding, not encryption. Egress filtering and DLP would have blocked the upload.
+walkthrough: >
+  tshark -r evidence/capture.pcap -Y ftp shows PASS k4li-r0cks. -Y http shows a
+  POST to /upload.php with data=<base64>. ./decode.py <base64> k4li-r0cks prints
+  the flag.
+references:
+  - title: Wireshark - tshark manual page
+    url: https://www.wireshark.org/docs/man-pages/tshark.html
