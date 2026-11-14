@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — MyCTF</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head><body>
+<div class="auth-wrap"><div class="auth-card card">
+  <div class="brand"><div class="logo">M</div>
+    <div><b>MyCTF</b><span>Learn·Exploit·Capture</span></div></div>
+  <h1 style="text-align:center;margin:.2em 0">Sign in</h1>
+  {% for e in errors %}<div class="alert err">{{ e }}</div>{% endfor %}
+  <form method="post" action="{{ url_for('auth.login') }}{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}">
+    <label>Username or email</label>
+    <input name="username" value="{{ form.get('username','') }}" autofocus required>
+    <label>Password</label>
+    <input name="password" type="password" required>
+    {% if otp_required %}
+    <label>2FA code</label>
+    <input name="otp" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" required>
+    {% endif %}
+    <button class="btn" style="width:100%;margin-top:16px" type="submit">Sign in</button>
+  </form>
+  <div class="spread" style="margin-top:14px">
+    <a class="muted small" href="{{ url_for('auth.register_page') }}">Create account</a>
+    <a class="muted small" href="{{ url_for('auth.forgot_page') }}">Forgot password?</a>
+  </div>
+</div></div>
+</body></html>

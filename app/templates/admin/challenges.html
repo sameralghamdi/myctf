@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Manage Challenges{% endblock %}
+{% block heading %}Manage Challenges{% endblock %}
+{% block content %}
+<div class="card" style="margin-bottom:16px">
+  <table class="data">
+    <thead><tr><th>Name</th><th>Category</th><th>Difficulty</th><th>Lab</th><th>Points</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for c in challenges %}
+      <tr>
+        <td>{{ c['name'] }}<div class="tiny muted mono">{{ c['slug'] }}</div></td>
+        <td>{{ c['category_name'] }}</td>
+        <td><span class="badge {{ 've' if c['difficulty']=='very_easy' else 'e' if c['difficulty']=='easy' else 'm' if c['difficulty']=='medium' else 'h' if c['difficulty']=='hard' else 'i' }}">{{ DIFFICULTY_LABELS[c['difficulty']] }}</span></td>
+        <td class="mono tiny">{{ c['lab_kind'] }}</td>
+        <td class="flag mono">{{ c['points'] }}</td>
+        <td>{% if c['published'] %}<span class="badge solved">published</span>{% else %}<span class="badge">draft</span>{% endif %}</td>
+        <td><button class="btn ghost sm" onclick="togglePub({{ c['id'] }}, {{ 0 if c['published'] else 1 }})">
+          {{ 'Unpublish' if c['published'] else 'Publish' }}</button></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2 style="margin:0 0 8px">Publish from manifest</h2>
+  <p class="muted small">Paste a challenge manifest (JSON). It is validated and
+     unsafe configurations are rejected before publishing.</p>
+  <textarea id="manifest" rows="12" class="mono" style="font-size:13px">{
+  "slug": "demo-static",
+  "name": "Demo Static Challenge",
+  "category": "crypto",
+  "difficulty": "very_easy",
+  "lab_kind": "static",
+  "flag": "MYCTF{replace_with_your_own_flag}",
+  "description": "A simple static-flag demo.",
+  "hints": [{"level": 1, "cost": 0, "body": "The flag is right there."}]
+}</textarea>
+  <div class="row" style="margin-top:10px">
+    <button class="btn ghost" onclick="validateManifest()">Validate</button>
+    <button class="btn" onclick="publishManifest()">Validate &amp; Publish</button>
+  </div>
+  <div id="m-result" class="alert" style="display:none;margin-top:10px"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function parseManifest(){ try { return JSON.parse(document.getElementById('manifest').value); }
+  catch(e){ show('Invalid JSON: '+e.message,'err'); return null; } }
+function show(msg, kind){ const b=document.getElementById('m-result');
+  b.className='alert '+(kind==='ok'?'ok':'err'); b.textContent=msg; b.style.display='block'; }
+async function validateManifest(){ const m=parseManifest(); if(!m) return;
+  const {ok,data}=await api('/admin/api/challenges/validate',{method:'POST',body:m});
+  show(ok?('Valid: '+JSON.stringify(data.normalized)):('Rejected: '+data.error), ok?'ok':'err'); }
+async function publishManifest(){ const m=parseManifest(); if(!m) return;
+  const {ok,data}=await api('/admin/api/challenges/publish',{method:'POST',body:m});
+  show(ok?('Published (id '+data.challenge_id+').'):('Rejected: '+data.error), ok?'ok':'err');
+  if(ok) setTimeout(()=>location.reload(),900); }
+async function togglePub(id, pub){ await api(`/admin/api/challenges/${id}/publish`,{method:'POST',body:{published:!!pub}});
+  location.reload(); }
+</script>
+{% endblock %}

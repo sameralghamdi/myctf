@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_components.html" import stat_card, diff_badge, empty_state %}
+{% block title %}Profile{% endblock %}
+{% block heading %}Profile{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('core.dashboard') }}">MyCTF</a>
+  <span class="sep">/</span> Profile{% endblock %}
+{% block content %}
+
+<!-- stats header -->
+<div class="card" style="margin-bottom:var(--space-4)">
+  <div class="spread">
+    <div class="row" style="gap:var(--space-4)">
+      <div class="avatar" style="width:52px;height:52px;font-size:22px">{{ (user['username'] or '?')[0]|upper }}</div>
+      <div>
+        <div style="font-size:20px;font-weight:800">{{ user['display_name'] or user['username'] }}</div>
+        <div class="row" style="gap:var(--space-2);margin-top:4px">
+          <span class="badge cat">{{ user['role'] }}</span>
+          {% if user['email_verified'] %}<span class="badge solved">verified</span>
+          {% else %}<span class="badge">unverified</span>{% endif %}
+          {% if user['totp_secret'] %}<span class="badge">2FA on</span>{% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="row" style="gap:var(--space-6)">
+      <div class="center"><div class="stat"><div class="n accent">{{ score }}</div><div class="l">Points</div></div></div>
+      <div class="center"><div class="stat"><div class="n">#{{ rank or '—' }}</div><div class="l">Rank</div></div></div>
+      <div class="center"><div class="stat"><div class="n success">{{ solves|length }}</div><div class="l">Solves</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="grid cols-2">
+  <!-- solved challenges -->
+  <div class="card">
+    <div class="small muted" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-2)">Solved challenges</div>
+    {% if solves %}
+    <table class="data">
+      <tbody>
+      {% for s in solves %}
+        <tr>
+          <td><a href="{{ url_for('core.challenge_page', slug=s['slug']) }}">{{ s['name'] }}</a></td>
+          <td>{{ diff_badge(s['difficulty'], DIFFICULTY_LABELS) }}</td>
+          <td class="flag mono" style="text-align:right">+{{ s['points_awarded'] }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}{{ empty_state('⚑', 'No solves yet', 'Your captured flags will appear here.') }}{% endif %}
+  </div>
+
+  <!-- category breakdown + badges -->
+  <div class="card">
+    <div class="small muted" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-3)">Category breakdown</div>
+    {% for skill, s in skills.items() %}
+    <div class="skill">
+      <div class="top"><span>{{ skill }}</span>
+        <span class="muted">{{ s.solved }}/{{ s.total }}</span></div>
+      <div class="bar"><span style="width: {{ (100 * s.solved / s.total) if s.total else 0 }}%"></span></div>
+    </div>
+    {% endfor %}
+    <div class="small muted" style="text-transform:uppercase;letter-spacing:1px;margin:var(--space-6) 0 var(--space-2)">Badges</div>
+    <div class="row">
+      {% for a in achievements %}<span class="badge" title="{{ a['description'] }}">★ {{ a['name'] }}</span>
+      {% else %}<span class="muted small">None yet.</span>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

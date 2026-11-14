@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Learning Paths{% endblock %}
+{% block heading %}Learning Paths{% endblock %}
+{% block content %}
+<div class="grid cols-2">
+  {% for p in paths %}
+  <div class="card">
+    <div class="spread">
+      <div>
+        <span class="badge cat">{{ p.path['level'] }}</span>
+        <h2 style="margin:8px 0 4px">{{ p.path['name'] }}</h2>
+      </div>
+      <div class="stat" style="text-align:right">
+        <div class="n accent" style="font-size:22px">{{ p.done }}/{{ p.total }}</div>
+        <div class="l">done</div>
+      </div>
+    </div>
+    <p class="muted small">{{ p.path['description'] }}</p>
+    <div class="progress" style="margin:10px 0 14px">
+      <span style="width: {{ (100 * p.done / p.total) if p.total else 0 }}%"></span></div>
+    <div>
+      {% for it in p['items'] %}
+      <a class="spread" style="padding:8px 2px;border-bottom:1px solid var(--line)"
+         href="{{ url_for('core.challenge_page', slug=it['slug']) }}">
+        <span class="small">
+          {% if it['id'] in solved %}<span class="flag">✓</span>{% else %}<span class="muted">○</span>{% endif %}
+          {{ it['name'] }}</span>
+        <span class="badge {{ 've' if it['difficulty']=='very_easy' else 'e' if it['difficulty']=='easy' else 'm' if it['difficulty']=='medium' else 'h' if it['difficulty']=='hard' else 'i' }}">
+          {{ DIFFICULTY_LABELS[it['difficulty']] }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

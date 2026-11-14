@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% from "_components.html" import stat_card, diff_badge, progress_bar, empty_state %}
+{% block title %}Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block content %}
+
+<!-- stat row -->
+<div class="grid cols-4" style="margin-bottom:var(--space-4)">
+  {{ stat_card(score, 'Total score', tone='accent', icon='◆') }}
+  {{ stat_card('#' ~ (rank or '—'), 'Global rank', icon='≣') }}
+  {{ stat_card(completed ~ ' / ' ~ total, 'Challenges solved', tone='success',
+               sub=completion_pct ~ '% complete', icon='⚑') }}
+  {{ stat_card(streak, 'Day streak', sub=('keep it going' if streak else 'solve one today'), icon='✦') }}
+</div>
+
+<div class="grid cols-2">
+  <!-- continue where you left off -->
+  <div class="card">
+    <div class="small muted" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-2)">
+      Continue where you left off</div>
+    {% if in_progress %}
+      <div class="spread">
+        <div>
+          <div style="font-size:18px;font-weight:700">{{ in_progress['name'] }}</div>
+          <div class="row" style="margin-top:6px">
+            {{ diff_badge(in_progress['difficulty'], DIFFICULTY_LABELS) }}
+            <span class="badge cat">{{ in_progress['category_name'] }}</span>
+            <span class="flag mono small">{{ in_progress['points'] }} pts</span>
+          </div>
+        </div>
+        <a class="btn" href="{{ url_for('core.challenge_page', slug=in_progress['slug']) }}">Resume →</a>
+      </div>
+    {% elif recommended %}
+      <div class="spread">
+        <div>
+          <div style="font-size:18px;font-weight:700">{{ recommended['name'] }}</div>
+          <div class="muted small" style="margin-top:4px">Recommended next challenge</div>
+        </div>
+        <a class="btn" href="{{ url_for('core.challenge_page', slug=recommended['slug']) }}">Start →</a>
+      </div>
+    {% else %}
+      {{ empty_state('✓', 'All caught up', 'You have solved every published challenge.') }}
+    {% endif %}
+  </div>
+
+  <!-- recent solves -->
+  <div class="card">
+    <div class="small muted" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-2)">
+      Recent solves</div>
+    {% set solves = recent | selectattr('correct') | list %}
+    {% if solves %}
+    <table class="data">
+      <tbody>
+      {% for r in solves %}
+        <tr>
+          <td><a href="{{ url_for('core.challenge_page', slug=r['slug']) }}">{{ r['name'] }}</a></td>
+          <td style="text-align:right"><span class="badge solved">✓</span>
+            <span class="muted tiny">{{ r['created_at'] }}</span></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      {{ empty_state('⚑', 'No solves yet', 'Capture your first flag to see it here.') }}
+    {% endif %}
+  </div>
+</div>
+
+<!-- category progress -->
+<div class="card" style="margin-top:var(--space-4)">
+  <div class="small muted" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-3)">
+    Progress by category</div>
+  <div class="grid cols-2">
+    {% for skill, s in skills.items() %}
+    <div class="skill">
+      <div class="top"><span>{{ skill }}</span>
+        <span class="muted">{{ s.solved }}/{{ s.total }} · {{ s.earned }}/{{ s.available }} pts</span></div>
+      <div class="bar"><span style="width: {{ (100 * s.earned / s.available) if s.available else 0 }}%"></span></div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% if achievements %}
+<div class="card" style="margin-top:var(--space-4)">
+  <div class="small muted" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-3)">
+    Recent achievements</div>
+  <div class="row">
+    {% for a in achievements %}<span class="badge" title="{{ a['description'] }}">★ {{ a['name'] }}</span>{% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

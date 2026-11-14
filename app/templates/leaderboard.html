@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Scoreboard{% endblock %}
+{% block heading %}Scoreboard{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('core.dashboard') }}">MyCTF</a>
+  <span class="sep">/</span> Scoreboard{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="data">
+    <thead><tr><th>#</th><th>Player</th><th>Solves</th><th>Score</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr class="{{ 'me-row' if r['id']==me }}">
+        <td class="rank">{{ loop.index }}</td>
+        <td>{{ r['display_name'] or r['username'] }}{% if r['id']==me %} <span class="muted tiny">(you)</span>{% endif %}</td>
+        <td>{{ r['solves'] }}</td>
+        <td class="flag mono">{{ r['score'] }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">No solves recorded yet. Be the first.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

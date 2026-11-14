@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} — MyCTF</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head><body>
+<div class="auth-wrap"><div class="auth-card card" style="text-align:center">
+  <div class="brand" style="justify-content:center"><div class="logo">M</div>
+    <div><b>MyCTF</b><span>Learn·Exploit·Capture</span></div></div>
+  <h1 style="margin:.2em 0">{{ title }}</h1>
+  <p class="muted">{{ message }}</p>
+  {% if link %}
+  <div class="alert info" style="text-align:left;word-break:break-all">
+    <b>Dev mode (no mailer):</b> <a href="{{ link }}">{{ link }}</a></div>
+  {% endif %}
+  <a class="btn ghost" style="margin-top:10px" href="{{ url_for('auth.login_page') }}">Back to sign in</a>
+</div></div>
+</body></html>

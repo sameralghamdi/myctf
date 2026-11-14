@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Docs{% endblock %}
+{% block heading %}Documentation{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('core.dashboard') }}">MyCTF</a>
+  <span class="sep">/</span> Docs{% endblock %}
+{% block content %}
+<div class="docs-layout">
+  <nav class="docs-toc">
+    <div class="small muted" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:var(--space-2)">On this page</div>
+    <a href="#start">Getting started</a>
+    <a href="#how">How a challenge works</a>
+    <a href="#flags">Per-session flags</a>
+    <a href="#labs">Lab types</a>
+    <a href="#safety">Safety</a>
+  </nav>
+
+  <div class="docs-body">
+    <h1 id="start" style="margin-top:0">Getting started</h1>
+    <p class="muted">MyCTF teaches penetration testing through hands-on, isolated
+       labs. The loop is <b>Learn → Start Lab → Investigate → Exploit → Capture
+       Flag → Understand → Improve.</b></p>
+
+    <h2 id="how">How a challenge works</h2>
+    <ol class="muted">
+      <li>Open a challenge and read the objectives.</li>
+      <li>Click <span class="kbd">Start Lab</span> to spin up your own isolated instance with a unique flag.</li>
+      <li>Interact with the target in the right-hand pane (or open it in a new tab).</li>
+      <li>Find and exploit the vulnerability to reveal the flag (format <span class="flag">MYCTF{...}</span>).</li>
+      <li>Submit it on the left. Points are awarded once; a debrief with remediation unlocks.</li>
+    </ol>
+
+    <h2 id="flags">Per-session flags</h2>
+    <p class="muted">Each lab instance has its own flag tied to your account, so
+       sharing a flag never completes someone else's challenge. Validation happens
+       on the platform backend — exploiting a lab cannot shortcut scoring.</p>
+
+    <h2 id="labs">Lab types available</h2>
+    <div class="row">{% for k in live_kinds %}<span class="badge">{{ k }}</span>{% endfor %}</div>
+
+    <h2 id="safety">Safety</h2>
+    <p class="muted">All vulnerable behaviour is confined to intentionally isolated
+       training targets. Never point these techniques at systems you don't own or
+       have explicit permission to test.</p>
+    <p class="muted small">Adding new challenges? See
+       <span class="kbd">docs/ADDING_CHALLENGES.md</span> in the repository.</p>
+  </div>
+</div>
+{% endblock %}

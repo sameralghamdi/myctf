@@ -1,0 +1,40 @@
+{# Reusable UI partials (macros). Import with:
+   {% from "_components.html" import stat_card, diff_badge, status_badge, empty_state, progress_bar %}
+#}
+
+{# Difficulty → badge class (Easy=success, Medium=warning, Hard=danger, Insane=accent) #}
+{% macro diff_class(d) -%}
+{{ 've' if d=='very_easy' else 'e' if d=='easy' else 'm' if d=='medium' else 'h' if d=='hard' else 'i' }}
+{%- endmacro %}
+
+{% macro diff_badge(d, labels) -%}
+<span class="badge {{ diff_class(d) }}">{{ labels[d] }}</span>
+{%- endmacro %}
+
+{# status: 'solved' | 'progress' | 'new' #}
+{% macro status_badge(status) -%}
+{% if status == 'solved' %}<span class="badge solved">✓ Solved</span>
+{% elif status == 'progress' %}<span class="badge progress">◐ In progress</span>
+{% else %}<span class="badge newtag">New</span>{% endif %}
+{%- endmacro %}
+
+{% macro stat_card(value, label, tone='', sub='', icon='') -%}
+<div class="card pad-sm stat">
+  {% if icon %}<span class="stat-ic">{{ icon }}</span>{% endif %}
+  <div class="n {{ tone }}">{{ value }}</div>
+  <div class="l">{{ label }}</div>
+  {% if sub %}<div class="sub">{{ sub }}</div>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro progress_bar(done, total) -%}
+<div class="progress"><span style="width: {{ (100 * done / total) if total else 0 }}%"></span></div>
+{%- endmacro %}
+
+{% macro empty_state(icon, title, body='') -%}
+<div class="empty-state">
+  <div class="ico">{{ icon }}</div>
+  <h3>{{ title }}</h3>
+  {% if body %}<div class="small">{{ body }}</div>{% endif %}
+</div>
+{%- endmacro %}
