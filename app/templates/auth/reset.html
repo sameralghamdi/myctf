@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reset password — MyCTF</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head><body>
+<div class="auth-wrap"><div class="auth-card card">
+  <div class="brand"><div class="logo">M</div>
+    <div><b>MyCTF</b><span>Learn·Exploit·Capture</span></div></div>
+  <h1 style="text-align:center;margin:.2em 0">Set a new password</h1>
+  {% for e in errors %}<div class="alert err">{{ e }}</div>{% endfor %}
+  <form method="post" action="{{ url_for('auth.reset_password', token=token) }}">
+    <input type="hidden" name="token" value="{{ token }}">
+    <label>New password</label>
+    <input name="password" type="password" required minlength="10">
+    <button class="btn" style="width:100%;margin-top:16px" type="submit">Update password</button>
+  </form>
+  <div style="text-align:center;margin-top:14px">
+    <a class="muted small" href="{{ url_for('auth.login_page') }}">Back to sign in</a>
+  </div>
+</div></div>
+</body></html>

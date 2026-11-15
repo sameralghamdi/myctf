@@ -1,0 +1,37 @@
+slug: api-bola
+name: API — Broken Object Authorization
+category: api
+difficulty: medium
+lab_kind: bola_api
+dynamic_flag: true
+est_minutes: 15
+sort: 12
+description: >
+  ShopAPI authenticates callers with an API key but never checks that a requested
+  order belongs to you. Using your own key, read another user's order (5002) and
+  grab the confidential note.
+objectives:
+  - Authenticate to a REST API with a key
+  - Tamper with an object id (BOLA / OWASP API #1)
+  - Distinguish authentication from authorization
+hints:
+  - level: 1
+    cost: 0
+    body: Your key works for GET /api/orders/5001 (your order). Try another id.
+  - level: 2
+    cost: 5
+    body: The API checks your key but not whether the order is yours.
+  - level: 3
+    cost: 10
+    body: "GET /api/orders/5002 with the X-API-Key header; read the notes field."
+remediation: >
+  Enforce object-level authorization on every endpoint: verify the authenticated
+  principal owns or may access the object before returning it.
+walkthrough: >
+  Authenticated requests to /api/orders/<id> return any order. Requesting 5002
+  (not owned by guest) returns the corporate order whose note contains the flag.
+references:
+  - title: OWASP API Security — BOLA
+    url: https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/
+  - title: OWASP API Security Top 10
+    url: https://owasp.org/API-Security/

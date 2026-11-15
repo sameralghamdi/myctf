@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% from "_components.html" import diff_badge %}
+{% block title %}{{ c.name }}{% endblock %}
+{% block heading %}{{ c.name }}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('core.dashboard') }}">MyCTF</a>
+  <span class="sep">/</span> <a href="{{ url_for('core.challenges_page') }}">Challenges</a>
+  <span class="sep">/</span> {{ c.name }}{% endblock %}
+{% block container_class %}content-full{% endblock %}
+{% block content %}
+
+<!-- view toggle -->
+<div style="padding:var(--space-2) var(--space-6);border-bottom:1px solid var(--border);
+            display:flex;justify-content:flex-end">
+  <div class="toggle-group" id="view-toggle">
+    <button onclick="setView('brief-only')">Brief</button>
+    <button class="active" onclick="setView('')">Split</button>
+    <button onclick="setView('lab-only')">Lab</button>
+  </div>
+</div>
+
+<div class="play" id="play">
+  <!-- LEFT: brief + hints + sticky flag bar -->
+  <div class="brief">
+    <div class="row" style="margin-bottom:var(--space-3)">
+      {{ diff_badge(c.difficulty, DIFFICULTY_LABELS) }}
+      <span class="badge cat">{{ c.category_name }}</span>
+      <span class="flag mono">{{ c.points }} pts</span>
+      {% if c.solved %}<span class="badge solved">✓ Solved</span>{% endif %}
+    </div>
+    <p class="muted" style="white-space:pre-line">{{ c.description }}</p>
+
+    {% if c.objectives %}
+    <h2 style="font-size:13px;color:var(--accent-text);margin:var(--space-4) 0 6px">Objectives</h2>
+    <ul class="muted small" style="margin:0;padding-left:18px">
+      {% for o in c.objectives %}<li>{{ o }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if c.references %}
+    <h2 style="font-size:13px;color:var(--accent-text);margin:var(--space-4) 0 6px">Resources</h2>
+    <ul class="small" style="margin:0;padding-left:18px">
+      {% for r in c.references %}<li><a href="{{ r.url }}" target="_blank" rel="noopener">{{ r.title }}</a></li>{% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if c.hints %}
+    <h2 style="font-size:13px;color:var(--accent-text);margin:var(--space-4) 0 6px">Hints</h2>
+    {% for h in c.hints %}
+    <details class="hint {{ 'locked' if not h.unlocked }}" {% if h.unlocked %}open{% endif %}
+             {% if not h.unlocked %}onclick="if(!this.dataset.done){event.preventDefault();Challenge.unlockHint({{ h.level }}, null);this.dataset.done=1;this.open=true;}"{% endif %}>
+      <summary style="cursor:pointer;list-style:none">
+        <span class="small"><b>Hint {{ h.level }}</b>
+          {% if h.cost %}<span class="badge" style="color:var(--warning)">−{{ h.cost }} pts</span>
+          {% else %}<span class="muted tiny">free</span>{% endif %}
+          {% if not h.unlocked %}<span class="muted tiny"> · tap to reveal</span>{% endif %}
+        </span>
+      </summary>
+      <div id="hint-body-{{ h.level }}" class="muted small" style="margin-top:6px">{{ h.body or '' }}</div>
+    </details>
+    {% endfor %}
+    {% endif %}
+
+    {% if c.solved and (c.remediation or c.walkthrough) %}
+    <div class="card pad-sm" style="margin-top:var(--space-4)">
+      <h2 style="font-size:13px;color:var(--success);margin:0 0 6px">✓ Debrief</h2>
+      {% if c.walkthrough %}<p class="small"><b>How it works:</b> {{ c.walkthrough }}</p>{% endif %}
+      {% if c.remediation %}<p class="small"><b>Remediation:</b> {{ c.remediation }}</p>{% endif %}
+    </div>
+    {% endif %}
+
+    <div style="flex:1"></div>
+
+    <!-- sticky flag submission bar -->
+    <div class="flag-bar">
+      <form onsubmit="Challenge.submitFlag(event)">
+        <input id="flag-input" placeholder="MYCTF{...}" autocomplete="off" {{ 'disabled' if c.solved }}>
+        <button class="btn" type="submit" {{ 'disabled' if c.solved }}>
+          {{ 'Solved ✓' if c.solved else 'Submit' }}</button>
+      </form>
+      <div id="submit-result" class="alert" style="display:none;margin-bottom:0"></div>
+      <div class="muted tiny" style="margin-top:6px">Attempts: {{ c.attempts }}</div>
+    </div>
+  </div>
+
+  <div class="resizer" id="resizer"></div>
+
+  <!-- RIGHT: live lab -->
+  <div class="lab" id="lab-pane">
+    {% if c.lab %}
+    <div class="lab-toolbar">
+      <span class="dot run"></span> <span>running</span>
+      <span class="mono">{{ c.lab.instance_id[:8] }}</span>
+      <span class="muted">· expires {{ c.lab.expires_at }}</span>
+      <span style="margin-left:auto" class="row">
+        <a class="btn ghost sm" href="{{ c.lab.url }}" target="_blank" rel="noopener">Open in tab ↗</a>
+        <button class="btn ghost sm" onclick="Challenge.resetLab('{{ c.lab.instance_id }}')">Restart</button>
+        <button class="btn danger sm" onclick="Challenge.stopLab('{{ c.lab.instance_id }}')">Stop</button>
+      </span>
+    </div>
+    <iframe src="{{ c.lab.url }}" title="lab"></iframe>
+    {% else %}
+    <div class="lab-placeholder">
+      <div>
+        <div style="font-size:40px;margin-bottom:var(--space-2)">⌁</div>
+        {% if c.has_lab %}
+        <p class="terminal-line cursor">Start the lab to launch your isolated target</p>
+        <button class="btn" style="margin-top:var(--space-3)" onclick="Challenge.startLab()">▶ Start Lab</button>
+        {% else %}
+        <p class="muted">This challenge is solved without a live lab.</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+Challenge.slug = {{ c.slug|tojson }};
+function setView(mode){
+  const play=document.getElementById('play');
+  play.classList.remove('brief-only','lab-only');
+  if(mode) play.classList.add(mode);
+  document.querySelectorAll('#view-toggle button').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+// drag-to-resize the split
+(function(){
+  const r=document.getElementById('resizer'), play=document.getElementById('play');
+  let drag=false;
+  r.addEventListener('mousedown',()=>{drag=true;document.body.style.userSelect='none';});
+  window.addEventListener('mouseup',()=>{drag=false;document.body.style.userSelect='';});
+  window.addEventListener('mousemove',e=>{
+    if(!drag) return;
+    const x=Math.min(Math.max(e.clientX,280),Math.min(720,window.innerWidth-320));
+    play.style.setProperty('--play-left', x+'px');
+  });
+})();
+</script>
+{% endblock %}

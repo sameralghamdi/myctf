@@ -1,0 +1,22 @@
+# MyCTF API — production image (gunicorn). Used by docker-compose.prod.yml.
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt "gunicorn>=22,<24"
+
+COPY . .
+
+# Non-root runtime user; the SQLite database lives in /app/instance (a volume).
+RUN useradd -m myctf && mkdir -p /app/instance && chown -R myctf:myctf /app
+USER myctf
+
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s \
+  CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=4).status == 200 else 1)"
+
+# ONE worker on purpose: lab state and the rate limiter live in process memory.
+# Threads give concurrency; see docs/DEPLOYMENT.md before changing this.
+CMD ["gunicorn", "wsgi:app", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "8", "--timeout", "60", "--access-logfile", "-"]

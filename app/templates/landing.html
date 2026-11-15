@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MyCTF — Learn. Exploit. Capture.</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head><body>
+<div class="content" style="max-width:980px;margin:0 auto">
+  <div class="spread" style="padding:18px 0">
+    <div class="brand"><div class="logo">M</div>
+      <div><b>MyCTF</b><span>Learn·Exploit·Capture</span></div></div>
+    <div class="row">
+      <a class="btn ghost sm" href="{{ url_for('auth.login_page') }}">Sign in</a>
+      <a class="btn sm" href="{{ url_for('auth.register_page') }}">Create account</a>
+    </div>
+  </div>
+
+  <div class="hero">
+    <p class="tag">Learn · Exploit · Capture</p>
+    <h1>Hands-on <span class="grad">penetration testing</span><br>in isolated labs.</h1>
+    <p class="muted" style="max-width:560px;margin:14px auto 0">
+      Exploit intentionally vulnerable targets, capture flags, and learn exactly
+      why each attack works — then how to defend against it. From HTTP basics to
+      multi-step web exploitation.</p>
+    <div class="row" style="justify-content:center;margin-top:22px">
+      <a class="btn" href="{{ url_for('auth.register_page') }}">Start hacking →</a>
+      <a class="btn ghost" href="{{ url_for('auth.login_page') }}">I have an account</a>
+    </div>
+  </div>
+
+  <div class="grid cols-4" style="margin:10px 0 30px">
+    <div class="card stat"><div class="n accent">{{ stats.challenges }}</div><div class="l">Challenges</div></div>
+    <div class="card stat"><div class="n accent">{{ stats.users }}</div><div class="l">Hackers</div></div>
+    <div class="card stat"><div class="n success">{{ stats.solves }}</div><div class="l">Flags captured</div></div>
+    <div class="card stat"><div class="n">6</div><div class="l">Categories</div></div>
+  </div>
+
+  <div class="grid cols-3" style="margin-bottom:40px">
+    <div class="card"><h2 style="color:var(--accent-text);margin-top:0">Real targets</h2>
+      <p class="muted small">Every lab is a live, exploitable app — SQLi, XSS, IDOR,
+        path traversal, command injection and more. No multiple-choice quizzes.</p></div>
+    <div class="card"><h2 style="color:var(--accent-text);margin-top:0">Isolated & safe</h2>
+      <p class="muted small">Each instance is private to you with a per-session flag.
+        Vulnerable code never touches the platform itself.</p></div>
+    <div class="card"><h2 style="color:var(--success);margin-top:0">Learn the defense</h2>
+      <p class="muted small">After each capture, a debrief explains the root cause and
+        the remediation that would have stopped it.</p></div>
+  </div>
+</div>
+</body></html>

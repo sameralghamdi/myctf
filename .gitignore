@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+instance/*.sqlite3
+instance/*.sqlite3-*
+.env
+.pytest_cache/
+.DS_Store
+
+# production secrets + frontend build output
+.env.prod
+frontend/node_modules/
+frontend/dist/
+frontend/.wrangler/

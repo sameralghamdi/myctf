@@ -1,0 +1,40 @@
+slug: insecure-file-upload
+name: Insecure File Upload
+category: web
+difficulty: medium
+lab_kind: file_upload
+dynamic_flag: true
+est_minutes: 20
+sort: 9
+description: >
+  ProfilePix says it accepts images only, but performs no real server-side
+  validation. Upload a server-side script instead of an image; the server would
+  serve it as executable, revealing the flag. (Nothing is actually written or
+  run — it's a safe simulation.)
+objectives:
+  - Recognise client-side-only file validation
+  - Upload executable content past an image-only control
+  - Understand why uploads must be validated by content on the server
+hints:
+  - level: 1
+    cost: 0
+    body: The "images only" rule is not enforced on the server. What else can you send?
+  - level: 2
+    cost: 5
+    body: Try uploading a file with a server-script extension instead of an image.
+  - level: 3
+    cost: 10
+    body: "Upload a file named shell.php (any content)."
+remediation: >
+  Validate uploads server-side by content (magic bytes), enforce a safe-extension
+  allow-list, store outside the web root with randomised names, and never serve
+  user uploads as executable code.
+walkthrough: >
+  The uploader accepts any file. Uploading shell.php is accepted and treated as
+  executable in the simulation, revealing the flag — demonstrating that missing
+  server-side validation enables remote code execution.
+references:
+  - title: OWASP — Unrestricted File Upload
+    url: https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload
+  - title: OWASP — File Upload Cheat Sheet
+    url: https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html

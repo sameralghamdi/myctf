@@ -1,0 +1,11 @@
+# MyCTF — dev runtime (this is what the running application needs).
+# The app is intentionally dependency-light so it runs anywhere Python 3.11+ is
+# available, with SQLite from the stdlib. See requirements-prod.txt for the
+# production stack (PostgreSQL/Redis/containers).
+
+Flask>=3.0,<4.0
+PyJWT>=2.8,<3.0
+PyYAML>=6.0,<7.0
+
+# Testing
+pytest>=8.0

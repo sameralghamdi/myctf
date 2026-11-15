@@ -1,0 +1,52 @@
+/* MyCTF — THEME TOKENS (single source of truth for color & spacing).
+   Dark red theme. Every other stylesheet consumes these variables; no raw
+   color literals live outside this file. WCAG AA contrast noted per token. */
+:root {
+  /* --- surfaces --- */
+  --bg:            #0E0A0B;  /* page background, near-black with red tint */
+  --surface:       #1A1214;  /* cards, panels, sidebar */
+  --surface-2:     #241A1C;  /* hover / raised / input background */
+  --border:        #3A2A2D;  /* subtle borders, dividers */
+
+  /* --- text --- */
+  --text:          #F2E9EA;  /* main text — 16.5:1 on --bg */
+  --text-muted:    #A8999B;  /* secondary text — 7.2:1 on --bg */
+
+  /* --- accents --- */
+  --accent:        #E5484D;  /* icons, active borders, focus rings — 5.0:1 */
+  --accent-text:   #F06A6E;  /* links & highlighted text — 6.6:1 */
+  --btn:           #C3262F;  /* primary button fill — WHITE text only (5.8:1) */
+  --btn-hover:     #A81E26;
+
+  /* --- status --- */
+  --success:       #3FB950;  /* solved / correct flag */
+  --warning:       #D29922;  /* hints, timers, rate-limited */
+  --danger:        #F85149;  /* wrong flag, errors */
+
+  /* --- derived UI tokens (red-family only) --- */
+  --accent-weak:   rgba(229, 72, 77, 0.12);   /* active nav / subtle fills */
+  --accent-line:   rgba(229, 72, 77, 0.38);   /* accent borders */
+  --success-weak:  rgba(63, 185, 80, 0.12);
+  --warning-weak:  rgba(210, 153, 34, 0.12);
+  --danger-weak:   rgba(248, 81, 73, 0.12);
+  --on-btn:        #FFFFFF;                    /* text on --btn / --btn-hover */
+  --ring:          0 0 0 3px rgba(229, 72, 77, 0.45); /* focus ring */
+  --shadow:        0 10px 34px rgba(0, 0, 0, 0.45);
+
+  /* --- shape --- */
+  --radius:        10px;
+  --radius-sm:     7px;
+  --radius-pill:   999px;
+
+  /* --- spacing scale (use ONLY these) --- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-6: 24px; --space-8: 32px;
+
+  /* --- type --- */
+  --mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* --- layout --- */
+  --sidebar-w: 236px;
+  --content-max: 1160px;
+}

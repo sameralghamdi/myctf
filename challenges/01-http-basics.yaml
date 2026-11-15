@@ -1,0 +1,41 @@
+slug: http-basics
+name: HTTP Basics
+category: web
+difficulty: very_easy
+lab_kind: http_basics
+dynamic_flag: true
+est_minutes: 10
+sort: 1
+description: >
+  Every web attack is built on HTTP. Learn to control the request method and
+  headers by hand. The lab's flag endpoint only answers a specific method and a
+  specific header — read the hints the server gives you in its responses.
+objectives:
+  - Understand HTTP methods (GET vs POST)
+  - Send custom request headers
+  - Read response headers and status codes
+hints:
+  - level: 1
+    cost: 0
+    body: The index page tells you exactly which method and header are required.
+  - level: 2
+    cost: 5
+    body: >
+      GET the flag endpoint and you'll get 405 Method Not Allowed with an Allow
+      header. Switch to POST.
+  - level: 3
+    cost: 10
+    body: "Send: POST /flag with header  X-MyCTF-Access: let-me-in"
+remediation: >
+  This is a teaching exercise, not a vulnerability. The lesson is that clients
+  fully control method and headers — never trust them for security decisions on
+  the server without validation.
+walkthrough: >
+  Open the lab, read the instructions, then issue
+  `curl -X POST <lab>/flag -H 'X-MyCTF-Access: let-me-in'`. The flag is returned
+  in the response body. Wrong attempts return an X-Hint response header.
+references:
+  - title: MDN — HTTP request methods
+    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
+  - title: MDN — HTTP headers
+    url: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
