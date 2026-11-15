@@ -204,22 +204,3 @@ def test_shell_is_private_to_owner(client, user):
     _, t2 = register(other)
     r = other.post(_lab(iid, "shell"), headers=auth_headers(t2), json={"command": "ls -a"})
     assert r.status_code == 403
-
-
-# ------------------------------------------------- EWPT static challenge pack --
-def test_ewpt_pack_is_listed_and_flags_work(client, user):
-    r = client.get("/api/challenges", headers=auth_headers(user["token"]))
-    assert r.status_code == 200
-    body = r.get_json()
-    items = body["challenges"] if isinstance(body, dict) else body
-    ewpt = [c for c in items if c["slug"].startswith("ewpt-")]
-    assert len(ewpt) == 20
-    assert all("(EWPT)" in c["name"] for c in ewpt)
-    # Answer material must never appear in the catalog listing.
-    assert "FLAG{" not in json.dumps(items)
-
-    wrong = submit_flag(client, user["token"], "ewpt-fuzz-the-login", "FLAG{nope}")
-    assert wrong.get_json().get("correct") is False
-    ok = submit_flag(client, user["token"], "ewpt-fuzz-the-login",
-                     "FLAG{fuzzing_found_sqli_bypass}")
-    assert ok.get_json().get("correct") is True

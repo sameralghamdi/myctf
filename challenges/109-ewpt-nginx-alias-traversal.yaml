@@ -2,18 +2,22 @@ slug: ewpt-nginx-alias-traversal
 name: Nginx Alias Traversal (EWPT)
 category: web
 difficulty: medium
-lab_kind: static
-flag: FLAG{nginx_alias_traversal}
+lab_kind: ewpt_109
 est_minutes: 20
 sort: 109
-description: |-
-  `http://nginx.lab.local:5000/static/` serves static files. The nginx `alias` directive is misconfigured.
+description: '`http://nginx.lab.local:5000/static/` serves static files. The nginx `alias` directive is
+  misconfigured.
+
 
   **Objective:** Use alias traversal to read `/flag.txt`.
 
+
   **Exam topics:** nginx 1.25.1; configuration/deployment management; alias traversal.
 
-  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+
+  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
+  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
+  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
 objectives:
 - Recognise the off-by-slash alias misconfiguration
 - Send a request that is not normalized away by the client
@@ -32,3 +36,4 @@ walkthrough: curl --path-as-is "http://nginx.lab.local:5000/static../flag.txt" r
 references:
 - title: OWASP WSTG - Configuration and Deployment Management Testing
   url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/
+dynamic_flag: true

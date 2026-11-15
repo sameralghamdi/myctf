@@ -20,7 +20,7 @@ Learn → Start Lab → Investigate → Exploit → Capture Flag → Understand 
 
 ## What this repository contains
 
-A **fully runnable, fully tested** implementation of the platform core and seven
+A **fully runnable, fully tested** implementation of the platform core and 37
 interactive challenges, built on a deliberately dependency-light stack
 (**Flask + SQLite + Python stdlib crypto**) so it runs and passes its test suite
 anywhere, with **no infrastructure to provision**.
@@ -40,7 +40,7 @@ and the code is structured around the two seams (`app/models.py`,
 > **logical** isolation (per-user, per-session instances; unguessable routing
 > tokens; ownership checks; backend-only flag validation).
 
-### Implemented & verified — all 15 seed challenges
+### Original seed challenges
 
 | # | Challenge | Category | Difficulty | Live lab | Verified by |
 |---|-----------|----------|-----------|:--------:|-------------|
@@ -62,12 +62,27 @@ and the code is structured around the two seams (`app/models.py`,
 
 Every challenge above has an **end-to-end test that performs the intended exploit
 against the live lab, captures the per-session flag, submits it, and asserts the
-award** — a challenge is not counted as done unless its test passes. **50 tests**
-pass in total.
+award** — a challenge is not counted as done unless its test passes.
 
 Two new live-lab engines were added alongside these: a safe **simulated shell**
 (`app/labs/fakeshell.py`) backing the browser-terminal Linux challenges, and a
 reused XSS execution checker for the stored-XSS moderator simulation.
+
+### EWPT terminal collection
+
+The project includes **20 EWPT terminal challenges (101–120)** alongside the
+17 existing challenges, for **37 total**. Every new challenge opens the existing
+browser terminal and uses a private, dynamic `MYCTF{...}` flag. Start a lab and
+run `cat README.txt` for its scope and commands. No external lab hosts are needed.
+
+The targets, tools, DNS, SSH, RDP and downloaded archives are simulated in memory,
+using the same model as the original terminal labs. They do not launch operating
+system commands or make network requests. RDP authentication mounts virtual
+desktop files; it does not open a graphical desktop.
+
+See [EWPT terminal guide](docs/EWPT_TERMINALS.md) for the challenge list, supported
+commands and installation notes. `tests/test_ewpt.py` solves and submits every new
+challenge through the API and checks failure cases, isolation and reset behavior.
 
 Platform features implemented: registration / login / logout, JWT-over-sessions
 auth with revocation, password reset, email-verification flow, optional TOTP 2FA,

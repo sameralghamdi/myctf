@@ -4,18 +4,22 @@ category: api
 category_name: API Security
 skill: API Security
 difficulty: medium
-lab_kind: static
-flag: FLAG{fastapi_openapi_docs_leak}
+lab_kind: ewpt_105
 est_minutes: 20
 sort: 105
-description: |-
-  `http://api.lab.local:8000/` returns `{"info":"Visit the /docs endpoint for the OpenAPI UI"}`. The Server header is `uvicorn`. The API documentation is exposed in production.
+description: '`http://api.lab.local:8000/` returns `{"info":"Visit the /docs endpoint for the OpenAPI
+  UI"}`. The Server header is `uvicorn`. The API documentation is exposed in production.
+
 
   **Objective:** Inspect the OpenAPI schema, find a hidden admin endpoint, and retrieve the flag.
 
+
   **Exam topics:** Server-side language detection; FastAPI/uvicorn; OpenAPI UI; the /docs endpoint.
 
-  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+
+  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
+  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
+  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
 objectives:
 - Fingerprint the stack from response headers
 - Read an exposed OpenAPI schema
@@ -39,3 +43,4 @@ walkthrough: 'curl http://api.lab.local:8000/openapi.json reveals /api/v1/admin/
 references:
 - title: OWASP API Security Top 10
   url: https://owasp.org/API-Security/
+dynamic_flag: true

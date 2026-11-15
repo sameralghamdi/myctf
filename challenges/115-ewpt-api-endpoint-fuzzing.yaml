@@ -4,18 +4,22 @@ category: api
 category_name: API Security
 skill: API Security
 difficulty: medium
-lab_kind: static
-flag: FLAG{api_fuzzing_debug_endpoint}
+lab_kind: ewpt_115
 est_minutes: 25
 sort: 115
-description: |-
-  `http://api-fuzz.lab.local/api/FUZZ` hides a debug endpoint. The debug endpoint returns the flag only for `127.0.0.1`.
+description: '`http://api-fuzz.lab.local/api/FUZZ` hides a debug endpoint. The debug endpoint returns
+  the flag only for `127.0.0.1`.
+
 
   **Objective:** Fuzz API paths to find the debug endpoint, then spoof localhost using a header.
 
+
   **Exam topics:** Fuzzing random inputs; endpoint discovery; API enumeration.
 
-  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+
+  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
+  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
+  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
 objectives:
 - Fuzz API paths with a wordlist
 - Filter results by status code
@@ -26,13 +30,14 @@ hints:
   body: Use ffuf with an API wordlist.
 - level: 2
   cost: 5
-  body: Look for 200 responses.
+  body: 'Use -mc all or -mc 200,403: a 403 still reveals an existing protected endpoint.'
 - level: 3
   cost: 10
   body: 'Try X-Forwarded-For: 127.0.0.1.'
 remediation: Do not trust forwarding headers; disable debug endpoints; authenticate APIs.
-walkthrough: 'ffuf -u http://api-fuzz.lab.local/api/FUZZ -w api-wordlist.txt finds /api/debug. curl -H
-  ''X-Forwarded-For: 127.0.0.1'' http://api-fuzz.lab.local/api/debug returns the flag.'
+walkthrough: 'ffuf -u http://api-fuzz.lab.local/api/FUZZ -w api-wordlist.txt -mc 200,403 reveals /api/debug
+  with 403. curl -H "X-Forwarded-For: 127.0.0.1" http://api-fuzz.lab.local/api/debug returns the flag.'
 references:
 - title: OWASP API Security Top 10
   url: https://owasp.org/API-Security/
+dynamic_flag: true

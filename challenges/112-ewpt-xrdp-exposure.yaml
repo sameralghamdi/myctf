@@ -2,18 +2,23 @@ slug: ewpt-xrdp-exposure
 name: XRDP Exposure (EWPT)
 category: network
 difficulty: easy
-lab_kind: static
-flag: FLAG{xrdp_exposed_weak_password}
+lab_kind: ewpt_112
 est_minutes: 15
 sort: 112
-description: |-
-  Nmap shows `3389/tcp open ms-wbt-server xrdp` on `xrdp.lab.local`. The challenge file contains weak credentials.
+description: 'Nmap shows `3389/tcp open ms-wbt-server xrdp` on `xrdp.lab.local`. The challenge file contains
+  weak credentials.
 
-  **Objective:** Connect via RDP and read the flag on the desktop.
+
+  **Objective:** Authenticate with the simulated `xfreerdp` client, then read `~/Desktop/flag.txt` in
+  the terminal. This lab mounts desktop files after authentication; it does not open a graphical desktop.
+
 
   **Exam topics:** Port 3389; ms-wbt-server; xrdp; service enumeration.
 
-  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+
+  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
+  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
+  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
 objectives:
 - Identify RDP/xrdp from a port scan
 - Connect with an RDP client
@@ -29,7 +34,9 @@ hints:
   cost: 10
   body: Check the desktop for flag.txt.
 remediation: Restrict RDP/xrdp to a VPN, enforce MFA, use strong passwords.
-walkthrough: xfreerdp /v:xrdp.lab.local /u:ctf /p:ctf, then open flag.txt on the desktop.
+walkthrough: xfreerdp /v:xrdp.lab.local /u:ctf /p:ctf authenticates and mounts the virtual desktop. Then
+  cat ~/Desktop/flag.txt.
 references:
 - title: Nmap service detection
   url: https://nmap.org/book/man-version-detection.html
+dynamic_flag: true

@@ -37,6 +37,7 @@ class FakeShell:
         self.files = dict(files)                 # abspath -> content (str)
         self.user = user
         self.home = home
+        self.program_cwd = home
         self.host = host
         self.root_only = set(root_only or set())  # paths readable only as root
         self.sudo = list(sudo_nopasswd or [])     # binaries allowed via sudo
@@ -160,6 +161,7 @@ class FakeShell:
 
         program, pargs = self._find_program(cwd, cmd, args)
         if program is not None:
+            self.program_cwd = cwd
             out, err = program(self, pargs, stdin, as_root)
             return out, err, cwd
 

@@ -6,6 +6,7 @@ downloadable artifact or a pure-analysis task).
 """
 from __future__ import annotations
 
+from .ewpt import EWPT_SCENARIOS
 from .bola import BolaApiLab
 from .cmdinjection import CommandInjectionLab
 from .crypto import EncodingLab
@@ -38,7 +39,7 @@ _HANDLERS = {
         FileUploadLab(),
         PcapLab(),
         # Terminal challenges are data-driven: one handler per scenario.
-        *(ShellLab(scenario) for scenario in SCENARIOS),
+        *(ShellLab(scenario) for scenario in (*SCENARIOS, *EWPT_SCENARIOS)),
     ]
 }
 

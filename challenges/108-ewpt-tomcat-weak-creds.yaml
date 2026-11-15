@@ -2,18 +2,22 @@ slug: ewpt-tomcat-weak-creds
 name: Tomcat Manager Weak Credentials (EWPT)
 category: web
 difficulty: medium
-lab_kind: static
-flag: FLAG{tomcat_manager_weak_creds}
+lab_kind: ewpt_108
 est_minutes: 20
 sort: 108
-description: |-
-  `http://tomcat.lab.local:8080/manager/html` is exposed. The flag is in an HTML comment on the manager page after login.
+description: '`http://tomcat.lab.local:8080/manager/html` is exposed. The flag is in an HTML comment on
+  the manager page after login.
+
 
   **Objective:** Find weak Tomcat manager credentials and access the manager page.
 
+
   **Exam topics:** Tomcat 8.5.19; service enumeration; weak credentials; manager app.
 
-  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+
+  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
+  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
+  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
 objectives:
 - Enumerate an exposed management interface
 - Test common default credentials
@@ -29,8 +33,9 @@ hints:
   cost: 10
   body: Look at the page source after login.
 remediation: Remove the manager app from production; use strong passwords; restrict by network.
-walkthrough: Log in to /manager/html with the weak credentials, then view the page source to find the
-  flag in an HTML comment.
+walkthrough: 'curl -i http://tomcat.lab.local:8080/manager/html shows Basic authentication. Try common
+  defaults: curl -u tomcat:tomcat http://tomcat.lab.local:8080/manager/html. Read the HTML comment.'
 references:
 - title: OWASP WSTG - Test Default Credentials
   url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/04-Authentication_Testing/02-Testing_for_Default_Credentials
+dynamic_flag: true

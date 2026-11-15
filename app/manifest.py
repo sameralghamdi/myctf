@@ -8,7 +8,7 @@ Safety checks (the "reject unsafe configurations" requirement):
   * difficulty must be known; points default from the difficulty table;
   * lab_kind must be either 'static' or a registered live lab;
   * a 'static' challenge must ship a flag (so it is actually solvable), and the
-    flag must look like MYCTF{...} or FLAG{...};
+    flag must match the MYCTF{...} format;
   * a live-lab challenge must be dynamic_flag (per-session) — a live lab with a
     single shared static flag is rejected, since that leaks across users;
   * no raw SQL / shell / file paths are accepted from a manifest; a manifest
@@ -25,7 +25,7 @@ import yaml
 from .config import Config
 from .labs.registry import is_live_lab
 
-FLAG_RE = re.compile(r"^(?:MYCTF|FLAG)\{[^}]+\}$")
+FLAG_RE = re.compile(r"^MYCTF\{[^}]+\}$")
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,48}$")
 VALID_DIFFICULTY = set(Config.DIFFICULTY_POINTS)
 
@@ -77,7 +77,7 @@ def validate(data: dict) -> dict:
         if not flag:
             errors.append("static challenge must define a flag")
         elif not FLAG_RE.match(str(flag)):
-            errors.append("flag must look like MYCTF{...} or FLAG{...}")
+            errors.append("flag must match MYCTF{...}")
     else:
         if not dynamic:
             errors.append("live-lab challenge must be dynamic_flag (per-session)")

