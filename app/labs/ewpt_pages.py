@@ -22,6 +22,10 @@ def document(title, content, extra='', body_class=''):
     return f'<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{esc(title)}</title><style>{CSS}\n{extra}</style></head><body class="{body_class}">{content}</body></html>'
 
 
+def money(value):
+    return ('−' if value < 0 else '') + '$' + f'{abs(value):.2f}'
+
+
 def note(message, error=False):
     return f'<div class="notice {"error" if error else "success"}" role="status">{esc(message)}</div>'
 
@@ -42,13 +46,13 @@ def flag_text(body):
 
 def auth_page(number, status, message='', step='login'):
     is_reset = number == 116
-    brand = 'NEXUS <span style="font-weight:400;color:#8a93a3">workspace</span>' if is_reset else 'NEXUS<span style="color:#386de8">PORTAL</span>'
+    brand = 'LUMORA <span style="font-weight:400;color:#8a93a3">workspace</span>' if is_reset else 'LUMORA<span style="color:#386de8">PORTAL</span>'
     if step == 'login':
         title = 'Welcome back' if is_reset else 'Staff sign in'
         action = '/api/login'
         inputs = field('Email address' if is_reset else 'Username', 'email' if is_reset else 'username', type='email' if is_reset else 'text') + field('Password', 'password', type='password')
         submit, subtitle = 'Sign in', 'Sign in to continue to your workspace.'
-        footer = '<a href="/reset/step1">Forgot your password?</a>' if is_reset else 'Authorized staff only · Nexus Technologies'
+        footer = '<a href="/reset/step1">Forgot your password?</a>' if is_reset else 'Authorized staff only · Lumora Technologies'
     elif step == 'step1':
         title, subtitle, action, submit = 'Reset your password', 'Enter your email and we’ll send you a verification code.', '/reset/step1', 'Send reset code'
         inputs, footer = field('Email address', 'email', type='email'), '<a href="/">Back to sign in</a>'
@@ -60,7 +64,7 @@ def auth_page(number, status, message='', step='login'):
         inputs = field('Email address', 'email', type='email') + field('New password', 'password', type='password')
         footer = '<a href="/">Back to sign in</a>'
     notice = note(message, status >= 400) if message else ''
-    content = f'<main class="auth"><p class="brand">{brand}</p><section class="card"><h1>{title}</h1><p class="muted">{subtitle}</p>{notice}<form method="post" action="{action}">{inputs}<button type="submit">{submit}</button></form><p style="text-align:center;font-size:13px;margin-top:24px">{footer}</p></section><p class="muted small" style="text-align:center">Nexus Technologies · Account services</p>'
+    content = f'<main class="auth"><p class="brand">{brand}</p><section class="card"><h1>{title}</h1><p class="muted">{subtitle}</p>{notice}<form method="post" action="{action}">{inputs}<button type="submit">{submit}</button></form><p style="text-align:center;font-size:13px;margin-top:24px">{footer}</p></section><p class="muted small" style="text-align:center">Lumora Technologies · Account services</p>'
     if is_reset: content += '<p class="muted small" style="text-align:center">Need help? Contact admin@lab.local</p>'
     return document(title, content + '</main>')
 
@@ -71,11 +75,11 @@ def tomcat_home():
     return document('Apache Tomcat/8.5.19', body, extra)
 
 
-def basic_auth_page(number, status):
+def basic_auth_page(number, status, attempted=False):
     host = 'target.lab.local:8080' if number == 108 else 'target.lab.local'
     realm = 'Tomcat Manager' if number == 108 else 'example.com'
     next_path = '/manager/html' if number == 108 else '/flag'
-    body = f'<main class="auth"><section class="card"><span class="muted small">{host}</span><h1 style="margin-top:15px">Sign in</h1><p class="muted">{esc(realm)}</p><form method="post" action="/_auth?{urlencode({"next": next_path})}">{field("Username", "username")}{field("Password", "password", type="password")}<button type="submit">Sign in</button></form><p class="muted small">The server requires {"Basic" if number == 108 else "Digest"} authentication.</p></section><p class="muted small" style="text-align:center">HTTP {status} · Unauthorized</p></main>'
+    body = f'<main class="auth"><section class="card"><span class="muted small">{host}</span><h1 style="margin-top:15px">Sign in</h1><p class="muted">{esc(realm)}</p>{note("Incorrect username or password.", True) if attempted else ""}<form method="post" action="/_auth?{urlencode({"next": next_path})}">{field("Username", "username")}{field("Password", "password", type="password")}<button type="submit">Sign in</button></form><p class="muted small">The server requires {"Basic" if number == 108 else "Digest"} authentication.</p></section><p class="muted small" style="text-align:center">HTTP {status} · Unauthorized</p></main>'
     return document('Sign in — ' + host, body)
 
 
@@ -97,34 +101,34 @@ def tomcat_manager(path, body, state):
 
 def shop(path, status, body, state):
     total = 100 * state['quantity'] - state['coupons'] * 10
-    content = nav('nexus / store', [('Shop', '/'), ('Your cart', '/')])
+    content = nav('lumora / store', [('Shop', '/'), ('Your cart', '/')])
     if flag_text(body):
         content += f'<main class="wrap"><section class="card"><span class="pill">Payment complete</span><h1>Your Premium Flag is ready.</h1><pre>{flag_text(body)}</pre><p class="muted">Thank you for your order.</p><a href="/">Continue shopping</a></section></main>'
-        return document('Order complete — Nexus Store', content)
+        return document('Order complete — Lumora Store', content)
     notice = note(body, status >= 400) if status >= 400 or (path == '/apply-coupon' and status == 200) else ''
-    content += f'<main class="wrap"><p class="muted small">STORE / DIGITAL PRODUCTS</p><h1>Your cart</h1>{notice}<div class="columns"><section class="card"><div style="height:190px;background:#e8e7e2;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:25px"><span style="font:70px Georgia;color:#6e735f">⚑</span></div><span class="muted small">DIGITAL DOWNLOAD</span><h2>Premium Flag</h2><p class="muted">One premium capture. Delivered instantly after checkout.</p><form method="post" action="/cart" class="flex">{field("Quantity", "quantity", type="number", value=state["quantity"])}<button type="submit" style="align-self:end">Update</button></form></section><aside class="card" style="align-self:start"><h2>Order summary</h2><p>Premium Flag <span style="float:right">$100.00</span></p><p class="muted">Quantity <span style="float:right">{state["quantity"]}</span></p><p class="muted">Discount <span style="float:right">−${state["coupons"] * 10:.2f}</span></p><hr style="border:0;border-top:1px solid #ddd;margin:24px 0"><h2>Total <span style="float:right">${total:.2f}</span></h2><form method="post" action="/apply-coupon">{field("Promo code", "coupon")}<button type="submit" style="margin-top:12px;background:#515848">Apply code</button></form><p class="muted small">New here? Save 10% with WELCOME10.</p><form method="post" action="/checkout"><button type="submit" style="width:100%;margin-top:16px;background:#252d25">Checkout</button></form></aside></div></main>'
-    return document('Your cart — Nexus Store', content, 'body{background:#f7f6f2}.top b{font-family:Georgia,serif;font-size:25px}.card{border-color:#e3e1d9}h1,h2{font-family:Georgia,serif}')
+    content += f'<main class="wrap"><p class="muted small">STORE / DIGITAL PRODUCTS</p><h1>Your cart</h1>{notice}<div class="columns"><section class="card"><div style="height:190px;background:#e8e7e2;border-radius:7px;display:flex;align-items:center;justify-content:center;margin-bottom:25px"><span style="font:70px Georgia;color:#6e735f">⚑</span></div><span class="muted small">DIGITAL DOWNLOAD</span><h2>Premium Flag</h2><p class="muted">One premium capture. Delivered instantly after checkout.</p><form method="post" action="/cart" class="flex">{field("Quantity", "quantity", type="number", value=state["quantity"])}<button type="submit" style="align-self:end">Update</button></form></section><aside class="card" style="align-self:start"><h2>Order summary</h2><p>Premium Flag <span style="float:right">$100.00</span></p><p class="muted">Quantity <span style="float:right">{state["quantity"]}</span></p><p class="muted">Discount <span style="float:right">{money(-state["coupons"] * 10)}</span></p><hr style="border:0;border-top:1px solid #ddd;margin:24px 0"><h2>Total <span style="float:right">{money(total)}</span></h2><form method="post" action="/apply-coupon">{field("Promo code", "coupon")}<button type="submit" style="margin-top:12px;background:#515848">Apply code</button></form><p class="muted small">New here? Save 10% with WELCOME10.</p><form method="post" action="/checkout"><button type="submit" style="width:100%;margin-top:16px;background:#252d25">Checkout</button></form></aside></div></main>'
+    return document('Your cart — Lumora Store', content, 'body{background:#f7f6f2}.top b{font-family:Georgia,serif;font-size:25px}.card{border-color:#e3e1d9}h1,h2{font-family:Georgia,serif}')
 
 
 def company(number):
     is_files = number in (111, 114)
-    body = nav('NEXUS<span style="color:#3362d1">TECH</span>', [('Company', '/'), ('Services', '/nexustech.html')] if not is_files else [('Home','/')])
-    body += '<main class="wrap"><section style="padding:45px 0 55px;max-width:780px"><p style="color:#3362d1;font-size:12px;letter-spacing:2px">TECHNOLOGY THAT MOVES YOU FORWARD</p><h1 style="font-size:clamp(36px,6vw,58px);letter-spacing:-2px">Better software.<br>Built around your business.</h1><p class="muted" style="font-size:18px;max-width:560px">We design and develop custom web applications for ambitious organizations.</p></section><div class="columns"><section class="card"><span class="small muted">01 / OUR EXPERTISE</span><h2>Custom web development</h2><p>Thoughtful, reliable applications that help your teams do more.</p></section><section class="card"><span class="small muted">02 / OUR APPROACH</span><h2>From idea to impact</h2><p>Close collaboration. Clear communication. Software that fits.</p></section></div><footer class="muted small" style="margin-top:60px;border-top:1px solid #ddd;padding-top:20px">© NexusTech · hello@nexustech.lab</footer></main>'
+    body = nav('LUMORA<span style="color:#3362d1">TECH</span>', [('Company', '/'), ('Services', '/lumoratech.html')] if not is_files else [('Home','/')])
+    body += '<main class="wrap"><section style="padding:45px 0 55px;max-width:780px"><p style="color:#3362d1;font-size:12px;letter-spacing:2px">TECHNOLOGY THAT MOVES YOU FORWARD</p><h1 style="font-size:clamp(36px,6vw,58px);letter-spacing:-2px">Better software.<br>Built around your business.</h1><p class="muted" style="font-size:18px;max-width:560px">We design and develop custom web applications for ambitious organizations.</p></section><div class="columns"><section class="card"><span class="small muted">01 / OUR EXPERTISE</span><h2>Custom web development</h2><p>Thoughtful, reliable applications that help your teams do more.</p></section><section class="card"><span class="small muted">02 / OUR APPROACH</span><h2>From idea to impact</h2><p>Close collaboration. Clear communication. Software that fits.</p></section></div><footer class="muted small" style="margin-top:60px;border-top:1px solid #ddd;padding-top:20px">© LumoraTech · hello@lumoratech.lab</footer></main>'
     if number == 104: body += '\n<!-- Additional service: Maintenance and Support -->'
-    return document('NexusTech — Custom Web Applications', body, 'body{background:#f8faff}')
+    return document('LumoraTech — Custom Web Applications', body, 'body{background:#f8faff}')
 
 
-def swagger():
-    extra = 'body{background:#fafafa;color:#3b4151}.swagger-top{background:#1b1b1b;color:#fff;padding:15px 28px;font-size:22px}.swagger-top b{color:#85c942}.version{font:12px monospace;color:#fff;background:#7b8490;border-radius:12px;padding:3px 9px;vertical-align:middle}.endpoint{border:1px solid #61affe;background:#ebf3fb;border-radius:4px;margin-top:24px}.endpoint summary{display:flex;align-items:center;gap:15px;padding:12px}.method{background:#61affe;color:white;padding:4px 20px;border-radius:3px;font-weight:bold;font-size:13px}.endpoint section{padding:10px 20px 25px;border-top:1px solid #c2d9f0}.endpoint button{background:#4990d0;border:1px solid #3983c3;width:100%}.schema{font-size:13px}.swagger-title{font-size:34px;letter-spacing:-1px}'
-    body = '<header class="swagger-top"><b>◉</b> swagger <span style="font-size:11px;float:right;margin-top:7px">OpenAPI 3.0</span></header><main class="wrap"><h1 class="swagger-title">Nexus API <span class="version">1.0.0</span></h1><a href="/openapi.json" class="small">/openapi.json</a><p>Internal application API.</p><label>Servers</label><select><option>http://target.lab.local:8000</option></select><h2 style="margin-top:45px;border-bottom:1px solid #ddd;padding-bottom:12px">admin</h2><details class="endpoint"><summary><span class="method">GET</span><code>/api/v1/admin/flag</code><span class="small muted">Read admin flag</span></summary><section><h3>Parameters</h3><table><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td><b>X-Admin</b> <span style="color:#d33">* required</span><br><code>string (header)</code></td><td>Administrative request marker.<br><span class="schema">Allowed values: <code>true</code></span></td></tr></tbody></table><form method="get" action="/api/v1/admin/flag"><label for="x-admin">X-Admin</label><input id="x-admin" data-header="X-Admin" name="X-Admin" placeholder="X-Admin" required><button style="margin-top:16px" type="submit">Execute</button></form><h3>Responses</h3><p><b>200</b> Successful response</p><p><b>401</b> Unauthorized</p></section></details><details style="margin-top:35px;border:1px solid #ccc;padding:15px"><summary><b>Schemas</b></summary><p class="schema">HTTPValidationError</p></details></main>'
-    return document('Nexus API — Swagger UI', body, extra)
+def api_docs():
+    extra = 'body{background:#fafafa;color:#3b4151}.docs-top{background:#1b1b1b;color:#fff;padding:15px 28px;font-size:22px}.docs-top b{color:#85c942}.version{font:12px monospace;color:#fff;background:#7b8490;border-radius:12px;padding:3px 9px;vertical-align:middle}.endpoint{border:1px solid #61affe;background:#ebf3fb;border-radius:4px;margin-top:24px}.endpoint summary{display:flex;align-items:center;gap:15px;padding:12px}.method{background:#61affe;color:white;padding:4px 20px;border-radius:3px;font-weight:bold;font-size:13px}.endpoint section{padding:10px 20px 25px;border-top:1px solid #c2d9f0}.endpoint button{background:#4990d0;border:1px solid #3983c3;width:100%}.schema{font-size:13px}.docs-title{font-size:34px;letter-spacing:-1px}'
+    body = '<header class="docs-top"><b>◉</b> API docs <span style="font-size:11px;float:right;margin-top:7px">OpenAPI 3.0</span></header><main class="wrap"><h1 class="docs-title">Lumora API <span class="version">1.0.0</span></h1><a href="/openapi.json" class="small">/openapi.json</a><p>Internal application API.</p><label>Servers</label><select><option>http://target.lab.local:8000</option></select><h2 style="margin-top:45px;border-bottom:1px solid #ddd;padding-bottom:12px">admin</h2><details class="endpoint"><summary><span class="method">GET</span><code>/api/v1/admin/flag</code><span class="small muted">Read admin flag</span></summary><section><h3>Parameters</h3><table><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody><tr><td><b>X-Admin</b> <span style="color:#d33">* required</span><br><code>string (header)</code></td><td>Administrative request marker.<br><span class="schema">Allowed values: <code>true</code></span></td></tr></tbody></table><form method="get" action="/api/v1/admin/flag"><label for="x-admin">X-Admin</label><input id="x-admin" data-header="X-Admin" name="X-Admin" placeholder="X-Admin" required><button style="margin-top:16px" type="submit">Execute</button></form><h3>Responses</h3><p><b>200</b> Successful response</p><p><b>401</b> Unauthorized</p></section></details><details style="margin-top:35px;border:1px solid #ccc;padding:15px"><summary><b>Schemas</b></summary><p class="schema">HTTPValidationError</p></details></main>'
+    return document('Lumora API — API docs', body, extra)
 
 
-def directory(path, items):
+def directory(path, items, server=''):
     rows = '<tr><td><a href="/">Parent Directory</a></td><td>—</td><td>—</td></tr>'
     for name, href, size in items:
         rows += f'<tr><td><a href="{esc(href)}">{esc(name)}</a></td><td>2026-11-15 10:42</td><td>{size}</td></tr>'
-    return document('Index of ' + path, f'<h1>Index of {esc(path)}</h1><hr><table><thead><tr><th>Name</th><th>Last modified</th><th>Size</th></tr></thead><tbody>{rows}</tbody></table><hr><address>Apache Server</address>', 'body{font:16px "Times New Roman",serif;background:white;color:black;padding:8px}h1{font-size:32px}table{width:auto;min-width:65%}th,td{background:white;font:16px "Times New Roman",serif;border:0;padding:4px 30px 4px 0}a{color:#0000ee}')
+    return document('Index of ' + path, f'<h1>Index of {esc(path)}</h1><hr><table><thead><tr><th>Name</th><th>Last modified</th><th>Size</th></tr></thead><tbody>{rows}</tbody></table><hr><address>{esc(server or 'Web server')}</address>', 'body{font:16px "Times New Roman",serif;background:white;color:black;padding:8px}h1{font-size:32px}table{width:auto;min-width:65%}th,td{background:white;font:16px "Times New Roman",serif;border:0;padding:4px 30px 4px 0}a{color:#0000ee}')
 
 
 def apache_home():
@@ -138,14 +142,16 @@ def render_target(number, path, method, status, headers, body, state):
     if status == 404:
         return document('404 Not Found', '<main class="wrap"><h1>Not Found</h1><p>The requested URL was not found on this server.</p><hr><p class="muted small">' + esc(headers.get('Server', '')) + '</p></main>'), 'text/html; charset=utf-8'
     if number == 108:
-        if status == 401: return basic_auth_page(number, status), 'text/html; charset=utf-8'
+        if status == 401: return basic_auth_page(number, status, state.get('attempted')), 'text/html; charset=utf-8'
         if path == '/': return tomcat_home(), 'text/html; charset=utf-8'
         if status == 200 and path in ('/manager/html', '/manager/status'): return tomcat_manager(path, body, state), 'text/html; charset=utf-8'
-    if number == 113 and status == 401: return basic_auth_page(number, status), 'text/html; charset=utf-8'
+    if number == 113 and status == 401: return basic_auth_page(number, status, state.get('attempted')), 'text/html; charset=utf-8'
     if number in (101, 116):
+        if path == '/admin' and status in (401, 403):
+            return document('Sign in required', nav('LUMORA workspace' if number == 116 else 'LUMORA<span style="color:#386de8">PORTAL</span>', [('Sign in', '/')]) + '<main class="wrap"><section class="card" style="max-width:520px;margin:40px auto"><h1>Sign in required</h1><p class="muted">You need to sign in to view this page.</p><a class="button" href="/">Go to sign in</a></section></main>'), 'text/html; charset=utf-8'
         if path == '/admin' and status == 200:
-            page = nav('NEXUS workspace', [('Dashboard','/admin'),('Sign out','/_logout')]) + f'<main class="wrap"><p class="small muted">WORKSPACE / OVERVIEW</p><h1>Welcome, admin.</h1><section class="card"><h2>Administrator console</h2><p class="muted">Your private workspace token</p><pre>{flag_text(body)}</pre></section></main>'
-            return document('Admin dashboard — Nexus', page), 'text/html; charset=utf-8'
+            page = nav('LUMORA workspace', [('Dashboard','/admin'),('Sign out','/_logout')]) + f'<main class="wrap"><p class="small muted">WORKSPACE / OVERVIEW</p><h1>Welcome, admin.</h1><section class="card"><h2>Administrator console</h2><p class="muted">Your private workspace token</p><pre>{flag_text(body)}</pre></section></main>'
+            return document('Admin dashboard — Lumora', page), 'text/html; charset=utf-8'
         if path in ('/', '/api/login', '/login'):
             if status == 200 and method == 'POST': return document('Signed in', '<main class="auth"><section class="card"><h1>You’re signed in.</h1><a class="button" href="/admin">Open dashboard</a></section></main>'), 'text/html; charset=utf-8'
             return auth_page(number, status, 'Invalid username or password.' if status == 401 else ''), 'text/html; charset=utf-8'
@@ -158,33 +164,33 @@ def render_target(number, path, method, status, headers, body, state):
     if number == 103: return shop(path, status, body, state), 'text/html; charset=utf-8'
     if number == 104 and status == 200: return company(number), 'text/html; charset=utf-8'
     if number in (111, 114) and path == '/': return company(number), 'text/html; charset=utf-8'
-    if number == 111 and path == '/backup/': return directory(path, [('id_rsa','/backup/id_rsa','1679')]), 'text/html; charset=utf-8'
+    if number == 111 and path == '/backup/': return directory(path, [('id_rsa','/backup/id_rsa','1679')], headers.get('Server')), 'text/html; charset=utf-8'
     if number == 105:
-        if path == '/docs': return swagger(), 'text/html; charset=utf-8'
+        if path == '/docs': return api_docs(), 'text/html; charset=utf-8'
         if path in ('/', '/openapi.json', '/api/v1/admin/flag'):
             try: body = json.dumps(json.loads(body), indent=2)
             except ValueError: pass
             return body, 'application/json' if path != '/api/v1/admin/flag' else 'text/plain; charset=utf-8'
     if number == 106 and path == '/':
-        page = nav('Nexus Console', [('Overview','/')]) + '<main class="wrap"><p class="muted small">APPLICATION STATUS</p><h1>Everything is running.</h1><section class="card"><h2>Internal service portal</h2><p class="muted">Welcome to the Nexus operations console.</p><span class="pill">Service healthy</span></section></main>'
-        return document('Nexus Console',page), 'text/html; charset=utf-8'
+        page = nav('Lumora Console', [('Overview','/')]) + '<main class="wrap"><p class="muted small">APPLICATION STATUS</p><h1>Everything is running.</h1><section class="card"><h2>Internal service portal</h2><p class="muted">Welcome to the Lumora operations console.</p><span class="pill">Service healthy</span></section></main>'
+        return document('Lumora Console',page), 'text/html; charset=utf-8'
     if number == 107 and path == '/': return apache_home(), 'text/html; charset=utf-8'
     if number == 109 and path == '/':
         return document('Welcome to nginx!', '<main style="width:35em;max-width:90%;margin:60px auto"><h1>Welcome to nginx!</h1><p>If you see this page, the nginx web server is successfully installed and working.</p><p>Further configuration is required.</p><p><em>Thank you for using nginx.</em></p></main>', 'body{background:white;color:black;font-family:Tahoma,Verdana,Arial,sans-serif}h1{font-size:32px}'), 'text/html; charset=utf-8'
-    if number == 109 and path == '/static/': return directory(path,[('logo.svg','/static/logo.svg','861'),('site.css','/static/site.css','2048')]), 'text/html; charset=utf-8'
+    if number == 109 and path == '/static/': return directory(path,[('logo.svg','/static/logo.svg','861'),('site.css','/static/site.css','2048')], headers.get('Server')), 'text/html; charset=utf-8'
     if number in (102, 120) and path == '/' and method not in ('OPTIONS','TRACE'):
-        page = '<main class="wrap"><h1>' + ('File service' if number == 102 else 'Nexus HTTP service') + '</h1><p>Service is online.</p>' + ('<a href="/uploads/">Shared files →</a>' if number == 102 else '') + '</main>'
-        return document('Nexus HTTP service',page), 'text/html; charset=utf-8'
-    if number == 115 and path == '/': return '{"service":"Nexus API","version":"1.0","base":"/api/"}', 'application/json'
+        page = '<main class="wrap"><h1>' + ('File service' if number == 102 else 'Lumora HTTP service') + '</h1><p>Service is online.</p>' + ('<a href="/uploads/">Shared files →</a>' if number == 102 else '') + '</main>'
+        return document('Lumora HTTP service',page), 'text/html; charset=utf-8'
+    if number == 115 and path == '/': return '{"service":"Lumora API","version":"1.0","base":"/api/"}', 'application/json'
     if number == 119:
         if path == '/':
-            page = nav('NEXUS / supply',[('Catalog','/')]) + '<main class="wrap"><p class="muted small">SHOP / ALL PRODUCTS</p><h1>Tools for your next idea.</h1><section class="card" style="max-width:370px"><div style="height:150px;background:#e3ebef;border-radius:6px;display:flex;align-items:center;justify-content:center"><div style="width:75px;height:75px;background:#90a9b7;box-shadow:12px 12px 0 #bacbd4;border-radius:10px"></div></div><h2>Widget</h2><p class="muted">A dependable everyday essential.</p><b>$25.00</b><p><a class="button" href="/product?id=1">View product</a></p></section></main>'
-            return document('Catalog — Nexus Supply',page), 'text/html; charset=utf-8'
+            page = nav('LUMORA / supply',[('Catalog','/')]) + '<main class="wrap"><p class="muted small">SHOP / ALL PRODUCTS</p><h1>Tools for your next idea.</h1><section class="card" style="max-width:370px"><div style="height:150px;background:#e3ebef;border-radius:6px;display:flex;align-items:center;justify-content:center"><div style="width:75px;height:75px;background:#90a9b7;box-shadow:12px 12px 0 #bacbd4;border-radius:10px"></div></div><h2>Widget</h2><p class="muted">A dependable everyday essential.</p><b>$25.00</b><p><a class="button" href="/product?id=1">View product</a></p></section></main>'
+            return document('Catalog — Lumora Supply',page), 'text/html; charset=utf-8'
         if path == '/product':
-            page = nav('NEXUS / supply',[('Catalog','/')]) + '<main class="wrap"><p class="muted small">CATALOG / PRODUCT</p><h1>Product details</h1>'
+            page = nav('LUMORA / supply',[('Catalog','/')]) + '<main class="wrap"><p class="muted small">CATALOG / PRODUCT</p><h1>Product details</h1>'
             if status >= 400: page += '<pre>' + esc(body) + '</pre>'
             else:
                 rows = ''.join('<tr>' + ''.join('<td>'+esc(col.strip())+'</td>' for col in row.split('|')) + '</tr>' for row in body.splitlines())
                 page += '<section class="card"><table><thead><tr><th>ID</th><th>Product</th><th>Price</th></tr></thead><tbody>' + rows + '</tbody></table></section>'
-            return document('Product — Nexus Supply',page + '</main>'), 'text/html; charset=utf-8'
+            return document('Product — Lumora Supply',page + '</main>'), 'text/html; charset=utf-8'
     return body, plain

@@ -28,7 +28,7 @@ def test_browser_target_available_without_pre_solve_flag(client, user, number):
     assert response.status_code == 200
     html = response.get_data(as_text=True)
     assert 'Target path' in html and 'Source' in html and 'Headers' in html
-    assert 'sandbox="allow-scripts"' in html and 'allow-same-origin' not in html
+    assert 'sandbox="allow-scripts allow-forms"' in html and 'allow-same-origin' not in html
     assert not FLAG.search(html)
     root = web(client, token, iid)
     assert root['status'] in (200, 401)
@@ -89,10 +89,10 @@ def test_browser_login_injection_and_cookie_scope(client, user):
     assert not FLAG.search(web(client, token, second, '/admin')['body'])
 
 
-def test_swagger_try_it_out_header_and_source(client, user):
+def test_api_docs_try_it_out_header_and_source(client, user):
     token = user['token']; iid = start_lab(client, token, 'ewpt-fastapi-docs-leak')
     docs = web(client, token, iid, '/docs')
-    assert 'swagger' in docs['body'] and 'data-header="X-Admin"' in docs['body']
+    assert 'openapi.json' in docs['body'] and 'data-header="X-Admin"' in docs['body']
     schema = web(client, token, iid, '/openapi.json')
     assert '/api/v1/admin/flag' in schema['body']
     assert web(client, token, iid, '/api/v1/admin/flag')['status'] == 401
@@ -171,10 +171,10 @@ def test_neutral_briefs_public_urls_and_no_objectives_resources(client, user):
 
 def test_dns_can_be_discovered_without_a_domain_in_the_brief(client, user):
     token = user['token']; iid = start_lab(client, token, 'ewpt-dns-enumeration')
-    assert 'nexustech.lab' not in sh(client, token, iid, 'cat README.txt')
-    assert 'nexustech.lab' in sh(client, token, iid, 'cat /etc/resolv.conf')
-    assert 'ns1.nexustech.lab' in sh(client, token, iid, 'dig @192.168.0.2 -x 192.168.0.2')
-    transfer = sh(client, token, iid, 'dig @192.168.0.2 nexustech.lab AXFR')
+    assert 'lumoratech.lab' not in sh(client, token, iid, 'cat README.txt')
+    assert 'lumoratech.lab' in sh(client, token, iid, 'cat /etc/resolv.conf')
+    assert 'ns1.lumoratech.lab' in sh(client, token, iid, 'dig @192.168.0.2 -x 192.168.0.2')
+    transfer = sh(client, token, iid, 'dig @192.168.0.2 lumoratech.lab AXFR')
     assert FLAG.search(transfer)
 
 
@@ -182,3 +182,22 @@ def test_report_tools_accept_natural_answer_format(client, user):
     token = user['token']; iid = start_lab(client, token, 'ewpt-architecture-mapping-quiz')
     assert 'ascending port order' in sh(client, token, iid, 'cat engagement.txt')
     assert FLAG.search(sh(client, token, iid, 'answer nginx uvicorn tomcat apache'))
+
+
+def test_lab_pages_format_money_and_explain_failed_sign_in(client, user):
+    token = user['token']
+    iid = start_lab(client, token, 'ewpt-coupon-king')
+    web(client, token, iid, '/cart', 'POST', 'quantity=-1')
+    page = web(client, token, iid, '/')['body']
+    assert '$-' not in page and '−$' in page
+    iid = start_lab(client, token, 'ewpt-tomcat-weak-creds')
+    first = web(client, token, iid, '/manager/html')['body']
+    assert 'Incorrect username or password' not in first
+    web(client, token, iid, '/_auth?next=%2Fmanager%2Fhtml', 'POST', 'username=tomcat&password=nope')
+    again = web(client, token, iid, '/manager/html')['body']
+    assert 'Incorrect username or password' in again
+    iid = start_lab(client, token, 'ewpt-fuzz-the-login')
+    denied = web(client, token, iid, '/admin')
+    assert denied['status'] == 401 and 'Sign in required' in denied['body']
+    iid = start_lab(client, token, 'ewpt-nginx-alias-traversal')
+    assert 'nginx' in web(client, token, iid, '/static/')['body'].split('<address>')[-1]

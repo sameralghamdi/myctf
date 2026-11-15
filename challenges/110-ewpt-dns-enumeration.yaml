@@ -18,5 +18,5 @@ hints:
   cost: 10
   body: Use @192.168.0.2 to target the server.
 remediation: Restrict recursion, hide the version, limit zone data.
-walkthrough: dig TXT flag.nexustech.lab @192.168.0.2 returns the flag in the TXT record.
+walkthrough: dig TXT flag.lumoratech.lab @192.168.0.2 returns the flag in the TXT record.
 dynamic_flag: true

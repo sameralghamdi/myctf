@@ -19,7 +19,7 @@ from .base import LabHandler, LabResult, get_state
 
 class IdorBankLab(LabHandler):
     kind = "idor_bank"
-    title = "NimbusBank — Account Portal"
+    title = "Demo Bank — Account Portal"
 
     def _accounts(self, instance) -> dict:
         st = get_state(instance["id"])
@@ -29,10 +29,10 @@ class IdorBankLab(LabHandler):
                 "1001": {"id": "1001", "owner": "you@training.local",
                          "name": "Your Training Account", "balance": 4210.55,
                          "note": "Welcome. Your account id is 1001."},
-                "1002": {"id": "1002", "owner": "treasury@nimbusbank.local",
+                "1002": {"id": "1002", "owner": "treasury@demobank.local",
                          "name": "Corporate Treasury", "balance": 918342.00,
                          "note": f"CONFIDENTIAL reconciliation token: {instance['flag']}"},
-                "1003": {"id": "1003", "owner": "p.nkemdirim@nimbusbank.local",
+                "1003": {"id": "1003", "owner": "p.nkemdirim@demobank.local",
                          "name": "Priya N.", "balance": 220.10,
                          "note": "Vacation hold until next month."},
             }
@@ -58,7 +58,7 @@ class IdorBankLab(LabHandler):
         # default: the portal page the learner "logs into" as 1001
         me = accounts["1001"]
         body = f"""
-<h1>NimbusBank Portal</h1>
+<h1>Demo Bank Portal</h1>
 <p class="muted">Signed in as <b>{me['owner']}</b> — account #{me['id']}.</p>
 <div class="card">
   <h2>Account summary</h2>
@@ -76,4 +76,4 @@ class IdorBankLab(LabHandler):
   <p class="muted">Account API</p>
   <pre>curl {base}/api/account/1001</pre>
 </div>"""
-        return LabResult(self.page(instance, "NimbusBank", body))
+        return LabResult(self.page(instance, "Demo Bank", body))

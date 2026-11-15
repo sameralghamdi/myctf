@@ -22,7 +22,7 @@ from .base import LabHandler, LabResult, get_state
 
 class SqliLoginLab(LabHandler):
     kind = "sqli_login"
-    title = "AcmeCorp Intranet — Login"
+    title = "Demo Corp Intranet — Login"
 
     def _lab_db(self, instance) -> sqlite3.Connection:
         st = get_state(instance["id"])
@@ -72,7 +72,7 @@ class SqliLoginLab(LabHandler):
             cls = "flag" if ok else "err"
             banner = f'<div class="card"><p class="{cls}">{message}</p></div>'
         body = f"""
-<h1>AcmeCorp Intranet</h1>
+<h1>Demo Corp Intranet</h1>
 <p class="muted">Staff sign-in. Unauthorized access is prohibited.</p>
 {banner}
 <div class="card">
@@ -85,7 +85,7 @@ class SqliLoginLab(LabHandler):
   </form>
 </div>
 """
-        return self.page(instance, "AcmeCorp Login", body)
+        return self.page(instance, "Demo Corp Login", body)
 
     def _login(self, instance, request) -> LabResult:
         username = request.form.get("username", "")

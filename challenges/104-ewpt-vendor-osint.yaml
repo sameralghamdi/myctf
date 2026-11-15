@@ -20,7 +20,7 @@ hints:
   cost: 10
   body: The correct service is the one most commonly offered alongside custom development.
 remediation: OSINT awareness; remove sensitive comments from production pages.
-walkthrough: Inspect http://target.lab.local/nexustech.html and find the comment listing the services.
+walkthrough: Inspect http://target.lab.local/lumoratech.html and find the comment listing the services.
   The additional service offered with custom development is maintenance and support. Run answer maintenance_and_support
   to receive your session flag.
 dynamic_flag: true
