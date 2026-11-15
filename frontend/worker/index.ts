@@ -24,17 +24,24 @@ const json = (body: unknown, status: number): Response =>
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    if (!env.ORIGIN_URL) return json({ error: "ORIGIN_URL is not configured" }, 500);
+    const originUrl = (env.ORIGIN_URL ?? "").trim();
+    // Pasted secrets often carry a stray space or newline; strip it.
+    const originSecret = (env.ORIGIN_SECRET ?? "").trim();
+    if (!originUrl) return json({ error: "ORIGIN_URL is not configured" }, 500);
 
     const incoming = new URL(request.url);
-    const target = new URL(incoming.pathname + incoming.search, env.ORIGIN_URL);
+    // TEMPORARY diagnostic (remove after setup): reports presence and length only.
+    if (incoming.pathname === "/api/_worker-check") {
+      return json({ origin_url_set: true, secret_set: originSecret.length > 0, secret_length: originSecret.length }, 200);
+    }
+    const target = new URL(incoming.pathname + incoming.search, originUrl);
 
     const headers = new Headers(request.headers);
     headers.delete("host");
     // Never trust these from the browser; set them ourselves.
     headers.delete("X-Origin-Secret");
     headers.set("X-Client-IP", request.headers.get("CF-Connecting-IP") ?? "");
-    if (env.ORIGIN_SECRET) headers.set("X-Origin-Secret", env.ORIGIN_SECRET);
+    if (originSecret) headers.set("X-Origin-Secret", originSecret);
 
     const hasBody = request.method !== "GET" && request.method !== "HEAD";
     try {
