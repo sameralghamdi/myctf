@@ -1,0 +1,37 @@
+slug: ewpt-fuzz-the-login
+name: Fuzz the Login (EWPT)
+category: web
+difficulty: easy
+lab_kind: static
+flag: FLAG{fuzzing_found_sqli_bypass}
+est_minutes: 15
+sort: 101
+description: |-
+  `http://login.lab.local` has a login form. The developer says "SQL injection is impossible because we use a custom login page."
+
+  **Objective:** Fuzz the `username` parameter of `POST /api/login` and find a payload that logs you in as admin. The admin dashboard contains the flag.
+
+  **Exam topics:** Fuzzing objective; sending large numbers of random/malformed inputs to identify vulnerabilities; injection testing.
+
+  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+objectives:
+- Fuzz a request parameter with a wordlist
+- Spot a successful payload by response status/length
+- Reuse the session cookie to reach /admin
+hints:
+- level: 1
+  cost: 0
+  body: Try ffuf, wfuzz, or Burp Intruder against POST /api/login.
+- level: 2
+  cost: 5
+  body: Fuzz username with an SQL injection payload list.
+- level: 3
+  cost: 10
+  body: Look for a different response length or status than the 401s.
+remediation: Parameterized queries, input validation, generic login errors, rate limiting.
+walkthrough: Send username=test&password=test and note the 401. Fuzz username with payloads such as '
+  OR 1=1-- -. The successful payload returns 200 and a session cookie. Visit /admin with the cookie to
+  read the flag.
+references:
+- title: OWASP WSTG - Testing for SQL Injection
+  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05-Testing_for_SQL_Injection

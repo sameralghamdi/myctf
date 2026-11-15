@@ -9,7 +9,7 @@ import type {
 } from "./types";
 
 const SLUG = /^[a-z0-9][a-z0-9-]{1,48}$/;
-const FLAG = /^MYCTF\{[^}]+\}$/;
+const FLAG = /^(?:MYCTF|FLAG)\{[^}]+\}$/;
 const WHOLE_NUMBER = /^\d+$/;
 
 /** "My First Challenge!" -> "my-first-challenge" */
@@ -60,7 +60,7 @@ export function validateStep(step: StepId, values: CtfFormValues): CtfFormErrors
       if (url && (!isSafeUrl(url) || /\s/.test(url))) {
         errors.targetUrl = "Enter a full link starting with http:// or https://";
       }
-      if (!FLAG.test(values.flag.trim())) errors.flag = "The flag must look like MYCTF{something}.";
+      if (!FLAG.test(values.flag.trim())) errors.flag = "The flag must look like MYCTF{something} or FLAG{something}.";
     } else if (!values.labKind) {
       errors.labKind = "Pick one of the built-in labs.";
     }

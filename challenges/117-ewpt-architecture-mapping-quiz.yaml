@@ -1,0 +1,38 @@
+slug: ewpt-architecture-mapping-quiz
+name: Architecture Mapping Quiz (EWPT)
+category: network
+difficulty: easy
+lab_kind: static
+flag: FLAG{nginx_uvicorn_tomcat_apache}
+est_minutes: 10
+sort: 117
+description: |-
+  Nmap output shows:
+
+  ```
+  5000/tcp  nginx 1.25.1
+  8000/tcp  uvicorn
+  8080/tcp  Apache Tomcat 8.5.19
+  8082/tcp  Apache httpd 2.4.49
+  ```
+
+  **Objective:** Identify the architecture string and submit it as the flag. Use the four service names in port order, lowercase, joined by underscores, inside FLAG{...}.
+
+  **Exam topics:** OWASP WSTG Information Gathering; fingerprint web server/app; map architecture.
+
+  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+objectives:
+- Match ports to services
+- Reason about frontend proxy, API, app server and CMS roles
+hints:
+- level: 1
+  cost: 0
+  body: Match each port to its service.
+- level: 2
+  cost: 5
+  body: 'Order: frontend proxy, Python API, Java app server, CMS.'
+remediation: Reduce banner disclosure; segment services; restrict management ports.
+walkthrough: 'Name each service in port order: nginx, uvicorn, tomcat, apache.'
+references:
+- title: OWASP WSTG - Map Application Architecture
+  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/10-Map_Application_Architecture

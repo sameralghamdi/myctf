@@ -1,0 +1,37 @@
+slug: ewpt-log-analysis-fuzzing
+name: 'Log Analysis: Detect Fuzzing (EWPT)'
+category: forensics
+category_name: Forensics
+skill: Forensics
+difficulty: easy
+lab_kind: static
+flag: FLAG{192.168.0.66}
+est_minutes: 15
+sort: 118
+description: |-
+  You are given an Apache `access.log`. One IP sent hundreds of malformed requests to `/api/login` in a short time.
+
+  **Objective:** Identify the attacking IP and submit it as FLAG{ip_address}.
+
+  **Exam topics:** Analyzing server logs; detecting fuzzing; distinguishing fuzzing from performance testing.
+
+  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+objectives:
+- Count requests per client IP
+- Spot malformed and error-heavy traffic
+- Tell fuzzing apart from load testing
+hints:
+- level: 1
+  cost: 0
+  body: Count requests per IP.
+- level: 2
+  cost: 5
+  body: Look for 400 and 401 responses and unusual payloads.
+- level: 3
+  cost: 10
+  body: The attacker IP is the one with the highest request count to /api/login.
+remediation: Rate limiting, a WAF, and alerting on fuzzing patterns.
+walkthrough: awk '{print $1}' access.log | sort | uniq -c | sort -nr shows the top requester.
+references:
+- title: OWASP - Logging Cheat Sheet
+  url: https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html

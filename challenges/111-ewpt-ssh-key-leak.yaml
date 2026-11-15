@@ -1,0 +1,39 @@
+slug: ewpt-ssh-key-leak
+name: SSH Key Leak (EWPT)
+category: network
+difficulty: medium
+lab_kind: static
+flag: FLAG{ssh_private_key_in_webroot}
+est_minutes: 20
+sort: 111
+description: |-
+  The web root contains `/backup/id_rsa`. The SSH service is OpenSSH 8.2p1 on Ubuntu (`ssh.lab.local`). The key belongs to user `ctf`.
+
+  **Objective:** Download the key, fix its permissions, SSH into the host, and read `/home/ctf/flag.txt`.
+
+  **Exam topics:** OpenSSH 8.2p1; service enumeration; credential leakage.
+
+  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+objectives:
+- Discover exposed files with directory brute forcing
+- Use a leaked private key
+- Set correct key file permissions
+hints:
+- level: 1
+  cost: 0
+  body: Use gobuster or ffuf to find /backup/.
+- level: 2
+  cost: 5
+  body: Download id_rsa.
+- level: 3
+  cost: 10
+  body: chmod 600 id_rsa.
+- level: 4
+  cost: 10
+  body: SSH as the ctf user.
+remediation: Never store keys in the web root; rotate keys; restrict SSH access.
+walkthrough: curl -O http://ssh.lab.local/backup/id_rsa; chmod 600 id_rsa; ssh -i id_rsa ctf@ssh.lab.local;
+  cat /home/ctf/flag.txt.
+references:
+- title: OWASP WSTG - Enumerate Infrastructure and Application Admin Interfaces
+  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces

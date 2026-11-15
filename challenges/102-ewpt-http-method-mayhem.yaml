@@ -1,0 +1,38 @@
+slug: ewpt-http-method-mayhem
+name: HTTP Method Mayhem (EWPT)
+category: web
+difficulty: easy
+lab_kind: static
+flag: FLAG{http_methods_put_enabled}
+est_minutes: 15
+sort: 102
+description: |-
+  `http://methods.lab.local` is an Apache/PHP file service. The administrator disabled directory listing but forgot to restrict HTTP methods.
+
+  **Objective:** Use OPTIONS to discover the enabled methods, then use a dangerous one to write a file that triggers the flag.
+
+  **Exam topics:** OWASP WSTG Configuration and Deployment Management Testing: Test HTTP Methods (WSTG-CONF-06).
+
+  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+objectives:
+- Enumerate allowed methods with OPTIONS
+- Read the Allow header
+- Abuse PUT to write a file
+hints:
+- level: 1
+  cost: 0
+  body: Send OPTIONS /uploads/.
+- level: 2
+  cost: 5
+  body: Check the Allow header.
+- level: 3
+  cost: 10
+  body: If PUT is enabled, upload probe.txt, then request it.
+remediation: Disable unused methods (PUT, DELETE, TRACE), enforce authorization, harden the Apache/nginx
+  configuration.
+walkthrough: 'curl -X OPTIONS http://methods.lab.local/uploads/ shows Allow: GET,HEAD,POST,PUT,DELETE,OPTIONS.
+  curl -X PUT --data owned http://methods.lab.local/uploads/probe.txt, then curl the same URL. The server
+  returns the flag once probe.txt exists.'
+references:
+- title: OWASP WSTG - Test HTTP Methods
+  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods

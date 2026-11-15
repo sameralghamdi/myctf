@@ -1,0 +1,40 @@
+slug: ewpt-coupon-king
+name: 'Coupon King: Business Logic (EWPT)'
+category: web
+difficulty: medium
+lab_kind: static
+flag: FLAG{business_logic_coupon_reuse}
+est_minutes: 25
+sort: 103
+description: |-
+  `http://shop.lab.local` sells a "Premium Flag" item for $100. You have a coupon, `WELCOME10`, for 10% off. The flag is released after a successful checkout.
+
+  **Objective:** Abuse the coupon or quantity logic to buy the item for $0 or less.
+
+  **Exam topics:** Business Logic Testing: assessing application logic and functionality for security flaws.
+
+  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+objectives:
+- Intercept and replay the apply-coupon request
+- Test one-time-use and quantity rules
+- Recognise missing server-side price validation
+hints:
+- level: 1
+  cost: 0
+  body: Intercept the "apply coupon" request.
+- level: 2
+  cost: 5
+  body: Try applying the same coupon more than once.
+- level: 3
+  cost: 10
+  body: Try a negative quantity.
+- level: 4
+  cost: 10
+  body: Check whether the final price is validated server-side.
+remediation: Server-side price calculation, one-time coupon state, positive quantity validation, a workflow
+  state machine.
+walkthrough: Apply WELCOME10 repeatedly until the price reaches $0, or set quantity=-1 and watch the total.
+  Complete checkout to receive the flag.
+references:
+- title: OWASP WSTG - Business Logic Testing
+  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/10-Business_Logic_Testing/

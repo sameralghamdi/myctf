@@ -1,0 +1,39 @@
+slug: ewpt-sqli-via-fuzzing
+name: SQL Injection via Fuzzing Wordlist (EWPT)
+category: web
+difficulty: medium
+lab_kind: static
+flag: FLAG{union_based_sqli_via_fuzzing}
+est_minutes: 25
+sort: 119
+description: |-
+  `http://sqli-fuzz.lab.local/product?id=1` is vulnerable. A fuzzing wordlist contains both benign and malicious payloads.
+
+  **Objective:** Fuzz the `id` parameter, find a UNION-based SQL injection, and extract the flag from the `flags` table.
+
+  **Exam topics:** Injection vulnerabilities; fuzzing; input validation.
+
+  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+objectives:
+- Fuzz a query parameter
+- Find the column count with ORDER BY
+- Extract data with UNION SELECT
+hints:
+- level: 1
+  cost: 0
+  body: Fuzz with SQL injection payloads.
+- level: 2
+  cost: 5
+  body: Determine the number of columns with ORDER BY.
+- level: 3
+  cost: 10
+  body: Use UNION SELECT.
+- level: 4
+  cost: 10
+  body: Extract from flags.flag.
+remediation: Prepared statements; a least-privilege DB user; input validation.
+walkthrough: id=1 ORDER BY 3-- - confirms three columns. id=-1 UNION SELECT 1,2,flag FROM flags-- - returns
+  the flag.
+references:
+- title: OWASP WSTG - Testing for SQL Injection
+  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05-Testing_for_SQL_Injection

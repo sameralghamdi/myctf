@@ -1,0 +1,38 @@
+slug: ewpt-api-endpoint-fuzzing
+name: API Endpoint Fuzzing (EWPT)
+category: api
+category_name: API Security
+skill: API Security
+difficulty: medium
+lab_kind: static
+flag: FLAG{api_fuzzing_debug_endpoint}
+est_minutes: 25
+sort: 115
+description: |-
+  `http://api-fuzz.lab.local/api/FUZZ` hides a debug endpoint. The debug endpoint returns the flag only for `127.0.0.1`.
+
+  **Objective:** Fuzz API paths to find the debug endpoint, then spoof localhost using a header.
+
+  **Exam topics:** Fuzzing random inputs; endpoint discovery; API enumeration.
+
+  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+objectives:
+- Fuzz API paths with a wordlist
+- Filter results by status code
+- Understand why forwarding headers cannot be trusted
+hints:
+- level: 1
+  cost: 0
+  body: Use ffuf with an API wordlist.
+- level: 2
+  cost: 5
+  body: Look for 200 responses.
+- level: 3
+  cost: 10
+  body: 'Try X-Forwarded-For: 127.0.0.1.'
+remediation: Do not trust forwarding headers; disable debug endpoints; authenticate APIs.
+walkthrough: 'ffuf -u http://api-fuzz.lab.local/api/FUZZ -w api-wordlist.txt finds /api/debug. curl -H
+  ''X-Forwarded-For: 127.0.0.1'' http://api-fuzz.lab.local/api/debug returns the flag.'
+references:
+- title: OWASP API Security Top 10
+  url: https://owasp.org/API-Security/

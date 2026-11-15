@@ -1,0 +1,37 @@
+slug: ewpt-vendor-osint
+name: 'Vendor OSINT: Additional Service (EWPT)'
+category: osint
+category_name: OSINT
+skill: OSINT
+difficulty: easy
+lab_kind: static
+flag: FLAG{maintenance_and_support}
+est_minutes: 10
+sort: 104
+description: |-
+  A public company profile says: "NexusTech develops custom web applications for clients." The page source contains a hidden comment listing additional services. One option is the correct additional service.
+
+  **Objective:** Find the hidden service in the page source or public profile (`http://osint.lab.local/nexustech.html`) and submit the flag, which is the service name in the form FLAG{service_name_with_underscores}.
+
+  **Exam topics:** NexusTech additional service question: Maintenance and Support.
+
+  _Isolated lab only (`*.lab.local` or your own Docker/VMs). Never expose these vulnerable services to the internet._
+objectives:
+- Read page source for HTML comments
+- Check for JSON-LD or other embedded metadata
+hints:
+- level: 1
+  cost: 0
+  body: View the page source.
+- level: 2
+  cost: 5
+  body: Look for HTML comments or JSON-LD.
+- level: 3
+  cost: 10
+  body: The correct service is the one most commonly offered alongside custom development.
+remediation: OSINT awareness; remove sensitive comments from production pages.
+walkthrough: Inspect http://osint.lab.local/nexustech.html and find the comment listing the services.
+  The additional service offered with custom development is maintenance and support.
+references:
+- title: OWASP WSTG - Review Webpage Content for Information Leakage
+  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/05-Review_Web_Page_Content_for_Information_Leakage
