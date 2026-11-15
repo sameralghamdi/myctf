@@ -91,10 +91,8 @@ class JwtFlawLab(LabHandler):
 <div class="card"><pre style="white-space:pre-wrap;word-break:break-all">{token}</pre></div>
 <div class="card">
   <h2>Admin area</h2>
-  <p class="muted">Protected at <code>{base}/admin</code>. The verifier reads the
-     token's <code>alg</code> header to decide how to check it.</p>
+  <p class="muted">Restricted account area: <a href="{base}/admin">Administrator console</a></p>
   <pre>curl "{{origin}}{base}/admin?token=&lt;your-token&gt;"</pre>
 </div>
-<p class="muted">A JWT is three base64url parts: header.payload.signature. What
-   happens if the header says <code>{{"alg":"none"}}</code>?</p>"""
+"""
         return LabResult(self.page(instance, "SecureApp", body))

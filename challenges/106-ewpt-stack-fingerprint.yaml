@@ -1,28 +1,12 @@
 slug: ewpt-stack-fingerprint
-name: 'Stack Fingerprint: Flask/Werkzeug (EWPT)'
+name: Control Room
 category: web
 difficulty: easy
 lab_kind: ewpt_106
 est_minutes: 15
 sort: 106
-description: '`http://flask.lab.local` returns `Server: Werkzeug httpd 0.14.1 (Python 3.8.17)`. A backup
-  file is publicly accessible.
-
-
-  **Objective:** Identify the server-side language and framework, find the backup source file, and recover
-  the flag route.
-
-
-  **Exam topics:** Server-side language detection; Flask/Werkzeug; Python 3.8.17; version disclosure.
-
-
-  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
-  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
-  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
-objectives:
-- Fingerprint a framework from banners
-- Use robots.txt to find hidden paths
-- Read leaked source to find a hidden route
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
 - level: 1
   cost: 0
@@ -35,8 +19,5 @@ hints:
   body: Read the source for a hidden route and the header it expects.
 remediation: Hide version banners, remove backups from the web root, disable debug routes.
 walkthrough: 'robots.txt disallows /backup/app.py. The source contains /flag, which requires the header
-  X-Debug: 1. curl -H ''X-Debug: 1'' http://flask.lab.local/flag returns the flag.'
-references:
-- title: OWASP WSTG - Fingerprint Web Server
-  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/02-Fingerprint_Web_Server
+  X-Debug: 1. curl -H ''X-Debug: 1'' http://target.lab.local/flag returns the flag.'
 dynamic_flag: true

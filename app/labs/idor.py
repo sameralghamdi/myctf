@@ -73,8 +73,7 @@ class IdorBankLab(LabHandler):
 </div>
 <div class="card">
   <h2>Try the API</h2>
-  <p class="muted">The portal fetches account data by id. What happens if you
-     request a different id?</p>
+  <p class="muted">Account API</p>
   <pre>curl {base}/api/account/1001</pre>
 </div>"""
         return LabResult(self.page(instance, "NimbusBank", body))

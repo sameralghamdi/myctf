@@ -29,20 +29,6 @@
     </div>
     <p class="muted" style="white-space:pre-line">{{ c.description }}</p>
 
-    {% if c.objectives %}
-    <h2 style="font-size:13px;color:var(--accent-text);margin:var(--space-4) 0 6px">Objectives</h2>
-    <ul class="muted small" style="margin:0;padding-left:18px">
-      {% for o in c.objectives %}<li>{{ o }}</li>{% endfor %}
-    </ul>
-    {% endif %}
-
-    {% if c.references %}
-    <h2 style="font-size:13px;color:var(--accent-text);margin:var(--space-4) 0 6px">Resources</h2>
-    <ul class="small" style="margin:0;padding-left:18px">
-      {% for r in c.references %}<li><a href="{{ r.url }}" target="_blank" rel="noopener">{{ r.title }}</a></li>{% endfor %}
-    </ul>
-    {% endif %}
-
     {% if c.hints %}
     <h2 style="font-size:13px;color:var(--accent-text);margin:var(--space-4) 0 6px">Hints</h2>
     {% for h in c.hints %}
@@ -97,7 +83,13 @@
         <button class="btn danger sm" onclick="Challenge.stopLab('{{ c.lab.instance_id }}')">Stop</button>
       </span>
     </div>
-    <iframe src="{{ c.lab.url }}" title="lab"></iframe>
+    {% if c.has_web_ui %}
+    <div style="display:flex;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border)">
+      <button class="btn ghost sm" type="button" onclick="setLabView('target')" data-lab-view="target" aria-pressed="{{ 'true' if c.default_lab_view == 'target' else 'false' }}">Target page</button>
+      <button class="btn ghost sm" type="button" onclick="setLabView('terminal')" data-lab-view="terminal" aria-pressed="{{ 'true' if c.default_lab_view == 'terminal' else 'false' }}">Terminal</button>
+    </div>
+    {% endif %}
+    <iframe id="lab-frame" src="{{ c.lab.url }}{{ 'terminal' if c.has_web_ui and c.default_lab_view == 'terminal' else '' }}" title="lab"></iframe>
     {% else %}
     <div class="lab-placeholder">
       <div>
@@ -116,7 +108,13 @@
 {% endblock %}
 {% block scripts %}
 <script>
-Challenge.slug = {{ c.slug|tojson }};
+Challenge.slug = {{ c.public_slug|tojson }};
+{% if c.lab and c.has_web_ui %}
+function setLabView(mode){
+  document.getElementById('lab-frame').src = {{ c.lab.url|tojson }} + (mode === 'terminal' ? 'terminal' : '');
+  document.querySelectorAll('[data-lab-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.labView === mode)));
+}
+{% endif %}
 function setView(mode){
   const play=document.getElementById('play');
   play.classList.remove('brief-only','lab-only');

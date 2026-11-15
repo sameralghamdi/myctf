@@ -1,40 +1,30 @@
 slug: sqli-login-bypass
-name: SQL Injection — Login Bypass
+name: Front Desk
 category: web
 difficulty: easy
 lab_kind: sqli_login
 dynamic_flag: true
 est_minutes: 20
 sort: 3
-description: >
-  The AcmeCorp intranet login builds its SQL query by pasting your input straight
-  into the statement. Bypass authentication, sign in as the administrator, and
-  read the admin's profile note — it contains the flag.
-objectives:
-  - Identify a string-concatenated SQL query
-  - Craft a payload that makes the WHERE clause always true
-  - Comment out the rest of the query
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
-  - level: 1
-    cost: 0
-    body: The username and password are wrapped in single quotes inside the query.
-  - level: 2
-    cost: 10
-    body: Break out of the quotes and add an always-true condition, like  ' OR '1'='1
-  - level: 3
-    cost: 20
-    body: "Username:  ' OR '1'='1' --    (note the trailing space after --), any password."
-remediation: >
-  Use parameterised queries / prepared statements so input is always treated as
-  data, never as SQL. Apply least-privilege DB accounts and add a WAF as
-  defence-in-depth. Never surface raw SQL errors to users.
-walkthrough: >
-  The backend runs:  SELECT * FROM users WHERE username='<u>' AND password='<p>'.
-  Submitting username  ' OR '1'='1' --   turns the WHERE clause always-true and
-  comments out the password check, returning the first row (admin), whose
-  secret_note holds the flag.
-references:
-  - title: OWASP — SQL Injection
-    url: https://owasp.org/www-community/attacks/SQL_Injection
-  - title: OWASP — Query Parameterization Cheat Sheet
-    url: https://cheatsheetseries.owasp.org/cheatsheets/Query_Parameterization_Cheat_Sheet.html
+- level: 1
+  cost: 0
+  body: The username and password are wrapped in single quotes inside the query.
+- level: 2
+  cost: 10
+  body: Break out of the quotes and add an always-true condition, like  ' OR '1'='1
+- level: 3
+  cost: 20
+  body: 'Username:  '' OR ''1''=''1'' --    (note the trailing space after --), any password.'
+remediation: 'Use parameterised queries / prepared statements so input is always treated as data, never
+  as SQL. Apply least-privilege DB accounts and add a WAF as defence-in-depth. Never surface raw SQL errors
+  to users.
+
+  '
+walkthrough: 'The backend runs:  SELECT * FROM users WHERE username=''<u>'' AND password=''<p>''. Submitting
+  username  '' OR ''1''=''1'' --   turns the WHERE clause always-true and comments out the password check,
+  returning the first row (admin), whose secret_note holds the flag.
+
+  '

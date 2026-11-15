@@ -113,7 +113,7 @@ class LabHandler:
  table{{width:100%;border-collapse:collapse}} td,th{{border-bottom:1px solid var(--line);
    padding:7px 8px;text-align:left;font-size:14px}}
 </style>{head}</head><body><div class="wrap">
-<div class="labbar"><b>MyCTF</b> lab · <span class="tag">{self.kind}</span>
+<div class="labbar"><b>MyCTF</b> lab · <span class="tag">training target</span>
  <span class="muted">isolated training target — instance {instance['id'][:8]}</span></div>
 {body}
 </div></body></html>"""

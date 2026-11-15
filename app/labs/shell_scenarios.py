@@ -45,9 +45,9 @@ class ShellScenario:
 
 # =========================================================== 1. linux basics ==
 LINUX_BASICS = ShellScenario(
-    kind="linux_basics", title="Terminal — Linux Basics",
+    kind="linux_basics", title="Terminal — Quiet Room",
     user="ctf", host="lab", home="/home/ctf",
-    motd="Find the hidden flag in your home directory. Type 'help' for commands.",
+    motd="Assigned host ready. Type help for terminal controls.",
     files={
         "/home/ctf/README.txt": "Welcome! Find the hidden flag in your home dir.",
         "/home/ctf/notes.txt": "TODO: tidy up. Nothing secret here.",
@@ -58,9 +58,9 @@ LINUX_BASICS = ShellScenario(
 
 # ============================================================ 2. linux privesc ==
 LINUX_PRIVESC = ShellScenario(
-    kind="linux_privesc", title="Terminal — Privilege Escalation",
+    kind="linux_privesc", title="Terminal — Higher Ground",
     user="ops", host="lab", home="/home/ops",
-    motd="You are 'ops'. The flag is in /root/flag.txt. Check your sudo rights.",
+    motd="Assigned host ready. Type help for terminal controls.",
     files={
         "/home/ops/notes.txt": "Deploy scripts live in /opt. Ask admin for root.",
         "/root/flag.txt": "{flag}",
@@ -153,7 +153,7 @@ def _web_programs(flag: str) -> dict[str, Program]:
 
 
 WEB_RECON = ShellScenario(
-    kind="shell_web_recon", title="Terminal — Web Recon",
+    kind="shell_web_recon", title="Terminal — Internal Affairs",
     user="guest", host="kali-web", home="/home/guest",
     motd=f"Target in scope: http://{_WEB_HOST}  -  read README.txt to begin.",
     files={
@@ -266,7 +266,7 @@ def _pcap_files(flag: str) -> dict[str, str]:
 
 
 PCAP_FORENSICS = ShellScenario(
-    kind="shell_pcap_forensics", title="Terminal — Packet Forensics",
+    kind="shell_pcap_forensics", title="Terminal — Outbound",
     user="analyst", host="kali-web", home="/home/analyst",
     motd="Incident IR-2291: a workstation leaked data. Start with case-notes.txt.",
     files={

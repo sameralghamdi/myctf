@@ -81,5 +81,5 @@ class ReflectedXssLab(LabHandler):
      document.body.appendChild(d);
   }};
 </script>
-<p class="muted">The page defines <code>{PROOF}()</code>. Make your query call it.</p>"""
+"""
         return LabResult(self.page(instance, "SearchHub", body))

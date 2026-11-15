@@ -1,39 +1,29 @@
 slug: command-injection
-name: Command Injection
+name: Signal Check
 category: web
 difficulty: medium
 lab_kind: command_injection
 dynamic_flag: true
 est_minutes: 25
 sort: 7
-description: >
-  NetTools runs a ping for the host you provide by building a shell command
-  string with your input appended. Inject an extra command to read the flag file
-  in the lab sandbox. (The lab uses a safe simulated interpreter — no real shell
-  is ever invoked.)
-objectives:
-  - Recognise input concatenated into a shell command
-  - Use a command separator to append your own command
-  - Read a file via the injected command
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
-  - level: 1
-    cost: 0
-    body: The server runs  ping -c 1 <host>  with your host value appended directly.
-  - level: 2
-    cost: 10
-    body: Shell separators like ; | && let you chain a second command after ping.
-  - level: 3
-    cost: 20
-    body: "Host value:  127.0.0.1; cat flag.txt   (or  | cat flag.txt )"
-remediation: >
-  Never build shell strings from user input. Call the binary with an argument
-  array and no shell (e.g. subprocess without shell=True), and validate/allow-list
-  the host. Drop privileges for any command runner.
-walkthrough: >
-  Input such as  127.0.0.1; cat flag.txt  makes the (simulated) shell run ping and
-  then cat the flag file, printing the flag in the command output.
-references:
-  - title: OWASP — Command Injection
-    url: https://owasp.org/www-community/attacks/Command_Injection
-  - title: OWASP — OS Command Injection Defense Cheat Sheet
-    url: https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html
+- level: 1
+  cost: 0
+  body: The server runs  ping -c 1 <host>  with your host value appended directly.
+- level: 2
+  cost: 10
+  body: Shell separators like ; | && let you chain a second command after ping.
+- level: 3
+  cost: 20
+  body: 'Host value:  127.0.0.1; cat flag.txt   (or  | cat flag.txt )'
+remediation: 'Never build shell strings from user input. Call the binary with an argument array and no
+  shell (e.g. subprocess without shell=True), and validate/allow-list the host. Drop privileges for any
+  command runner.
+
+  '
+walkthrough: 'Input such as  127.0.0.1; cat flag.txt  makes the (simulated) shell run ping and then cat
+  the flag file, printing the flag in the command output.
+
+  '

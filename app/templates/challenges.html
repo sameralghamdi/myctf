@@ -31,7 +31,7 @@
   <a class="card hover chal" style="display:block"
      data-cat="{{ c.category }}" data-diff="{{ c.difficulty }}"
      data-status="{{ c.status }}" data-name="{{ c.name|lower }}"
-     href="{{ url_for('core.challenge_page', slug=c.slug) }}">
+     href="{{ url_for('core.challenge_page', slug=c.public_slug) }}">
     <div class="spread" style="margin-bottom:var(--space-2)">
       <span class="badge cat">{{ c.category_name }}</span>
       {{ status_badge(c.status) }}

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ title }} — Target</title>
+<style>
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{font:13px/1.5 system-ui,sans-serif;background:#fff;color:#263246;display:flex;flex-direction:column}.browserbar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#eff1f5;border-bottom:1px solid #d6dbe4}.targetmark{font-size:10px;letter-spacing:.08em;white-space:nowrap;background:#e2e7ef;color:#4c607d;padding:4px 7px;border-radius:4px}.address{display:flex;flex:1;min-width:0;align-items:center;background:white;border:1px solid #d3d9e3;border-radius:6px;padding-left:10px;gap:2px}.origin{color:#697486;white-space:nowrap;font-size:11px}input,textarea,select,button{font:inherit}.address input{border:0;min-width:50px;width:100%;padding:8px 2px;color:#263246;background:transparent;font:12px ui-monospace,monospace;outline:none}.address button,.home{border:0;background:transparent;cursor:pointer;padding:7px 10px;color:#455d80}.tabs{display:flex;align-items:center;gap:4px;padding:0 12px;background:#fafbfc;border-bottom:1px solid #e0e4eb}.tab,.request-toggle{border:0;background:none;padding:10px 12px;color:#6e798a;cursor:pointer;font-size:12px}.tab[aria-selected=true]{color:#1f4f91;border-bottom:2px solid #3474cc;font-weight:600}.request-toggle{margin-left:auto}.status{font:11px ui-monospace,monospace;color:#658279;margin-left:8px}.stage{flex:1;min-height:350px;position:relative}.stage iframe{width:100%;height:100%;min-height:450px;border:0;display:block;background:#fff}.source{margin:0;height:100%;min-height:450px;overflow:auto;padding:24px;font:12px/1.7 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:#171e2b;color:#dce5f3}.error{background:#fff0f0;color:#a82c31;padding:12px 20px;border-bottom:1px solid #ecc4c4}.request-panel{padding:16px;border-bottom:1px solid #d7dfe8;background:#f6f8fa;max-height:350px;overflow:auto}.request-panel .row{display:flex;gap:10px;align-items:center}.request-panel select,.request-panel textarea{border:1px solid #c9d2de;border-radius:4px;padding:8px;background:white;color:#273347}.request-panel textarea{width:100%;font:12px ui-monospace,monospace;resize:vertical}.request-panel label{display:block;font-size:11px;font-weight:600;color:#5b6a7f;margin:12px 0 5px}.send{background:#265ea6;color:white;border:0;border-radius:4px;padding:8px 18px;cursor:pointer}.request-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.small{color:#8190a4;font-size:11px}.notice{padding:7px 12px;background:#fafbfc;color:#8792a0;font-size:10px;border-top:1px solid #e4e7ec}button:focus-visible{outline:2px solid #397cd1;outline-offset:2px}[hidden]{display:none!important}@media(max-width:650px){.origin{display:none}.targetmark{font-size:9px}.request-grid{grid-template-columns:1fr}.tabs{gap:0;padding:0 6px}.tab,.request-toggle{padding:10px 8px}}
+</style></head><body>
+<div class="browserbar"><span class="targetmark">LAB TARGET</span><button class="home" type="button" id="home" aria-label="Target home">⌂</button><form class="address" id="address"><span class="origin">{{ host }}{% if port != 80 %}:{{ port }}{% endif %}</span><input id="path" aria-label="Target path" value="{{ initial_path }}" spellcheck="false" autocomplete="off"><button type="submit" aria-label="Go to target path">↵</button></form></div>
+<div class="tabs" role="tablist" aria-label="Target response view"><button class="tab" id="page-tab" role="tab" aria-selected="true" aria-controls="target-frame">Page</button><button class="tab" id="source-tab" role="tab" aria-selected="false" aria-controls="source">Source</button><button class="tab" id="headers-tab" role="tab" aria-selected="false" aria-controls="response-headers">Headers</button><span class="status" id="status" aria-live="polite"></span><button class="request-toggle" id="request-toggle" type="button" aria-expanded="false" aria-controls="request-panel">Edit request</button></div>
+<section id="request-panel" class="request-panel" hidden aria-label="HTTP request editor"><div class="row"><label for="method" style="margin:0">Method</label><select id="method"><option>GET</option><option>POST</option><option>HEAD</option><option>OPTIONS</option><option>PUT</option><option>DELETE</option><option>TRACE</option></select><button class="send" id="send" type="button">Send request</button></div><div class="request-grid"><div><label for="request-headers">Request headers</label><textarea id="request-headers" rows="3" placeholder="Content-Type: application/x-www-form-urlencoded"></textarea></div><div><label for="request-body">Request body</label><textarea id="request-body" rows="3" placeholder="key=value"></textarea></div></div></section>
+<div id="error" class="error" hidden role="alert"></div>
+<main class="stage"><iframe id="target-frame" title="{{ title }} target page" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe><pre id="source" class="source" role="tabpanel" aria-labelledby="source-tab" hidden></pre><pre id="response-headers" class="source" role="tabpanel" aria-labelledby="headers-tab" hidden></pre></main>
+<footer class="notice">Isolated training target · {{ host }}{% if port != 80 %}:{{ port }}{% endif %}</footer>
+<script>
+(()=>{
+'use strict';
+const endpoint={{ (base + '/web/request')|tojson }}, initial={{ initial_path|tojson }};
+const el=id=>document.getElementById(id), frame=el('target-frame');
+let active='page', sequence=0, pending=false;
+const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function selectTab(name){active=name;for(const tab of ['page','source','headers'])el(tab+'-tab').setAttribute('aria-selected',String(name===tab));frame.hidden=name!=='page';el('source').hidden=name!=='source';el('response-headers').hidden=name!=='headers';}
+for(const name of ['page','source','headers'])el(name+'-tab').addEventListener('click',()=>selectTab(name));
+// The target document has an opaque origin. It cannot read platform cookies,
+// access its parent DOM, navigate the platform, or make external connections.
+const bridge=`<script>
+ document.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;e.preventDefault();parent.postMessage({type:'ewpt-navigation',path:a.getAttribute('href'),method:'GET',headers:{},data:''},'*');});
+ document.addEventListener('submit',e=>{e.preventDefault();const form=e.target,params=new URLSearchParams(),headers={};for(const [key,value] of new FormData(form)){const input=form.elements.namedItem(key);if(input&&input.dataset.header){headers[input.dataset.header]=String(value);}else if(!(value instanceof File)){params.append(key,value);}}if(e.submitter&&e.submitter.name)params.set(e.submitter.name,e.submitter.value);let path=form.getAttribute('action')||'/',method=(form.getAttribute('method')||'GET').toUpperCase(),data='';if(method==='GET'){const query=params.toString();if(query)path+=(path.includes('?')?'&':'?')+query;}else{data=params.toString();headers['Content-Type']='application/x-www-form-urlencoded';}parent.postMessage({type:'ewpt-navigation',path,method,headers,data},'*');});
+<\/script>`;
+async function request(path,method='GET',headers={},data=''){
+ const requestNumber=++sequence;pending=true;el('error').hidden=true;el('status').textContent='Loading…';
+ try{
+  const result=await fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({path,method,headers,data})});
+  const response=await result.json();if(requestNumber!==sequence)return;if(!result.ok)throw new Error(response.error||'Unable to load target.');
+  el('path').value=response.path;el('status').textContent='HTTP '+response.status;el('status').style.color=response.status>=400?'#ad454b':'#467864';
+  el('source').textContent=response.body;
+  el('response-headers').textContent='HTTP/1.1 '+response.status+'\n'+Object.entries(response.headers).map(([k,v])=>k+': '+v).join('\n');
+  const type=response.headers['Content-Type']||'';
+  let content=type.includes('text/html')?response.body:'<!doctype html><html><head><meta charset="utf-8"><style>body{font:14px/1.65 monospace;padding:18px;margin:0;color:#253044;background:white}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style></head><body><pre>'+escape(response.body)+'</pre></body></html>';
+  const policy='<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;; script-src &#39;unsafe-inline&#39;; form-action &#39;none&#39;; base-uri &#39;none&#39;">';
+  // Insert the CSP before any target content, including for raw/text responses.
+  content=content.replace(/<head>/i,'<head>'+policy);
+  frame.srcdoc=content.replace(/<\/body>/i,bridge+'</body>');
+ }catch(error){if(requestNumber!==sequence)return;el('error').textContent=error.message;el('error').hidden=false;el('status').textContent='Request failed';}finally{if(requestNumber===sequence)pending=false;}
+}
+window.addEventListener('message',event=>{if(event.source!==frame.contentWindow||!event.data||event.data.type!=='ewpt-navigation')return;const d=event.data;if(typeof d.path!=='string'||typeof d.method!=='string')return;selectTab('page');request(d.path,d.method,d.headers,d.data);});
+el('address').addEventListener('submit',e=>{e.preventDefault();selectTab('page');request(el('path').value);});
+el('home').addEventListener('click',()=>{selectTab('page');request('/');});
+el('request-toggle').addEventListener('click',()=>{const panel=el('request-panel');panel.hidden=!panel.hidden;el('request-toggle').setAttribute('aria-expanded',String(!panel.hidden));});
+el('send').addEventListener('click',()=>{const headers={};for(const line of el('request-headers').value.split('\n')){if(!line.trim())continue;const index=line.indexOf(':');if(index<1){el('error').textContent='Use one Name: value header per line.';el('error').hidden=false;return;}headers[line.slice(0,index).trim()]=line.slice(index+1).trim();}selectTab('page');request(el('path').value,el('method').value,headers,el('request-body').value);});
+request(initial);
+})();
+</script></body></html>

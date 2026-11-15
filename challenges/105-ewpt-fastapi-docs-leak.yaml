@@ -1,5 +1,5 @@
 slug: ewpt-fastapi-docs-leak
-name: FastAPI Docs Leak (EWPT)
+name: Service Desk
 category: api
 category_name: API Security
 skill: API Security
@@ -7,23 +7,8 @@ difficulty: medium
 lab_kind: ewpt_105
 est_minutes: 20
 sort: 105
-description: '`http://api.lab.local:8000/` returns `{"info":"Visit the /docs endpoint for the OpenAPI
-  UI"}`. The Server header is `uvicorn`. The API documentation is exposed in production.
-
-
-  **Objective:** Inspect the OpenAPI schema, find a hidden admin endpoint, and retrieve the flag.
-
-
-  **Exam topics:** Server-side language detection; FastAPI/uvicorn; OpenAPI UI; the /docs endpoint.
-
-
-  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
-  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
-  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
-objectives:
-- Fingerprint the stack from response headers
-- Read an exposed OpenAPI schema
-- Call an undocumented admin endpoint with the right header
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
 - level: 1
   cost: 0
@@ -38,9 +23,7 @@ hints:
   cost: 10
   body: Check the required request headers.
 remediation: Disable /docs and /openapi.json in production or protect them; require authentication.
-walkthrough: 'curl http://api.lab.local:8000/openapi.json reveals /api/v1/admin/flag, which requires X-Admin:
-  true. curl -H ''X-Admin: true'' http://api.lab.local:8000/api/v1/admin/flag returns the flag.'
-references:
-- title: OWASP API Security Top 10
-  url: https://owasp.org/API-Security/
+walkthrough: 'curl http://target.lab.local:8000/openapi.json reveals /api/v1/admin/flag, which requires
+  X-Admin: true. curl -H ''X-Admin: true'' http://target.lab.local:8000/api/v1/admin/flag returns the
+  flag.'
 dynamic_flag: true

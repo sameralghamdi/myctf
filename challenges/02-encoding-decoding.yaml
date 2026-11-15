@@ -1,37 +1,28 @@
 slug: encoding-decoding
-name: Encoding & Decoding
+name: Lost Message
 category: crypto
 difficulty: very_easy
 lab_kind: encoding
 dynamic_flag: true
 est_minutes: 10
 sort: 2
-description: >
-  Encoding is not encryption. The lab shows a blob that hides a flag under two
-  reversible layers. Use the decoder bench (or your own tools) to peel them off
-  and recover the MYCTF{...} flag.
-objectives:
-  - Recognise Base64 and ROT13 by sight
-  - Chain decoding operations in the right order
-  - Understand why encoding provides no confidentiality
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
-  - level: 1
-    cost: 0
-    body: The blob is text-safe and ends with '=' padding — a classic sign of one layer.
-  - level: 2
-    cost: 5
-    body: Base64-decode first. The result is letters shifted by a fixed amount.
-  - level: 3
-    cost: 10
-    body: After Base64, apply ROT13 to the result to reveal the flag.
-remediation: >
-  Never use encoding (Base64/hex) to protect secrets. Use authenticated
-  encryption (e.g. AES-GCM) with keys managed outside the application.
-walkthrough: >
-  Base64-decode the blob, then ROT13 the output. The decoder bench on the lab
-  page does both; "Use output as input" lets you chain them.
-references:
-  - title: Base64 (Wikipedia)
-    url: https://en.wikipedia.org/wiki/Base64
-  - title: ROT13 (Wikipedia)
-    url: https://en.wikipedia.org/wiki/ROT13
+- level: 1
+  cost: 0
+  body: The blob is text-safe and ends with '=' padding — a classic sign of one layer.
+- level: 2
+  cost: 5
+  body: Base64-decode first. The result is letters shifted by a fixed amount.
+- level: 3
+  cost: 10
+  body: After Base64, apply ROT13 to the result to reveal the flag.
+remediation: 'Never use encoding (Base64/hex) to protect secrets. Use authenticated encryption (e.g. AES-GCM)
+  with keys managed outside the application.
+
+  '
+walkthrough: 'Base64-decode the blob, then ROT13 the output. The decoder bench on the lab page does both;
+  "Use output as input" lets you chain them.
+
+  '

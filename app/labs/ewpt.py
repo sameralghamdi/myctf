@@ -16,7 +16,7 @@ from .shell_scenarios import ShellScenario
 
 HOME = '/home/ctf'
 # Number -> host, port, short label. Non-HTTP challenges still have a scope host.
-TARGETS = {
+LEGACY_TARGETS = {
     101: ('login.lab.local', 80, 'Fuzz the Login'),
     102: ('methods.lab.local', 80, 'HTTP Method Mayhem'),
     103: ('shop.lab.local', 80, 'Coupon King'),
@@ -38,6 +38,32 @@ TARGETS = {
     119: ('sqli-fuzz.lab.local', 80, 'SQL Injection Fuzzing'),
     120: ('trace.lab.local', 80, 'HTTP TRACE Leak'),
 }
+
+CASE_NAMES = {
+    101: 'Reception',
+    102: 'Storage Room',
+    103: 'The Last Item',
+    104: 'Public Record',
+    105: 'Service Desk',
+    106: 'Control Room',
+    107: 'Old Office',
+    108: 'Operations Center',
+    109: 'Side Entrance',
+    110: 'Name Service',
+    111: 'Remote Office',
+    112: 'Workstation',
+    113: 'Restricted Area',
+    114: 'Archive Room',
+    115: 'Service Corridor',
+    116: 'Account Services',
+    117: 'Site Survey',
+    118: 'Night Shift',
+    119: 'Supply Room',
+    120: 'Return Address',
+}
+
+TARGETS = {number: ('192.168.0.2' if number == 110 else 'target.lab.local', data[1], CASE_NAMES[number])
+           for number, data in LEGACY_TARGETS.items()}
 
 
 @dataclass
@@ -94,11 +120,11 @@ def parse_request(args):
     return r
 
 
-def programs(number, flag):
+def build_runtime(number, flag):
     host, port, _ = TARGETS[number]
     state = {'uploads': {}, 'coupons': 0, 'quantity': 1, 'password': secrets.token_hex(16),
              'session': secrets.token_hex(16), 'key': 'SIMULATED-KEY-' + secrets.token_hex(24),
-             'modes': {}}
+             'modes': {}, 'applications': {'/': True, '/docs': True, '/examples': True, '/host-manager': True, '/manager': True}}
 
     def file_path(shell, name):
         return shell._resolve(shell.program_cwd, name)
@@ -122,7 +148,7 @@ def programs(number, flag):
     def target(r):
         """Return status, headers, body; target validation never makes a connection."""
         url = urlsplit(r.url if '://' in r.url else 'http://' + r.url)
-        if url.scheme not in ('http', 'https') or url.hostname != host or (url.port or (443 if url.scheme == 'https' else 80)) != port:
+        if url.scheme not in ('http', 'https') or url.hostname not in (host, LEGACY_TARGETS[number][0]) or (url.port or (443 if url.scheme == 'https' else 80)) != port:
             raise ValueError('target is outside this lab scope; read scope.txt')
         path = url.path or '/'
         # Match curl's normal removal of plain dot segments. Encoded dots survive.
@@ -139,7 +165,11 @@ def programs(number, flag):
              'Content-Type': 'text/plain; charset=utf-8'}
         method, f = r.method, fields(r)
         def response(body, status=200, extra=None):
-            return status, {**h, **(extra or {})}, str(body)
+            from .ewpt_pages import render_target
+            headers = {**h, **(extra or {})}
+            body, content_type = render_target(number, path, method, status, headers, str(body), state)
+            headers['Content-Type'] = content_type
+            return status, headers, body
         def denied(): return response('Unauthorized', 401)
         def missing(): return response('Not Found', 404)
         def login():
@@ -209,11 +239,23 @@ def programs(number, flag):
                 return response(flag)
         elif number == 108:
             if path == '/': return response('Apache Tomcat 8.5.19. Manager: /manager/html')
-            if path == '/manager/html':
-                return response('<h1>Tomcat Manager</h1>\n<!-- ' + flag + ' -->') if r.creds == 'tomcat:tomcat' else response('Unauthorized', 401, {'WWW-Authenticate': 'Basic realm="Tomcat Manager"'})
+            if path in ('/manager/html', '/manager/status'):
+                if r.creds != 'tomcat:tomcat':
+                    return response('Unauthorized', 401, {'WWW-Authenticate': 'Basic realm="Tomcat Manager"'})
+                if method == 'POST':
+                    app = f.get('path')
+                    action = f.get('action')
+                    if app not in state['applications'] or action not in ('start', 'stop', 'reload'):
+                        return response('Unknown application or command', 400)
+                    if app == '/manager' and action == 'stop':
+                        return response('The current manager application cannot stop itself in this lab', 400)
+                    if action != 'reload': state['applications'][app] = action == 'start'
+                return response('<h1>Tomcat Manager</h1>\n<!-- ' + flag + ' -->')
         elif number == 109:
             if path == '/': return response('<a href="/static/">Static files</a>')
             if path == '/static/': return response('assets: logo.svg, site.css')
+            if path == '/static/site.css': return response('body { font-family: sans-serif; }', extra={'Content-Type':'text/css'})
+            if path == '/static/logo.svg': return response('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="36"><text y="26" font-size="24">Nexus</text></svg>', extra={'Content-Type':'image/svg+xml'})
             if unquote(path) == '/static../flag.txt': return response(flag)
         elif number == 111:
             if path == '/': return response('Nexus files. User ctf; SSH service is available.')
@@ -231,6 +273,8 @@ def programs(number, flag):
             if path == '/api/health': return response('{"status":"ok"}')
             if path == '/api/debug': return response(flag) if r.headers.get('x-forwarded-for') == '127.0.0.1' else response('Local clients only', 403)
         elif number == 116:
+            if path in ('/reset/step1', '/reset/step2', '/reset/step3') and method in ('GET', 'HEAD'):
+                return response('Reset your password')
             if path == '/': return response('Admin: admin@lab.local. POST /reset/step1 email=... -> /reset/step2 token=... -> /reset/step3 email=...&password=...; login at /api/login')
             if path == '/reset/step1' and method == 'POST': return response('If registered, an email was sent. Next: /reset/step2')
             if path == '/reset/step2' and method == 'POST': return response('Invalid token', 403)
@@ -321,7 +365,7 @@ def programs(number, flag):
             return '', 'ffuf: ' + (str(exc) or 'usage: ffuf -u URL/FUZZ -w wordlist.txt')
 
     def nmap(shell, args, stdin, root):
-        if not args or host not in args: return '', 'nmap: target must match scope.txt'
+        if not args or not any(value in args for value in (host, LEGACY_TARGETS[number][0])): return '', 'nmap: target must match scope.txt'
         if number == 110: lines = ['53/tcp open domain EC2 DNS']
         elif number == 112: lines = ['3389/tcp open ms-wbt-server xrdp']
         elif number == 117: lines = ['5000/tcp open http nginx 1.25.1', '8000/tcp open http uvicorn', '8080/tcp open http Apache Tomcat 8.5.19', '8082/tcp open http Apache httpd 2.4.49']
@@ -333,6 +377,12 @@ def programs(number, flag):
 
     def dig(shell, args, stdin, root):
         if '@192.168.0.2' not in args: return '', 'dig: use the in-scope resolver @192.168.0.2'
+        if '-x' in args and '192.168.0.2' in args:
+            return '2.0.168.192.in-addr.arpa. 60 IN PTR ns1.nexustech.lab.', ''
+        if any(a.upper() == 'AXFR' for a in args) and 'nexustech.lab' in args:
+            return 'nexustech.lab. 60 IN SOA ns1.nexustech.lab. admin.nexustech.lab. 1 3600 600 86400 60\nflag.nexustech.lab. 60 IN TXT "' + flag + '"', ''
+        if 'nexustech.lab' in args and any(a.upper() in ('NS','SOA') for a in args):
+            return 'nexustech.lab. 60 IN NS ns1.nexustech.lab.', ''
         if 'version.bind' in args and any(a.upper() in ('CH', 'CHAOS') for a in args) and any(a.upper() == 'TXT' for a in args): return 'version.bind. 0 CH TXT "EC2 DNS"', ''
         if 'flag.nexustech.lab' in args and any(a.upper() == 'TXT' for a in args): return 'flag.nexustech.lab. 60 IN TXT "' + flag + '"', ''
         return ';; status: NXDOMAIN', ''
@@ -347,20 +397,21 @@ def programs(number, flag):
     def ssh(shell, args, stdin, root):
         try:
             i = args.index('-i'); key = args[i + 1]
-            if 'ctf@ssh.lab.local' not in args: return '', 'ssh: target must be ctf@ssh.lab.local'
+            destination = next((value for value in args if value in ('ctf@target.lab.local', 'ctf@ssh.lab.local')), None)
+            if not destination: return '', 'ssh: target must match the assigned host and account'
             p = file_path(shell, key)
             if shell.files.get(p) != state['key']: return '', 'ssh: Permission denied (publickey)'
             if state['modes'].get(p) != '600': return '', 'ssh: UNPROTECTED PRIVATE KEY FILE! Use chmod 600.'
             shell.files['/home/ctf/flag.txt'] = flag
             # The simulated remote home maps to this terminal's home after login.
-            shell.host = 'ssh.lab.local'
-            cmd = args[args.index('ctf@ssh.lab.local') + 1:]
+            shell.host = host
+            cmd = args[args.index(destination) + 1:]
             if cmd: return (flag, '') if cmd in (['cat', '/home/ctf/flag.txt'], ['cat /home/ctf/flag.txt']) else ('', 'ssh: supported remote command: cat /home/ctf/flag.txt')
-            return 'Authenticated to ssh.lab.local. Remote home mounted at /home/ctf; cat /home/ctf/flag.txt', ''
-        except (ValueError, IndexError): return '', 'usage: ssh -i id_rsa ctf@ssh.lab.local [cat /home/ctf/flag.txt]'
+            return 'Authenticated to target.lab.local. Remote home mounted at /home/ctf; cat /home/ctf/flag.txt', ''
+        except (ValueError, IndexError): return '', 'usage: ssh -i id_rsa ctf@target.lab.local [cat /home/ctf/flag.txt]'
 
     def rdp(shell, args, stdin, root):
-        if not all(value in args for value in ('/v:xrdp.lab.local', '/u:ctf', '/p:ctf')): return '', 'xfreerdp: authentication failed; use /v:host /u:user /p:password'
+        if not any(value in args for value in ('/v:target.lab.local', '/v:xrdp.lab.local')) or not all(value in args for value in ('/u:ctf', '/p:ctf')): return '', 'xfreerdp: authentication failed; use /v:host /u:user /p:password'
         shell.dirs.add(HOME + '/Desktop')
         shell.files[HOME + '/Desktop/flag.txt'] = flag
         return 'Simulated RDP connected. Desktop mounted at ~/Desktop. Use cat ~/Desktop/flag.txt (no graphical desktop).', ''
@@ -377,7 +428,8 @@ def programs(number, flag):
 
     def answer(shell, args, stdin, root):
         expected = {104: 'maintenance_and_support', 117: 'nginx_uvicorn_tomcat_apache', 118: '192.168.0.66'}[number]
-        return (flag, '') if ' '.join(args).strip().lower() == expected else ('Incorrect answer. Review the evidence.', '')
+        finding = re.sub(r'[\s,]+', '_', ' '.join(args).strip().lower())
+        return (flag, '') if finding == expected else ('Incorrect answer. Review the evidence.', '')
 
     def awk(shell, args, stdin, root):
         if not args or args[0] != '{print $1}': return '', "awk: supported expression: '{print $1}'"
@@ -406,28 +458,19 @@ def programs(number, flag):
     if number == 114: result['unzip'] = unzip
     if number in (104, 117, 118): result['answer'] = answer
     if number == 118: result.update(awk=awk, sort=sort, uniq=uniq)
-    return result
+    return result, target, state
 
 
-SPECIAL_BRIEFS = {
-    104: 'Read the public profile at /nexustech.html. Redeem your finding with: answer <service_name_with_underscores>',
-    110: 'Use dig @192.168.0.2 version.bind CH TXT, then query flag.nexustech.lab TXT.',
-    111: 'The web service exposes backup files. Download a key, chmod 600, then ssh -i <file> ctf@ssh.lab.local. The remote home mounts here after authentication.',
-    112: 'Use nmap -sV xrdp.lab.local, then xfreerdp /v:xrdp.lab.local /u:ctf /p:<password>. Successful login mounts ~/Desktop in this terminal. No graphical RDP client is opened.',
-    114: 'Find and download the backup with curl -O, then unzip www.zip. This is a virtual archive; inspect extracted files with ls -a www and cat www/flag.txt.',
-    116: 'Target http://reset.lab.local. GET / describes the reset API, admin identity, and login endpoint.',
-    117: 'Run nmap -sV architecture.lab.local. Order services by port, then: answer <names_joined_by_underscores>. Use nginx, uvicorn, tomcat, apache as service labels.',
-    118: "Evidence: access.log. Count IPs using: awk '{print $1}' access.log | sort | uniq -c | sort -nr. Inspect payloads and status codes, then: answer <attacker_ip>",
-}
+def programs(number, flag):
+    return build_runtime(number, flag)[0]
 
 
 def scenario(number):
     host, port, label = TARGETS[number]
-    url = 'http://' + host + (':' + str(port) if port != 80 else '')
-    brief = SPECIAL_BRIEFS.get(number, 'Start with curl -i ' + url + '/. Use ffuf with the supplied wordlists when needed.')
+    brief = 'Investigate the assigned environment and recover the flag. No credentials or service information have been provided.'
     files = {
-        HOME + '/README.txt': f'EWPT: {label}\nScope: {host}:{port}\n{brief}\nAll tools, protocols, downloads and services are simulated inside this terminal.\nType help for available commands. Only the host in scope.txt is reachable.\nCaptured flags use MYCTF{{...}}; submit in the challenge panel.',
-        HOME + '/scope.txt': f'{host}:{port}' + ('\nssh.lab.local:22' if number == 111 else ''),
+        HOME + '/README.txt': f'ENGAGEMENT {number}\nScope: {host}\n{brief}\nType help for terminal controls.\nIf a finding must be reported, use answer <finding> to obtain a flag.\nSubmit captured flags in the challenge panel.',
+        HOME + '/scope.txt': host,
     }
     if number not in (110, 112, 117, 118):
         files.update({
@@ -435,13 +478,19 @@ def scenario(number):
             HOME + '/api-wordlist.txt': 'health\nusers\nstatus\ndebug\nadmin\n',
             HOME + '/sqli-payloads.txt': "test\nadmin\n' OR 1=1-- -\n1 ORDER BY 3-- -\n1 ORDER BY 4-- -\n-1 UNION SELECT 1,2,flag FROM flags-- -\n",
         })
+    if number == 110:
+        files['/etc/resolv.conf'] = 'nameserver 192.168.0.2\nsearch nexustech.lab'
+    if number == 117:
+        files[HOME + '/engagement.txt'] = ('Create a service inventory in ascending port order.\n'
+            'Report the software family names using: answer <names separated by spaces or underscores>.\n'
+            'Omit vendors and version numbers from the report.')
     if number == 118:
         rows = [f'192.168.0.10 - - [15/Nov/2026:12:00:{i:02d} +0000] "GET / HTTP/1.1" 200 512' for i in range(12)]
         rows += [f'192.168.0.66 - - [15/Nov/2026:12:01:{i % 60:02d} +0000] "POST /api/login?username=%27%22%3Cscript%3E{i} HTTP/1.1" {400 if i % 2 else 401} 32' for i in range(240)]
         rows += [f'192.168.0.25 - - [15/Nov/2026:12:02:{i:02d} +0000] "GET /products HTTP/1.1" 200 512' for i in range(30)]
         files[HOME + '/access.log'] = '\n'.join(rows)
     return ShellScenario(kind=f'ewpt_{number}', title='Terminal — ' + label, user='ctf', host='kali-web', home=HOME,
-                         motd=f'EWPT lab: {label}. Read README.txt to begin. Type help for commands.',
+                         motd=f'Engagement {number}. Scope: {host}. Type help for terminal controls.',
                          files=files, programs=lambda flag: programs(number, flag))
 
 

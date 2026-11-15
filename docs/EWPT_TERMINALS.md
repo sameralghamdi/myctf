@@ -1,28 +1,23 @@
-# EWPT terminal challenges
+# Web targets and terminal labs
 
-20 new challenges (101–120) join the original 17. Search **EWPT** in Challenges,
-open a challenge, click **Start lab**, then enter `cat README.txt`. The same
-terminal component, command history, flag submission, hints, scoring, ownership,
-expiry, stop and restart controls used by the original labs apply here.
+The project has 37 challenges. Player-facing challenge names, descriptions and
+URLs are neutral; the original manifest slugs remain stable for database updates
+and old bookmarks. Public pages use `case-<database-id>` aliases. Existing
+accounts, solves, points and hint history stay attached to the same challenge IDs.
 
-## Install the update
+## Update an existing installation
 
-Use this archive as the complete updated project, or copy these additions and
-changes into your current checkout:
+Stop the backend, replace the source files with the contents of this archive,
+then restart. Keep your existing `.env` and `instance/` database. Rebuild the React
+frontend for a deployed installation. The Flask factory automatically applies
+the updated manifests on startup. No database migration or new runtime dependency
+is required. A restart clears the in-process lab runtimes as before.
 
-- `challenges/101-*.yaml` through `challenges/120-*.yaml`
-- `app/labs/ewpt.py`
-- Updated `app/labs/registry.py` and `app/labs/fakeshell.py`
-- `tests/test_ewpt.py`, this guide and the README
+The update changes files across `app/labs/`, `app/core/routes.py`, `app/models.py`,
+`app/templates/`, `challenges/` and `frontend/src/`. Copy the complete source tree
+rather than only the challenge YAML files.
 
-Keep your current `.env` and `instance/` database. Stop the backend, update the
-files, then restart using your existing startup command. `create_app()` seeds the
-new manifests automatically and updates matching challenge slugs. Existing
-accounts and solves remain in the database. No schema migration or additional
-Python dependency is needed. Restarting the in-process backend clears active
-terminal state, as with the original terminal labs.
-
-For a fresh local setup:
+Fresh local setup:
 
 ```bash
 cd myctf
@@ -32,7 +27,7 @@ python -m pip install -r requirements.txt
 python run.py
 ```
 
-To use the React frontend, in a second terminal:
+For React, in a second terminal:
 
 ```bash
 cd myctf/frontend
@@ -40,95 +35,110 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite. The existing Flask-rendered interface also
-works directly at http://127.0.0.1:8000.
+Use the local URL printed by Vite. The Flask-rendered interface is also available
+at http://127.0.0.1:8000 and has Target page / Terminal controls for hybrid labs.
 
-## Collection
+## Player experience
 
-| # | Challenge | Terminal tools / evidence |
-|---|---|---|
-| 101 | Fuzz the Login | ffuf, SQL payload list, curl session cookies |
-| 102 | HTTP Method Mayhem | curl OPTIONS, PUT, GET; per-lab uploaded files |
-| 103 | Coupon King | Repeated coupons or negative quantity, checkout |
-| 104 | Vendor OSINT | HTML comment, `answer <service>` |
-| 105 | FastAPI Docs Leak | OpenAPI schema and required header |
-| 106 | Stack Fingerprint | Headers, robots.txt, leaked source |
-| 107 | Apache 2.4.49 Traversal | Encoded traversal, curl --path-as-is |
-| 108 | Tomcat Weak Credentials | HTTP Basic authentication, HTML source |
-| 109 | Nginx Alias Traversal | Off-by-slash alias path |
-| 110 | DNS Enumeration | nmap, dig TXT / CHAOS records |
-| 111 | SSH Key Leak | curl download, chmod 600, simulated SSH |
-| 112 | XRDP Exposure | nmap, simulated xfreerdp, mounted Desktop files |
-| 113 | Digest Auth Realm | curl --digest, response headers |
-| 114 | Backup File Leak | ffuf, curl download, virtual unzip |
-| 115 | API Endpoint Fuzzing | ffuf status filters, forwarding header |
-| 116 | Password Reset Step Skip | Reset API, login and session cookie |
-| 117 | Architecture Mapping | nmap, `answer <architecture>` |
-| 118 | Log Analysis | access.log, awk / sort / uniq, `answer <ip>` |
-| 119 | SQL Injection via Fuzzing | ffuf, ORDER BY, UNION SELECT |
-| 120 | HTTP TRACE Leak | OPTIONS, TRACE, reflected headers |
+Open a challenge and click Start lab. Web applications open on Target page when
+browsing is the natural starting point. Protocol-focused exercises start in
+Terminal. Hybrid labs provide both views without resetting their instance.
 
-## Supported commands
+- **Target page:** interactive forms, navigation and the simulated application.
+- **Source:** the exact target response body, including HTML comments.
+- **Headers:** the HTTP status and server response headers.
+- **Edit request:** choose a method, add headers and send a request body.
+- **Terminal:** the existing command history, virtual filesystem and scenario tools.
 
-The existing built-ins (`ls`, `cd`, `cat`, `grep`, `find`, `head`, `tail`,
-`strings`, `base64` and others) remain available. Type `help` to see the specific
-tools installed in each lab. Commands run individually; pipes are supported,
-but shell redirection, `;`, `&&` and command substitution are unsupported.
+Changing a cart or application state in one interface is visible in the other.
+Browser-target login cookies and credentials stay within that lab instance and
+never replace the platform authentication cookie. Restart creates a fresh flag
+and clears browser authentication, virtual downloads and all target state.
 
-HTTP labs provide `curl` with `-i`, `-I`, `-X`, `-H`, `-d`, `--data`,
+## Browser interfaces
+
+16 EWPT HTTP targets have web interfaces: cases 101–109, 111, 113–116, 119 and
+120. Their player-facing names do not identify the technology or vulnerability.
+For maintainers, these include:
+
+- A Tomcat-style landing page, sign-in prompt, application manager and server status.
+- Login portals and authenticated dashboards.
+- A store with quantity, coupon and checkout forms.
+- Company pages with source-level evidence.
+- Swagger-style API documentation with an executable header parameter.
+- A multi-step password reset and login flow.
+- Default Apache/nginx-style pages, file listings and a product catalog.
+
+Tomcat start, stop and reload controls update the virtual application state.
+WAR deployment is explicitly disabled; nothing is uploaded or executed on the
+host. The sign-in prompt reproduces the authentication flow inside the training
+page instead of opening a native browser authentication dialog.
+
+Technology banners and version numbers appear in target pages, headers or scans
+where a learner would discover them. Pre-solve challenge metadata does not give
+the player internal engine names or the original descriptive manifest slugs.
+Optional hints remain opt-in; technical debriefs unlock after solving.
+
+## Terminal tools
+
+Type `help` for commands installed in the current lab. Existing shell built-ins
+and pipes remain available. Each command runs individually; shell redirection,
+`;`, `&&` and command substitution are unsupported.
+
+HTTP targets support `curl` with `-i`, `-I`, `-X`, `-H`, `-d`, `--data`,
 `--data-raw`, `--data-binary`, `--data-urlencode`, `--json`, `-u`, `--digest`,
-`-b`, `-c`, `-o`, `-O` and `--path-as-is`. Form and JSON requests are accepted.
-Download with `-o` or `-O`; use `-c cookies.txt` to save a login session and
-`-b cookies.txt` to reuse it. Files are relative to the current terminal directory.
-The curl cookie jar is a simplified lab format, not a browser/Netscape cookie file.
+`-b`, `-c`, `-o`, `-O` and `--path-as-is`. Form and JSON requests work. Downloads
+are relative to the terminal's current directory. Cookie jars use a simplified
+virtual format, separate from browser-target authentication state.
 
-`ffuf` reads the supplied virtual wordlist and evaluates each candidate against
-the simulated target. It supports `-u`, `-w`, `-X`, `-d`, `-H`, `-mc`, `-fc`,
-`-fs` and `-ms`, with one `FUZZ` placeholder keyword. Requests are capped at 256
-wordlist entries per invocation. Find the bundled lists with `ls`.
+`ffuf` reads virtual wordlists and evaluates candidate requests against the same
+target used by the web interface. Supported options: `-u`, `-w`, `-X`, `-d`, `-H`,
+`-mc`, `-fc`, `-fs`, `-ms`. There is one `FUZZ` keyword and a cap of 256 wordlist
+entries per invocation.
 
-```bash
-ffuf -u http://login.lab.local/api/login -X POST -d 'username=FUZZ&password=test' -w sqli-payloads.txt -mc 200
-ffuf -u http://api-fuzz.lab.local/api/FUZZ -w api-wordlist.txt -mc 200,403
-```
+Relevant scenarios also provide `dig`, `nmap`, `ssh`, `chmod`, `xfreerdp`, `unzip`,
+`awk`, `sort`, `uniq` or an `answer` reporting command. Discovery evidence is
+inside each assigned environment. The log-analysis awk implementation supports
+`awk '{print $1}'`; numeric/reverse sort and `uniq -c` work with pipes.
 
-Only relevant tools are installed: `dig` in DNS, `ssh` / `chmod` in SSH,
-`xfreerdp` in XRDP, and `unzip` in the backup lab. Log analysis supports the
-specific `awk '{print $1}'` expression plus `sort`, `sort -nr` and `uniq -c`.
-For OSINT, architecture and log analysis, enter the evidence-derived answer using
-`answer` to receive a unique session flag rather than a shared static flag.
+The browser request editor accepts up to 32 headers, a 2048-character path and
+an 8192-character body. Requests stay on the assigned target. Old `.lab.local`
+host aliases remain accepted by terminal tools for compatibility with old notes;
+the player-facing scope is neutral.
 
-## Simulation boundaries
+## Simulation and isolation
 
-Everything operates in memory: no player command starts a process, reads the
-server filesystem or connects to an external machine. The `.lab.local` names
-are interpreted only by the simulated terminal; opening them in your browser,
-Burp, a real shell or an external scanner will not connect to these targets.
-Tools implement the documented training subset, not the full external programs.
+No player command starts a process, reads the server filesystem or contacts an
+external service. SQL teaching targets query a throwaway in-memory SQLite DB
+containing only synthetic scenario data, never the platform DB.
 
-SQL challenges execute their deliberately unsafe SELECT against a fresh
-in-memory SQLite database containing only synthetic challenge data. They never
-query the platform database. Other HTTP targets model the intended behavior
-rather than running Apache, Tomcat, FastAPI or nginx servers.
+Rendered target documents run in an iframe with an opaque origin. The sandbox
+allows only the trusted form/navigation bridge; target documents cannot read
+platform cookies, access the parent DOM or connect to external services. Source
+and headers are displayed as text. Every request still passes lab ownership and
+expiry checks.
 
-SSH uses an opaque virtual key and requires `chmod 600` before authentication;
-it then mounts the simulated remote home. RDP mounts a virtual Desktop after
-successful authentication; it does not render a desktop. `www.zip` is a virtual
-archive understood by the lab's `unzip`, not a downloadable binary ZIP file.
-Digest authentication models `curl --digest` credentials, not a cryptographic
-Digest handshake. Nmap reports the scenario's preset services.
-
-All mutable target state and flags belong to one lab instance. Restart creates a
-fresh flag and discards uploaded files, cookies, coupon state, passwords and
-mounted files. Old flags are rejected after restart.
+SSH authenticates using a virtual key and mounts a simulated remote home. RDP
+mounts desktop files after authentication; it does not render a desktop. Virtual
+archives are understood by the terminal's unzip and are not binary ZIP files.
+Digest authentication models the curl credential flow rather than implementing
+a cryptographic Digest handshake. Service enumeration returns scenario data.
 
 ## Verification
 
 ```bash
 python -m pytest
+cd frontend
+npm run build
 ```
 
-`tests/test_ewpt.py` covers all 20 intended solutions through the terminal and
-flag-submission API, unsuccessful attempts, real wordlist selection and filters,
-coupon replay, download paths, SSH permission checks, ownership, scope rejection
-and reset isolation. The original tests remain in place.
+The Python suite tests intended exploits and scoring, browser authentication,
+shared terminal/browser state, hidden-source evidence, scope restrictions,
+neutral public metadata, ownership and fresh state after reset. The frontend
+build runs TypeScript validation. DOM integration was also checked against the
+Flask endpoints for Tomcat, shopping, API docs and password reset.
+
+Design references for the training reproductions:
+
+- https://tomcat.apache.org/tomcat-8.5-doc/html-manager-howto.html
+- https://fastapi.tiangolo.com/tutorial/first-steps/

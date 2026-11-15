@@ -75,5 +75,5 @@ class PcapLab(LabHandler):
   <label>Result</label><textarea id="out" rows="2" readonly></textarea>
 </div>
 <p class="muted">Download the raw capture: <a href="{base}/download">capture.txt</a>.
-   The flag is a <code>MYCTF{{...}}</code> value once decoded.</p>"""
+</p>"""
         return LabResult(self.page(instance, "NetCapture", body))

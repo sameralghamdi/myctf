@@ -40,7 +40,7 @@ and the code is structured around the two seams (`app/models.py`,
 > **logical** isolation (per-user, per-session instances; unguessable routing
 > tokens; ownership checks; backend-only flag validation).
 
-### Original seed challenges
+### Original engines (maintainer reference)
 
 | # | Challenge | Category | Difficulty | Live lab | Verified by |
 |---|-----------|----------|-----------|:--------:|-------------|
@@ -68,21 +68,30 @@ Two new live-lab engines were added alongside these: a safe **simulated shell**
 (`app/labs/fakeshell.py`) backing the browser-terminal Linux challenges, and a
 reused XSS execution checker for the stored-XSS moderator simulation.
 
-### EWPT terminal collection
+### Discovery-first challenges and web targets
 
-The project includes **20 EWPT terminal challenges (101–120)** alongside the
-17 existing challenges, for **37 total**. Every new challenge opens the existing
-browser terminal and uses a private, dynamic `MYCTF{...}` flag. Start a lab and
-run `cat README.txt` for its scope and commands. No external lab hosts are needed.
+The project contains **37 challenges**: the original 17 plus 20 EWPT scenarios.
+All challenge names, briefs and public URLs are neutral. Objectives, exam-topic
+text and resources are absent from the player challenge pages. Versions,
+software stacks, vulnerable parameters and solution steps are discovered inside
+the targets. Optional hints remain locked until requested; solution debriefs
+unlock after a solve.
 
-The targets, tools, DNS, SSH, RDP and downloaded archives are simulated in memory,
-using the same model as the original terminal labs. They do not launch operating
-system commands or make network requests. RDP authentication mounts virtual
-desktop files; it does not open a graphical desktop.
+**16 EWPT HTTP targets** have browser interfaces alongside the existing terminal.
+Click **Target page** or **Terminal** to switch. Both interfaces share the same
+instance, flag and mutable target state. Tomcat, sign-in, shopping, password reset,
+API documentation, default server pages and directory listings each have their
+own interface. The target browser includes navigation, **Source**, **Headers**
+and an **Edit request** panel for methods, headers and request bodies.
 
-See [EWPT terminal guide](docs/EWPT_TERMINALS.md) for the challenge list, supported
-commands and installation notes. `tests/test_ewpt.py` solves and submits every new
-challenge through the API and checks failure cases, isolation and reset behavior.
+These are local training reproductions. They do not install or operate the real
+Apache/Tomcat/FastAPI/nginx products. SSH, RDP and virtual archives retain the
+simulated terminal model. No external targets or DNS setup are needed.
+
+See [web and terminal guide](docs/EWPT_TERMINALS.md) for setup and supported
+behavior. `tests/test_ewpt.py` solves all 20 EWPT scenarios;
+`tests/test_ewpt_web.py` checks browser/terminal state sharing, authentication,
+source-only evidence, neutral metadata, isolation, reset and input validation.
 
 Platform features implemented: registration / login / logout, JWT-over-sessions
 auth with revocation, password reset, email-verification flow, optional TOTP 2FA,

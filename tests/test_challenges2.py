@@ -160,9 +160,13 @@ def test_shell_session_and_streams(client, user):
 
 def test_shell_flag_listed_in_api(client, user):
     t = user["token"]
-    rows = {c["slug"]: c for c in client.get("/api/challenges", headers=auth_headers(t)).get_json()}
-    assert rows["shell-web-recon"]["is_shell"] and rows["linux-basics"]["is_shell"]
-    assert not rows["sqli-login-bypass"]["is_shell"]
+    rows = client.get("/api/challenges", headers=auth_headers(t)).get_json()
+    for original, expected in [("shell-web-recon", True), ("linux-basics", True), ("sqli-login-bypass", False)]:
+        detail = client.get("/api/challenges/" + original, headers=auth_headers(t)).get_json()
+        row = next(c for c in rows if c["id"] == detail["id"])
+        assert row["is_shell"] is expected
+        assert row["slug"].startswith("case-")
+
 
 
 def test_shell_web_recon(client, user):

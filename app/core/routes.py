@@ -35,7 +35,8 @@ def serialize_challenge(challenge, user, *, detail: bool = False) -> dict:
     is_solved = challenge["id"] in solved_ids
     out = {
         "id": challenge["id"],
-        "slug": challenge["slug"],
+        "slug": f"case-{challenge['id']}",
+        "public_slug": f"case-{challenge['id']}",
         "name": challenge["name"],
         "category": challenge["category_slug"] if "category_slug" in challenge.keys()
                     else None,
@@ -46,8 +47,12 @@ def serialize_challenge(challenge, user, *, detail: bool = False) -> dict:
         "points": challenge["points"],
         "est_minutes": challenge["est_minutes"],
         "has_lab": labs.registry.is_live_lab(challenge["lab_kind"]),
-        "lab_kind": challenge["lab_kind"],
+        "lab_kind": (challenge["lab_kind"] if user and user["role"] == "administrator" else
+                     "web_terminal" if labs.registry.has_web_ui(challenge["lab_kind"]) else
+                     "terminal" if labs.registry.is_shell_lab(challenge["lab_kind"]) else "web"),
         "is_shell": labs.registry.is_shell_lab(challenge["lab_kind"]),
+        "has_web_ui": labs.registry.has_web_ui(challenge["lab_kind"]),
+        "default_lab_view": labs.registry.default_lab_view(challenge["lab_kind"]),
         "solved": is_solved,
     }
     if detail:
@@ -118,8 +123,10 @@ def challenge_page(slug):
     challenge = models.get_challenge_by_slug(slug)
     if not challenge or not challenge["published"]:
         abort(404)
+    if slug != f"case-{challenge['id']}":
+        return redirect(url_for("core.challenge_page", slug=f"case-{challenge['id']}"))
     full = models.list_challenges()
-    joined = next((c for c in full if c["slug"] == slug), challenge)
+    joined = next((c for c in full if c["id"] == challenge["id"]), challenge)
     data = serialize_challenge(joined, user, detail=True)
     return render_template("challenge.html", c=data)
 
@@ -181,7 +188,7 @@ def api_dashboard():
     user = current_user()
     data = _dashboard_data(user)
     # make JSON-safe
-    data["recent"] = [dict(r) for r in data["recent"]]
+    data["recent"] = [{**dict(r), "slug": f"case-{r['challenge_id']}", "public_slug": f"case-{r['challenge_id']}"} for r in data["recent"]]
     data["achievements"] = [dict(a) for a in data["achievements"]]
     data["recommended"] = (serialize_challenge(data["recommended"], user)
                            if data["recommended"] is not None else None)
@@ -211,7 +218,8 @@ def api_challenge(slug):
     user = current_user()
     # Admins can open drafts so they can test a challenge before publishing it.
     rows = models.list_challenges(published_only=user["role"] != "administrator")
-    c = next((r for r in rows if r["slug"] == slug), None)
+    challenge = _playable_challenge(slug, user)
+    c = next((r for r in rows if r["id"] == challenge["id"]), None)
     if c is None:
         abort(404)
     return jsonify(serialize_challenge(c, user, detail=True))
@@ -319,7 +327,7 @@ def api_profile():
         "user": _public_user(user),
         "score": models.user_score(user["id"]),
         "rank": models.user_rank(user["id"]) or None,
-        "solves": [{"name": r["name"], "slug": r["slug"],
+        "solves": [{"name": r["name"], "slug": f"case-{r['challenge_id']}", "public_slug": f"case-{r['challenge_id']}",
                     "difficulty": r["difficulty"], "skill": r["skill"],
                     "points_awarded": r["points_awarded"],
                     "created_at": r["created_at"]}
@@ -342,7 +350,7 @@ def api_paths():
             "description": p["description"],
             "done": sum(1 for it in items if it["id"] in solved),
             "total": len(items),
-            "items": [{"slug": it["slug"], "name": it["name"],
+            "items": [{"slug": f"case-{it['id']}", "name": it["name"], "public_slug": f"case-{it['id']}",
                        "difficulty": it["difficulty"], "points": it["points"],
                        "solved": it["id"] in solved} for it in items],
         })

@@ -1,27 +1,12 @@
 slug: ewpt-ssh-key-leak
-name: SSH Key Leak (EWPT)
+name: Remote Office
 category: network
 difficulty: medium
 lab_kind: ewpt_111
 est_minutes: 20
 sort: 111
-description: 'The web root contains `/backup/id_rsa`. The SSH service is OpenSSH 8.2p1 on Ubuntu (`ssh.lab.local`).
-  The key belongs to user `ctf`.
-
-
-  **Objective:** Download the key, fix its permissions, SSH into the host, and read `/home/ctf/flag.txt`.
-
-
-  **Exam topics:** OpenSSH 8.2p1; service enumeration; credential leakage.
-
-
-  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
-  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
-  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
-objectives:
-- Discover exposed files with directory brute forcing
-- Use a leaked private key
-- Set correct key file permissions
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
 - level: 1
   cost: 0
@@ -36,9 +21,7 @@ hints:
   cost: 10
   body: SSH as the ctf user.
 remediation: Never store keys in the web root; rotate keys; restrict SSH access.
-walkthrough: curl -O http://ssh.lab.local/backup/id_rsa, then chmod 600 id_rsa, then ssh -i id_rsa ctf@ssh.lab.local.
-  Each command is entered separately. The remote home mounts in the terminal; cat /home/ctf/flag.txt.
-references:
-- title: OWASP WSTG - Enumerate Infrastructure and Application Admin Interfaces
-  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces
+walkthrough: curl -O http://target.lab.local/backup/id_rsa, then chmod 600 id_rsa, then ssh -i id_rsa
+  ctf@target.lab.local. Each command is entered separately. The remote home mounts in the terminal; cat
+  /home/ctf/flag.txt.
 dynamic_flag: true

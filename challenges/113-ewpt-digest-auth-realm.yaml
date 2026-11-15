@@ -1,27 +1,12 @@
 slug: ewpt-digest-auth-realm
-name: Digest Auth Realm (EWPT)
+name: Restricted Area
 category: web
 difficulty: easy
 lab_kind: ewpt_113
 est_minutes: 10
 sort: 113
-description: '`http://digest.lab.local/` returns `401 Unauthorized` with `WWW-Authenticate: Digest realm="example.com",
-  ...`. The flag is behind `/flag` using default credentials.
-
-
-  **Objective:** Use Digest authentication with a default admin account to retrieve the flag.
-
-
-  **Exam topics:** HTTP Digest authentication; WWW-Authenticate realm; HTTP method testing.
-
-
-  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
-  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
-  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
-objectives:
-- Read the WWW-Authenticate challenge
-- Authenticate with curl --digest
-- Test default credentials
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
 - level: 1
   cost: 0
@@ -33,8 +18,5 @@ hints:
   cost: 10
   body: Request /flag.
 remediation: Use strong credentials; avoid default accounts; consider modern authentication.
-walkthrough: curl --digest -u admin:admin http://digest.lab.local/flag returns the flag.
-references:
-- title: OWASP WSTG - Testing for Default Credentials
-  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/04-Authentication_Testing/02-Testing_for_Default_Credentials
+walkthrough: curl --digest -u admin:admin http://target.lab.local/flag returns the flag.
 dynamic_flag: true

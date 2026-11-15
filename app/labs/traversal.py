@@ -65,6 +65,5 @@ class PathTraversalLab(LabHandler):
    <code>{self.BASE}/</code></p>
 <div class="card"><h2>Available documents</h2><ul>{listing}</ul></div>
 {content_block}
-<p class="muted">The viewer reads <code>{self.BASE}/&lt;file&gt;</code>. The file
-   parameter is passed straight to the path join.</p>"""
+"""
         return LabResult(self.page(instance, "DocuView", body))

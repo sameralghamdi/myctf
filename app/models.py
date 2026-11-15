@@ -230,9 +230,14 @@ def get_challenge(challenge_id: int):
 
 
 def get_challenge_by_slug(slug: str, *, include_drafts: bool = True):
-    row = get_db().execute(
-        "SELECT * FROM challenges WHERE slug=?", (slug,)
-    ).fetchone()
+    # Neutral public aliases keep implementation/vulnerability names out of
+    # player-facing URLs while preserving manifest identity and existing solves.
+    if slug.startswith("case-") and slug[5:].isascii() and slug[5:].isdigit() and len(slug) <= 20:
+        row = get_db().execute("SELECT * FROM challenges WHERE id=?", (int(slug[5:]),)).fetchone()
+    else:
+        row = get_db().execute(
+            "SELECT * FROM challenges WHERE slug=?", (slug,)
+        ).fetchone()
     if row is not None and not include_drafts and not row["published"]:
         return None
     return row

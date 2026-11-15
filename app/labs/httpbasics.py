@@ -41,22 +41,9 @@ class HttpBasicsLab(LabHandler):
                 content_type="text/plain; charset=utf-8",
             )
 
-        # index
+        # Public landing page. Protocol behavior is discoverable from responses.
         body = f"""
-<h1>HTTP Basics</h1>
-<div class="card">
-  <p>HTTP requests carry a <b>method</b> (GET, POST, …) and <b>headers</b>.
-     The flag endpoint is picky about both.</p>
-  <ol>
-    <li>The flag lives at <code>{base}/flag</code>.</li>
-    <li>It only answers the <code>POST</code> method.</li>
-    <li>It requires the header
-        <code>{REQUIRED_HEADER}: {REQUIRED_VALUE}</code>.</li>
-  </ol>
-  <p class="muted">Watch the response headers too — a <code>X-Hint</code> header
-     is returned when you get it wrong.</p>
-  <pre>curl -X POST {{origin}}{base}/flag \\
-     -H '{REQUIRED_HEADER}: {REQUIRED_VALUE}'</pre>
-</div>"""
-        return LabResult(self.page(instance, "HTTP Basics", body),
-                         headers={"X-Hint": f"POST {base}/flag with {REQUIRED_HEADER}"})
+<h1>Internal Service</h1>
+<div class="card"><p>Service status: online.</p>
+<a href="{base}/flag">Restricted endpoint</a></div>"""
+        return LabResult(self.page(instance, "Internal Service", body))

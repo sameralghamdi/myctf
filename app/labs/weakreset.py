@@ -78,11 +78,10 @@ class WeakResetLab(LabHandler):
   <h2>2 · Use a reset token</h2>
   <form method="post" action="{base}/reset">
     <label>Username</label><input name="user" value="victim">
-    <label>Reset token</label><input name="token" placeholder="e.g. 1008">
-    <label>New password</label><input name="new_password" value="pwned123!">
+    <label>Reset token</label><input name="token" placeholder="Enter token">
+    <label>New password</label><input name="new_password" type="password">
     <button type="submit">Reset password</button>
   </form>
 </div>
-<p class="muted">Tokens are issued sequentially. Observe yours, then predict the
-   victim's.</p>"""
+"""
         return LabResult(self.page(instance, "AccountCenter", body))

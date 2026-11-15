@@ -27,14 +27,12 @@ class EncodingLab(LabHandler):
     def dispatch(self, instance, subpath: str, request) -> LabResult:
         blob = encode_challenge(instance["flag"])
         body = f"""
-<h1>Encoding &amp; Decoding</h1>
-<p class="muted">Encoding is reversible and provides no secrecy. This blob hides a
-   flag under two common layers.</p>
+<h1>Message Viewer</h1>
+<p class="muted">A message was received.</p>
 <div class="card">
   <h2>Encoded blob</h2>
   <pre id="blob">{blob}</pre>
-  <p class="muted">Two layers were applied: an outer transport encoding, then a
-     classic letter rotation on the inside.</p>
+  
 </div>
 <div class="card">
   <h2>Decoder bench</h2>

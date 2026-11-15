@@ -92,6 +92,5 @@ class CommandInjectionLab(LabHandler):
   </form>
 </div>
 {result_block}
-<p class="muted">The server runs <code>ping -c 1 &lt;host&gt;</code> with your input
-   appended directly. The sandbox also has a file called <code>flag.txt</code>.</p>"""
+"""
         return LabResult(self.page(instance, "NetTools", body))

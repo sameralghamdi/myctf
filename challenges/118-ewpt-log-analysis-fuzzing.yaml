@@ -1,5 +1,5 @@
 slug: ewpt-log-analysis-fuzzing
-name: 'Log Analysis: Detect Fuzzing (EWPT)'
+name: Night Shift
 category: forensics
 category_name: Forensics
 skill: Forensics
@@ -7,24 +7,8 @@ difficulty: easy
 lab_kind: ewpt_118
 est_minutes: 15
 sort: 118
-description: 'You are given an Apache `access.log`. One IP sent hundreds of malformed requests to `/api/login`
-  in a short time.
-
-
-  **Objective:** Inspect `access.log` in the terminal. Identify the attacking IP and run `answer <ip_address>`
-  to receive your session flag.
-
-
-  **Exam topics:** Analyzing server logs; detecting fuzzing; distinguishing fuzzing from performance testing.
-
-
-  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
-  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
-  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
-objectives:
-- Count requests per client IP
-- Spot malformed and error-heavy traffic
-- Tell fuzzing apart from load testing
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
 - level: 1
   cost: 0
@@ -38,7 +22,4 @@ hints:
 remediation: Rate limiting, a WAF, and alerting on fuzzing patterns.
 walkthrough: awk '{print $1}' access.log | sort | uniq -c | sort -nr shows the top requester. Inspect
   the malformed /api/login requests, then run answer 192.168.0.66 to receive your session flag.
-references:
-- title: OWASP - Logging Cheat Sheet
-  url: https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html
 dynamic_flag: true

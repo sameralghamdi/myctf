@@ -7,7 +7,7 @@ import {
   type FormEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { Alert, type AlertTone } from "../components/ui/Alert";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
@@ -53,6 +53,7 @@ function PlayScreen({ slug }: { slug: string }) {
   );
 
   const [view, setView] = useState<View>("split");
+  const [labView, setLabView] = useState<"target" | "terminal" | null>(null);
   const [briefWidth, setBriefWidth] = useState(480);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -87,6 +88,8 @@ function PlayScreen({ slug }: { slug: string }) {
       </div>
     );
   }
+
+  if (slug !== challenge.public_slug) return <Navigate to={`/challenges/${challenge.public_slug}`} replace />;
 
   const lab = challenge.lab ?? null;
 
@@ -138,7 +141,6 @@ function PlayScreen({ slug }: { slug: string }) {
     event.currentTarget.releasePointerCapture(event.pointerId);
   }
 
-  const references = challenge.references.filter((reference) => isSafeUrl(reference.url));
   const showBrief = view !== "lab";
   const showLab = view !== "brief";
 
@@ -199,37 +201,6 @@ function PlayScreen({ slug }: { slug: string }) {
                     <ExternalLink aria-hidden="true" className="h-4 w-4" />
                     Open target
                   </Button>
-                </div>
-              )}
-
-              {challenge.objectives.length > 0 && (
-                <div className="flex flex-col gap-2">
-                  <SectionLabel>Objectives</SectionLabel>
-                  <ul className="flex list-disc flex-col gap-2 pl-6 text-sm text-gray-300">
-                    {challenge.objectives.map((objective) => (
-                      <li key={objective}>{objective}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {references.length > 0 && (
-                <div className="flex flex-col gap-2">
-                  <SectionLabel>Resources</SectionLabel>
-                  <ul className="flex list-disc flex-col gap-2 pl-6 text-sm">
-                    {references.map((reference) => (
-                      <li key={reference.url}>
-                        <a
-                          href={reference.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-brand-400 hover:underline"
-                        >
-                          {reference.title}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
               )}
 
@@ -328,7 +299,7 @@ function PlayScreen({ slug }: { slug: string }) {
                   <span className="font-mono text-gray-300">{lab.instance_id.slice(0, 8)}</span>
                   <span className="text-gray-400">Expires {formatDateTime(lab.expires_at)}</span>
                   <span className="ml-auto flex items-center gap-2">
-                    <Button href={lab.url} external target="_blank" rel="noopener noreferrer" variant="ghost" size="sm">
+                    <Button href={challenge.has_web_ui && (labView ?? challenge.default_lab_view) === "terminal" ? `${lab.url}terminal` : lab.url} external target="_blank" rel="noopener noreferrer" variant="ghost" size="sm">
                       Open in tab ↗
                     </Button>
                     <Button
@@ -356,7 +327,17 @@ function PlayScreen({ slug }: { slug: string }) {
                     <Alert tone="danger">{labError}</Alert>
                   </div>
                 )}
-                {challenge.is_shell ? (
+                {challenge.has_web_ui && (
+                  <div className="flex gap-2 border-b border-gray-800 bg-gray-950 px-4 py-2" role="group" aria-label="Lab interface">
+                    <Button size="sm" variant={(labView ?? challenge.default_lab_view) === "target" ? "primary" : "ghost"} aria-pressed={(labView ?? challenge.default_lab_view) === "target"} onClick={() => setLabView("target")}>
+                      Target page
+                    </Button>
+                    <Button size="sm" variant={(labView ?? challenge.default_lab_view) === "terminal" ? "primary" : "ghost"} aria-pressed={(labView ?? challenge.default_lab_view) === "terminal"} onClick={() => setLabView("terminal")}>
+                      Terminal
+                    </Button>
+                  </div>
+                )}
+                {challenge.is_shell && (!challenge.has_web_ui || (labView ?? challenge.default_lab_view) === "terminal") ? (
                   <div className="flex min-h-0 flex-1 flex-col p-4">
                     <LabTerminal key={lab.instance_id} labUrl={lab.url} />
                   </div>
@@ -374,7 +355,9 @@ function PlayScreen({ slug }: { slug: string }) {
                 {challenge.has_lab ? (
                   <>
                     <p className="font-mono text-sm text-gray-400">
-                      {challenge.is_shell
+                      {challenge.has_web_ui
+                        ? "Start the lab to open your target page and terminal"
+                        : challenge.is_shell
                         ? "Start the lab to open your private terminal"
                         : "Start the lab to launch your isolated target"}
                     </p>

@@ -21,7 +21,7 @@
     <div>
       {% for it in p['items'] %}
       <a class="spread" style="padding:8px 2px;border-bottom:1px solid var(--line)"
-         href="{{ url_for('core.challenge_page', slug=it['slug']) }}">
+         href="{{ url_for('core.challenge_page', slug='case-' ~ it['id']) }}">
         <span class="small">
           {% if it['id'] in solved %}<span class="flag">✓</span>{% else %}<span class="muted">○</span>{% endif %}
           {{ it['name'] }}</span>

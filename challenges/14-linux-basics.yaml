@@ -1,35 +1,27 @@
 slug: linux-basics
-name: Basic Linux Commands
+name: Quiet Room
 category: linux
 difficulty: very_easy
 lab_kind: linux_basics
 dynamic_flag: true
 est_minutes: 10
 sort: 14
-description: >
-  A sandboxed browser terminal. Navigate your home directory with ls, cd and cat
-  to find a flag hidden in a dot-directory. Great for learning the basics of
-  moving around a Linux filesystem.
-objectives:
-  - List directory contents, including hidden entries
-  - Change directories and print files
-  - Understand hidden (dot) files and directories
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
-  - level: 1
-    cost: 0
-    body: Run `ls` in your home directory. Then try `pwd` to see where you are.
-  - level: 2
-    cost: 0
-    body: Plain `ls` hides dot-entries. Use `ls -a` to reveal hidden directories.
-  - level: 3
-    cost: 5
-    body: "`ls -a` shows .secret — then `cat .secret/flag.txt`."
-remediation: >
-  Not a vulnerability — a fundamentals exercise. Hidden files are not a security
-  control; never rely on obscurity to protect secrets.
-walkthrough: >
-  `ls -a` in /home/ctf reveals a .secret directory; `cat .secret/flag.txt` prints
-  the flag.
-references:
-  - title: The Linux command line (ls, cd, cat)
-    url: https://linuxcommand.org/lc3_lts0020.php
+- level: 1
+  cost: 0
+  body: Run `ls` in your home directory. Then try `pwd` to see where you are.
+- level: 2
+  cost: 0
+  body: Plain `ls` hides dot-entries. Use `ls -a` to reveal hidden directories.
+- level: 3
+  cost: 5
+  body: '`ls -a` shows .secret — then `cat .secret/flag.txt`.'
+remediation: 'Not a vulnerability — a fundamentals exercise. Hidden files are not a security control;
+  never rely on obscurity to protect secrets.
+
+  '
+walkthrough: '`ls -a` in /home/ctf reveals a .secret directory; `cat .secret/flag.txt` prints the flag.
+
+  '

@@ -1,27 +1,12 @@
 slug: ewpt-dns-enumeration
-name: 'DNS Enumeration: EC2 DNS (EWPT)'
+name: Name Service
 category: network
 difficulty: easy
 lab_kind: ewpt_110
 est_minutes: 10
 sort: 110
-description: '`192.168.0.2` exposes DNS on TCP/53. The banner reveals EC2 DNS. A TXT record contains the
-  flag.
-
-
-  **Objective:** Query the DNS server and retrieve the TXT record for `flag.nexustech.lab`.
-
-
-  **Exam topics:** DNS service on port 53; version.bind; EC2 DNS; TXT record enumeration.
-
-
-  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
-  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
-  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
-objectives:
-- Query a specific resolver with dig
-- Read version.bind CHAOS records
-- Enumerate TXT records
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
 - level: 1
   cost: 0
@@ -34,7 +19,4 @@ hints:
   body: Use @192.168.0.2 to target the server.
 remediation: Restrict recursion, hide the version, limit zone data.
 walkthrough: dig TXT flag.nexustech.lab @192.168.0.2 returns the flag in the TXT record.
-references:
-- title: OWASP WSTG - Map Network and Application Architecture
-  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/10-Map_Application_Architecture
 dynamic_flag: true

@@ -28,7 +28,7 @@
             <span class="flag mono small">{{ in_progress['points'] }} pts</span>
           </div>
         </div>
-        <a class="btn" href="{{ url_for('core.challenge_page', slug=in_progress['slug']) }}">Resume →</a>
+        <a class="btn" href="{{ url_for('core.challenge_page', slug='case-' ~ in_progress['id']) }}">Resume →</a>
       </div>
     {% elif recommended %}
       <div class="spread">
@@ -36,7 +36,7 @@
           <div style="font-size:18px;font-weight:700">{{ recommended['name'] }}</div>
           <div class="muted small" style="margin-top:4px">Recommended next challenge</div>
         </div>
-        <a class="btn" href="{{ url_for('core.challenge_page', slug=recommended['slug']) }}">Start →</a>
+        <a class="btn" href="{{ url_for('core.challenge_page', slug='case-' ~ recommended['id']) }}">Start →</a>
       </div>
     {% else %}
       {{ empty_state('✓', 'All caught up', 'You have solved every published challenge.') }}
@@ -53,7 +53,7 @@
       <tbody>
       {% for r in solves %}
         <tr>
-          <td><a href="{{ url_for('core.challenge_page', slug=r['slug']) }}">{{ r['name'] }}</a></td>
+          <td><a href="{{ url_for('core.challenge_page', slug='case-' ~ r['challenge_id']) }}">{{ r['name'] }}</a></td>
           <td style="text-align:right"><span class="badge solved">✓</span>
             <span class="muted tiny">{{ r['created_at'] }}</span></td>
         </tr>

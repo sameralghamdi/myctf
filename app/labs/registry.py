@@ -7,6 +7,7 @@ downloadable artifact or a pure-analysis task).
 from __future__ import annotations
 
 from .ewpt import EWPT_SCENARIOS
+from .ewpt_web import EwptLab
 from .bola import BolaApiLab
 from .cmdinjection import CommandInjectionLab
 from .crypto import EncodingLab
@@ -39,7 +40,8 @@ _HANDLERS = {
         FileUploadLab(),
         PcapLab(),
         # Terminal challenges are data-driven: one handler per scenario.
-        *(ShellLab(scenario) for scenario in (*SCENARIOS, *EWPT_SCENARIOS)),
+        *(ShellLab(scenario) for scenario in SCENARIOS),
+        *(EwptLab(scenario) for scenario in EWPT_SCENARIOS),
     ]
 }
 
@@ -59,3 +61,11 @@ def is_shell_lab(lab_kind: str) -> bool:
 
 def live_kinds() -> list[str]:
     return sorted(_HANDLERS)
+
+
+def has_web_ui(lab_kind: str) -> bool:
+    return bool(getattr(_HANDLERS.get(lab_kind), "has_web_ui", False))
+
+
+def default_lab_view(lab_kind: str) -> str:
+    return getattr(_HANDLERS.get(lab_kind), "default_lab_view", "terminal" if is_shell_lab(lab_kind) else "target")

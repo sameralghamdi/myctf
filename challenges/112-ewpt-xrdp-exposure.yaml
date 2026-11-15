@@ -1,28 +1,12 @@
 slug: ewpt-xrdp-exposure
-name: XRDP Exposure (EWPT)
+name: Workstation
 category: network
 difficulty: easy
 lab_kind: ewpt_112
 est_minutes: 15
 sort: 112
-description: 'Nmap shows `3389/tcp open ms-wbt-server xrdp` on `xrdp.lab.local`. The challenge file contains
-  weak credentials.
-
-
-  **Objective:** Authenticate with the simulated `xfreerdp` client, then read `~/Desktop/flag.txt` in
-  the terminal. This lab mounts desktop files after authentication; it does not open a graphical desktop.
-
-
-  **Exam topics:** Port 3389; ms-wbt-server; xrdp; service enumeration.
-
-
-  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
-  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
-  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
-objectives:
-- Identify RDP/xrdp from a port scan
-- Connect with an RDP client
-- Find the flag on the remote desktop
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
 - level: 1
   cost: 0
@@ -34,9 +18,6 @@ hints:
   cost: 10
   body: Check the desktop for flag.txt.
 remediation: Restrict RDP/xrdp to a VPN, enforce MFA, use strong passwords.
-walkthrough: xfreerdp /v:xrdp.lab.local /u:ctf /p:ctf authenticates and mounts the virtual desktop. Then
-  cat ~/Desktop/flag.txt.
-references:
-- title: Nmap service detection
-  url: https://nmap.org/book/man-version-detection.html
+walkthrough: xfreerdp /v:target.lab.local /u:ctf /p:ctf authenticates and mounts the virtual desktop.
+  Then cat ~/Desktop/flag.txt.
 dynamic_flag: true

@@ -112,7 +112,7 @@ export function ChallengesPage() {
           {visible.map((c) => (
             <Link
               key={c.slug}
-              to={`/challenges/${c.slug}`}
+              to={`/challenges/${c.public_slug}`}
               className={cn("block rounded-xl", focusRing)}
             >
               <Card interactive className="flex h-full flex-col gap-4">
@@ -124,7 +124,7 @@ export function ChallengesPage() {
                 <div className="mt-auto flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <DifficultyBadge difficulty={c.difficulty} />
-                    {c.has_lab && <Badge tone="brand">{c.is_shell ? "Terminal" : "Live lab"}</Badge>}
+                    {c.has_lab && <Badge tone="brand">{c.has_web_ui ? "Web + Terminal" : c.is_shell ? "Terminal" : "Live lab"}</Badge>}
                   </div>
                   <span className="font-mono text-sm text-brand-400">{c.points} pts</span>
                 </div>

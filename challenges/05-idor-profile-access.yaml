@@ -1,39 +1,29 @@
 slug: idor-profile-access
-name: IDOR — Broken Object Access
+name: Private Accounts
 category: web
 difficulty: easy
 lab_kind: idor_bank
 dynamic_flag: true
 est_minutes: 15
 sort: 5
-description: >
-  The NimbusBank portal loads your account by its id over an API that forgets to
-  check whether the account is yours. You are account 1001. Read an account you
-  shouldn't be able to — the Corporate Treasury (1002) — and grab its note.
-objectives:
-  - Find the object identifier in the request
-  - Tamper with the id to reference another object
-  - Recognise a missing object-level authorization check
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
-  - level: 1
-    cost: 0
-    body: The portal fetches GET <lab>/api/account/1001. What is 1001?
-  - level: 2
-    cost: 5
-    body: Try requesting a different account id directly.
-  - level: 3
-    cost: 10
-    body: "GET <lab>/api/account/1002 and read the note field."
-remediation: >
-  Enforce object-level authorization on every request: verify the authenticated
-  principal owns (or may access) the requested object before returning it. Use
-  unguessable ids only as defence-in-depth, never as the access control itself.
-walkthrough: >
-  The portal page loads account 1001 via the API. Changing the id to 1002 returns
-  the Corporate Treasury account because the endpoint does no ownership check; its
-  note field contains the flag.
-references:
-  - title: OWASP API Security — BOLA / IDOR
-    url: https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/
-  - title: PortSwigger — IDOR
-    url: https://portswigger.net/web-security/access-control/idor
+- level: 1
+  cost: 0
+  body: The portal fetches GET <lab>/api/account/1001. What is 1001?
+- level: 2
+  cost: 5
+  body: Try requesting a different account id directly.
+- level: 3
+  cost: 10
+  body: GET <lab>/api/account/1002 and read the note field.
+remediation: 'Enforce object-level authorization on every request: verify the authenticated principal
+  owns (or may access) the requested object before returning it. Use unguessable ids only as defence-in-depth,
+  never as the access control itself.
+
+  '
+walkthrough: 'The portal page loads account 1001 via the API. Changing the id to 1002 returns the Corporate
+  Treasury account because the endpoint does no ownership check; its note field contains the flag.
+
+  '

@@ -1,28 +1,12 @@
 slug: ewpt-http-method-mayhem
-name: HTTP Method Mayhem (EWPT)
+name: Storage Room
 category: web
 difficulty: easy
 lab_kind: ewpt_102
 est_minutes: 15
 sort: 102
-description: '`http://methods.lab.local` is an Apache/PHP file service. The administrator disabled directory
-  listing but forgot to restrict HTTP methods.
-
-
-  **Objective:** Use OPTIONS to discover the enabled methods, then use a dangerous one to write a file
-  that triggers the flag.
-
-
-  **Exam topics:** OWASP WSTG Configuration and Deployment Management Testing: Test HTTP Methods (WSTG-CONF-06).
-
-
-  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
-  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
-  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
-objectives:
-- Enumerate allowed methods with OPTIONS
-- Read the Allow header
-- Abuse PUT to write a file
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
 - level: 1
   cost: 0
@@ -35,10 +19,7 @@ hints:
   body: If PUT is enabled, upload probe.txt, then request it.
 remediation: Disable unused methods (PUT, DELETE, TRACE), enforce authorization, harden the Apache/nginx
   configuration.
-walkthrough: 'curl -X OPTIONS http://methods.lab.local/uploads/ shows Allow: GET,HEAD,POST,PUT,DELETE,OPTIONS.
-  curl -X PUT --data owned http://methods.lab.local/uploads/probe.txt, then curl the same URL. The server
+walkthrough: 'curl -X OPTIONS http://target.lab.local/uploads/ shows Allow: GET,HEAD,POST,PUT,DELETE,OPTIONS.
+  curl -X PUT --data owned http://target.lab.local/uploads/probe.txt, then curl the same URL. The server
   returns the flag once probe.txt exists.'
-references:
-- title: OWASP WSTG - Test HTTP Methods
-  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods
 dynamic_flag: true

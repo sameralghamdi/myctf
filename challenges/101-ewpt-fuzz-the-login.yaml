@@ -1,33 +1,16 @@
 slug: ewpt-fuzz-the-login
-name: Fuzz the Login (EWPT)
+name: Reception
 category: web
 difficulty: easy
 lab_kind: ewpt_101
 est_minutes: 15
 sort: 101
-description: '`http://login.lab.local` has a login form. The developer says "SQL injection is impossible
-  because we use a custom login page."
-
-
-  **Objective:** Fuzz the `username` parameter of `POST /api/login` and find a payload that logs you in
-  as admin. The admin dashboard contains the flag.
-
-
-  **Exam topics:** Fuzzing objective; sending large numbers of random/malformed inputs to identify vulnerabilities;
-  injection testing.
-
-
-  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
-  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
-  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
-objectives:
-- Fuzz a request parameter with a wordlist
-- Spot a successful payload by response status/length
-- Reuse the session cookie to reach /admin
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
 - level: 1
   cost: 0
-  body: Use ffuf -u http://login.lab.local/api/login -X POST -d "username=FUZZ&password=test" -w sqli-payloads.txt
+  body: Use ffuf -u http://target.lab.local/api/login -X POST -d "username=FUZZ&password=test" -w sqli-payloads.txt
     -mc 200.
 - level: 2
   cost: 5
@@ -37,8 +20,5 @@ hints:
   body: Look for a different response length or status than the 401s.
 remediation: Parameterized queries, input validation, generic login errors, rate limiting.
 walkthrough: Fuzz username with sqli-payloads.txt. Replay the successful SQL payload using curl -c cookies.txt,
-  then curl -b cookies.txt http://login.lab.local/admin.
-references:
-- title: OWASP WSTG - Testing for SQL Injection
-  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/07-Input_Validation_Testing/05-Testing_for_SQL_Injection
+  then curl -b cookies.txt http://target.lab.local/admin.
 dynamic_flag: true

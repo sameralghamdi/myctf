@@ -1,39 +1,31 @@
 slug: shell-web-recon
-name: "Terminal: Web Recon"
+name: Internal Affairs
 category: web
 difficulty: easy
 lab_kind: shell_web_recon
 dynamic_flag: true
 est_minutes: 15
 sort: 16
-description: |
-  You have a Kali terminal and one target in scope: an intranet portal at
-  `http://10.10.10.5`. Its admin console is password protected.
-
-  Use `curl` from the terminal to map the site, find what the developers left
-  behind, and sign in to the admin console to read the flag.
-objectives:
-  - Request pages from the command line with curl
-  - Use robots.txt as a map of what a site wants hidden
-  - Recognise exposed backup files and reuse leaked credentials
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
-  - level: 1
-    cost: 0
-    body: Start with `cat README.txt`, then `curl http://10.10.10.5/`. Read the HTML comment.
-  - level: 2
-    cost: 5
-    body: "`curl http://10.10.10.5/robots.txt` lists two paths the site does not want indexed. Look inside the backup one."
-  - level: 3
-    cost: 10
-    body: "The backup config contains the admin username and password. Send them with `curl -u user:password http://10.10.10.5/admin/`."
-remediation: >
-  Never leave backup or config copies inside the web root, and do not rely on
-  robots.txt to hide anything: it is a public list of the paths you care about.
-  Rotate any credential that was ever stored in a served file.
-walkthrough: >
-  curl /robots.txt reveals /backup/ and /admin/. curl /backup/ lists
-  config.php.bak; fetching it shows the admin credentials. curl -u
-  admin:<password> http://10.10.10.5/admin/ returns the flag.
-references:
-  - title: OWASP WSTG - Review Webserver Metafiles for Information Leakage
-    url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/03-Review_Webserver_Metafiles_for_Information_Leakage
+- level: 1
+  cost: 0
+  body: Start with `cat README.txt`, then `curl http://10.10.10.5/`. Read the HTML comment.
+- level: 2
+  cost: 5
+  body: '`curl http://10.10.10.5/robots.txt` lists two paths the site does not want indexed. Look inside
+    the backup one.'
+- level: 3
+  cost: 10
+  body: The backup config contains the admin username and password. Send them with `curl -u user:password
+    http://10.10.10.5/admin/`.
+remediation: 'Never leave backup or config copies inside the web root, and do not rely on robots.txt to
+  hide anything: it is a public list of the paths you care about. Rotate any credential that was ever
+  stored in a served file.
+
+  '
+walkthrough: 'curl /robots.txt reveals /backup/ and /admin/. curl /backup/ lists config.php.bak; fetching
+  it shows the admin credentials. curl -u admin:<password> http://10.10.10.5/admin/ returns the flag.
+
+  '

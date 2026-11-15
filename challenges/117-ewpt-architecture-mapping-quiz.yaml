@@ -1,39 +1,12 @@
 slug: ewpt-architecture-mapping-quiz
-name: Architecture Mapping Quiz (EWPT)
+name: Site Survey
 category: network
 difficulty: easy
 lab_kind: ewpt_117
 est_minutes: 10
 sort: 117
-description: 'Nmap output shows:
-
-
-  ```
-
-  5000/tcp  nginx 1.25.1
-
-  8000/tcp  uvicorn
-
-  8080/tcp  Apache Tomcat 8.5.19
-
-  8082/tcp  Apache httpd 2.4.49
-
-  ```
-
-
-  **Objective:** Run `nmap -sV architecture.lab.local`, identify the four service names in port order,
-  and enter `answer <names_joined_by_underscores>` to receive your session flag. Use lowercase short names.
-
-
-  **Exam topics:** OWASP WSTG Information Gathering; fingerprint web server/app; map architecture.
-
-
-  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
-  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
-  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
-objectives:
-- Match ports to services
-- Reason about frontend proxy, API, app server and CMS roles
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
 - level: 1
   cost: 0
@@ -44,7 +17,4 @@ hints:
 remediation: Reduce banner disclosure; segment services; restrict management ports.
 walkthrough: 'Name each service in port order: nginx, uvicorn, tomcat, apache. Run answer nginx_uvicorn_tomcat_apache
   to receive your session flag.'
-references:
-- title: OWASP WSTG - Map Application Architecture
-  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/01-Information_Gathering/10-Map_Application_Architecture
 dynamic_flag: true

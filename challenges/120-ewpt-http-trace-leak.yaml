@@ -1,27 +1,12 @@
 slug: ewpt-http-trace-leak
-name: HTTP TRACE / Method Information Leak (EWPT)
+name: Return Address
 category: web
 difficulty: easy
 lab_kind: ewpt_120
 est_minutes: 10
 sort: 120
-description: '`http://trace.lab.local` responds differently to TRACE. The flag is reflected in the TRACE
-  response body.
-
-
-  **Objective:** Use OPTIONS and TRACE to discover and retrieve the flag.
-
-
-  **Exam topics:** Test HTTP methods; configuration and deployment management; information disclosure.
-
-
-  **Terminal lab:** Click Start Lab and read `README.txt`. Targets and tools run in the same simulated
-  browser terminal as the other terminal challenges; no external machines or DNS setup are needed. Type
-  `help` for available commands. Flags are unique to your lab session and use `MYCTF{...}`.'
-objectives:
-- Enumerate methods with OPTIONS
-- Send a TRACE request with a custom header
-- Read the reflected request in the response body
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
 - level: 1
   cost: 0
@@ -33,9 +18,6 @@ hints:
   cost: 10
   body: Inspect the response body.
 remediation: Disable TRACE; harden web server methods.
-walkthrough: 'curl -X OPTIONS http://trace.lab.local/ lists TRACE. curl -X TRACE http://trace.lab.local/
+walkthrough: 'curl -X OPTIONS http://target.lab.local/ lists TRACE. curl -X TRACE http://target.lab.local/
   -H ''X-Test: flag'' reflects the flag in the body.'
-references:
-- title: OWASP WSTG - Test HTTP Methods
-  url: https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/06-Test_HTTP_Methods
 dynamic_flag: true

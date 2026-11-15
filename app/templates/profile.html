@@ -38,7 +38,7 @@
       <tbody>
       {% for s in solves %}
         <tr>
-          <td><a href="{{ url_for('core.challenge_page', slug=s['slug']) }}">{{ s['name'] }}</a></td>
+          <td><a href="{{ url_for('core.challenge_page', slug='case-' ~ s['challenge_id']) }}">{{ s['name'] }}</a></td>
           <td>{{ diff_badge(s['difficulty'], DIFFICULTY_LABELS) }}</td>
           <td class="flag mono" style="text-align:right">+{{ s['points_awarded'] }}</td>
         </tr>

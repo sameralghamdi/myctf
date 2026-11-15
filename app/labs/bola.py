@@ -64,6 +64,5 @@ Header:  X-API-Key: {API_KEY}</pre>
   <p class="muted">Try your own order first:</p>
   <pre>curl -H "X-API-Key: {API_KEY}" "{{origin}}{base}/api/orders/5001"</pre>
 </div>
-<p class="muted">The API checks your key — but does it check whether the order is
-   yours?</p>"""
+"""
         return LabResult(self.page(instance, "ShopAPI", body))

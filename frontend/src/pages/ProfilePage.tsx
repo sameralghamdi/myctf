@@ -79,7 +79,7 @@ export function ProfilePage() {
                 {data.solves.map((solve) => (
                   <Tr key={solve.slug}>
                     <Td>
-                      <Link to={`/challenges/${solve.slug}`} className="text-brand-400 hover:underline">
+                      <Link to={`/challenges/${solve.public_slug}`} className="text-brand-400 hover:underline">
                         {solve.name}
                       </Link>
                     </Td>

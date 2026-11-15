@@ -1,37 +1,28 @@
 slug: pcap-investigation
-name: PCAP Investigation
+name: After Hours
 category: forensics
 difficulty: easy
 lab_kind: pcap
 dynamic_flag: true
 est_minutes: 15
 sort: 13
-description: >
-  NetCapture shows a short captured session. One HTTP POST leaks a credential that
-  isn't plaintext. Inspect the packet payloads, find the encoded value, and decode
-  it to recover the flag.
-objectives:
-  - Read a packet capture and follow HTTP payloads
-  - Recognise Base64-encoded data in traffic
-  - Decode captured credentials
+description: You have permission to investigate this isolated environment. Explore what is available and
+  recover the flag.
 hints:
-  - level: 1
-    cost: 0
-    body: Scan each packet's Info/payload column. Which one carries form data?
-  - level: 2
-    cost: 5
-    body: The POST to /api/sync has a 'recovery' field that looks Base64-encoded.
-  - level: 3
-    cost: 10
-    body: Base64-decode the recovery value (use the decode bench) to get the flag.
-remediation: >
-  Never transmit credentials over plaintext HTTP, and don't mistake Base64 for
-  encryption. Use TLS and proper secret management.
-walkthrough: >
-  Packet 4 is a POST to /api/sync with recovery=<base64>. Base64-decoding that
-  value yields the MYCTF{...} flag.
-references:
-  - title: Wireshark User's Guide
-    url: https://www.wireshark.org/docs/wsug_html_chunked/
-  - title: Base64 (Wikipedia)
-    url: https://en.wikipedia.org/wiki/Base64
+- level: 1
+  cost: 0
+  body: Scan each packet's Info/payload column. Which one carries form data?
+- level: 2
+  cost: 5
+  body: The POST to /api/sync has a 'recovery' field that looks Base64-encoded.
+- level: 3
+  cost: 10
+  body: Base64-decode the recovery value (use the decode bench) to get the flag.
+remediation: 'Never transmit credentials over plaintext HTTP, and don''t mistake Base64 for encryption.
+  Use TLS and proper secret management.
+
+  '
+walkthrough: 'Packet 4 is a POST to /api/sync with recovery=<base64>. Base64-decoding that value yields
+  the MYCTF{...} flag.
+
+  '

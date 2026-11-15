@@ -62,7 +62,7 @@ export function DocsPage() {
               How a challenge works
             </h2>
             <ol className={cn(body, "flex list-decimal flex-col gap-2 pl-6")}>
-              <li>Open a challenge and read the objectives.</li>
+              <li>Open a challenge and inspect the assigned environment.</li>
               <li>Click Start lab to spin up your own isolated instance with a unique flag.</li>
               <li>Interact with the target in the right-hand pane, or open it in a new tab.</li>
               <li>

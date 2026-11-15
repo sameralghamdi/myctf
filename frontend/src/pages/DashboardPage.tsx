@@ -74,7 +74,7 @@ export function DashboardPage() {
                   <span className="font-mono text-sm text-brand-400">{next.points} pts</span>
                 </div>
               </div>
-              <Button href={`/challenges/${next.slug}`}>
+              <Button href={`/challenges/${next.public_slug}`}>
                 {data.in_progress ? "Resume" : "Start"}
               </Button>
             </div>
@@ -96,7 +96,7 @@ export function DashboardPage() {
                   <Tr key={`${entry.slug}-${entry.created_at}`}>
                     <Td>
                       <Link
-                        to={`/challenges/${entry.slug}`}
+                        to={`/challenges/${entry.public_slug}`}
                         className="text-brand-400 hover:underline"
                       >
                         {entry.name}

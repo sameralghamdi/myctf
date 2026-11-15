@@ -22,6 +22,7 @@ export interface SessionResponse {
 export interface Challenge {
   id: number;
   slug: string;
+  public_slug: string;
   name: string;
   category: string | null;
   category_name: string | null;
@@ -36,6 +37,9 @@ export interface Challenge {
    * simulated machine, instead of an embedded web page. Implies `has_lab`.
    */
   is_shell: boolean;
+  /** Hybrid labs provide a target page alongside the terminal. */
+  has_web_ui: boolean;
+  default_lab_view: "target" | "terminal";
   solved: boolean;
   status?: ChallengeStatus;
 }
@@ -99,7 +103,7 @@ export interface DashboardData {
   available: number;
   completion_pct: number;
   skills: Record<string, SkillStat>;
-  recent: { name: string; slug: string; correct: number | boolean; created_at: string }[];
+  recent: { name: string; slug: string; public_slug: string; correct: number | boolean; created_at: string }[];
   recommended: Challenge | null;
   in_progress: Challenge | null;
   achievements: { slug: string; name: string; description: string }[];
@@ -112,6 +116,7 @@ export interface ProfileData {
   solves: {
     name: string;
     slug: string;
+    public_slug: string;
     difficulty: Difficulty;
     skill: string | null;
     points_awarded: number;
@@ -136,7 +141,7 @@ export interface LearningPath {
   description: string;
   done: number;
   total: number;
-  items: { slug: string; name: string; difficulty: Difficulty; points: number; solved: boolean }[];
+  items: { slug: string; public_slug: string; name: string; difficulty: Difficulty; points: number; solved: boolean }[];
 }
 
 export interface PublicInfo {

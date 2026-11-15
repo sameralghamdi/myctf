@@ -84,8 +84,7 @@ class SqliLoginLab(LabHandler):
     <button type="submit">Sign in</button>
   </form>
 </div>
-<p class="muted">Hint for learners: the backend builds its SQL by string
-concatenation. Try to make the WHERE clause always true.</p>"""
+"""
         return self.page(instance, "AcmeCorp Login", body)
 
     def _login(self, instance, request) -> LabResult:

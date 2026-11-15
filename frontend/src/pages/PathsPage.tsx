@@ -47,7 +47,7 @@ export function PathsPage() {
                 {path.items.map((item) => (
                   <li key={item.slug}>
                     <Link
-                      to={`/challenges/${item.slug}`}
+                      to={`/challenges/${item.public_slug}`}
                       className={cn(
                         "flex h-12 items-center justify-between gap-4 rounded-lg px-2 transition-colors duration-200 hover:bg-gray-800/50",
                         focusRing,
