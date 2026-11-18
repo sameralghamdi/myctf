@@ -74,6 +74,6 @@ class IdorBankLab(LabHandler):
 <div class="card">
   <h2>Try the API</h2>
   <p class="muted">Account API</p>
-  <pre>curl {base}/api/account/1001</pre>
+  <pre data-curl="{base}/api/account/1001">curl {base}/api/account/1001</pre>
 </div>"""
         return LabResult(self.page(instance, "Demo Bank", body))

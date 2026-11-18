@@ -82,6 +82,7 @@ def apply_manifest(norm: dict) -> int:
     for h in norm["hints"]:
         models.upsert_hint(challenge_id, int(h["level"]), h["body"],
                            int(h.get("cost", 0)))
+    models.prune_hints(challenge_id, [int(h["level"]) for h in norm["hints"]])
     return challenge_id
 
 

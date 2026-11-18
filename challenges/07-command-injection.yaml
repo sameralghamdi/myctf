@@ -13,10 +13,10 @@ hints:
   cost: 0
   body: The server runs  ping -c 1 <host>  with your host value appended directly.
 - level: 2
-  cost: 10
+  cost: 0
   body: Shell separators like ; | && let you chain a second command after ping.
 - level: 3
-  cost: 20
+  cost: 0
   body: 'Host value:  127.0.0.1; cat flag.txt   (or  | cat flag.txt )'
 remediation: 'Never build shell strings from user input. Call the binary with an argument array and no
   shell (e.g. subprocess without shell=True), and validate/allow-list the host. Drop privileges for any

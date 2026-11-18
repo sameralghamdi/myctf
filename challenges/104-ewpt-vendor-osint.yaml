@@ -14,10 +14,10 @@ hints:
   cost: 0
   body: View the page source.
 - level: 2
-  cost: 5
+  cost: 0
   body: Look for HTML comments or JSON-LD.
 - level: 3
-  cost: 10
+  cost: 0
   body: The correct service is the one most commonly offered alongside custom development.
 remediation: OSINT awareness; remove sensitive comments from production pages.
 walkthrough: Inspect http://target.lab.local/lumoratech.html and find the comment listing the services.

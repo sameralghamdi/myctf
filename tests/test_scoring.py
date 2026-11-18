@@ -34,7 +34,16 @@ def test_first_blood_only_once(client):
     assert _solve_encoding(client, tb).get_json()["first_blood"] is False
 
 
-def test_hint_unlock_deducts_points(client):
+def _add_costed_hint(app, slug="sqli-login-bypass", level=2, cost=10):
+    """Shipped challenges have free hints; the cost mechanism is still supported."""
+    from app import models
+    with app.app_context():
+        cid = models.get_challenge_by_slug(slug)["id"]
+        models.upsert_hint(cid, level, "A costed test hint.", cost)
+
+
+def test_hint_unlock_deducts_points(app, client):
+    _add_costed_hint(app)
     _, token = register(client, "hinter")
     # unlock a costed hint on sqli (level 2 costs 10)
     r = client.post("/api/challenges/sqli-login-bypass/hints/2", headers=auth_headers(token))
@@ -57,7 +66,8 @@ def test_leaderboard_lists_solvers(client):
     assert any(row["username"] == "lbuser" for row in lb)
 
 
-def test_hints_hidden_until_unlocked(client):
+def test_hints_hidden_until_unlocked(app, client):
+    _add_costed_hint(app)
     _, token = register(client, "peeker")
     data = client.get("/api/challenges/sqli-login-bypass",
                       headers=auth_headers(token)).get_json()

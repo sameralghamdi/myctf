@@ -297,7 +297,20 @@ function PlayScreen({ slug }: { slug: string }) {
                     Running
                   </span>
                   <span className="font-mono text-gray-300">{lab.instance_id.slice(0, 8)}</span>
-                  <span className="text-gray-400">Expires {formatDateTime(lab.expires_at)}</span>
+                  <span className="text-gray-400">Expires {formatDateTime(lab.expires_at)} (SA time)</span>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="text-gray-400">URL</span>
+                    <code className="select-all truncate rounded bg-gray-950 px-2 py-0.5 font-mono text-xs text-gray-200">
+                      {window.location.origin}{lab.url}
+                    </code>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => void navigator.clipboard?.writeText(`${window.location.origin}${lab.url}`)}
+                    >
+                      Copy
+                    </Button>
+                  </span>
                   <span className="ml-auto flex items-center gap-2">
                     <Button href={challenge.has_web_ui && (labView ?? challenge.default_lab_view) === "terminal" ? `${lab.url}terminal` : lab.url} external target="_blank" rel="noopener noreferrer" variant="ghost" size="sm">
                       Open in tab ↗

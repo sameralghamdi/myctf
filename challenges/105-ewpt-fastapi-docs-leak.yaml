@@ -14,13 +14,13 @@ hints:
   cost: 0
   body: Visit /docs.
 - level: 2
-  cost: 5
+  cost: 0
   body: Fetch /openapi.json.
 - level: 3
-  cost: 10
+  cost: 0
   body: Look for an admin flag endpoint under /api/v1/.
 - level: 4
-  cost: 10
+  cost: 0
   body: Check the required request headers.
 remediation: Disable /docs and /openapi.json in production or protect them; require authentication.
 walkthrough: 'curl http://target.lab.local:8000/openapi.json reveals /api/v1/admin/flag, which requires

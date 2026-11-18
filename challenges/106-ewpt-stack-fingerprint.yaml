@@ -12,10 +12,10 @@ hints:
   cost: 0
   body: Check robots.txt.
 - level: 2
-  cost: 5
+  cost: 0
   body: Look for a backup copy of the application source.
 - level: 3
-  cost: 10
+  cost: 0
   body: Read the source for a hidden route and the header it expects.
 remediation: Hide version banners, remove backups from the web root, disable debug routes.
 walkthrough: 'robots.txt disallows /backup/app.py. The source contains /flag, which requires the header

@@ -13,10 +13,10 @@ hints:
   cost: 0
   body: The blob is text-safe and ends with '=' padding — a classic sign of one layer.
 - level: 2
-  cost: 5
+  cost: 0
   body: Base64-decode first. The result is letters shifted by a fixed amount.
 - level: 3
-  cost: 10
+  cost: 0
   body: After Base64, apply ROT13 to the result to reveal the flag.
 remediation: 'Never use encoding (Base64/hex) to protect secrets. Use authenticated encryption (e.g. AES-GCM)
   with keys managed outside the application.

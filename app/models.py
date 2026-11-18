@@ -277,6 +277,19 @@ def upsert_hint(challenge_id: int, level: int, body: str, cost: int = 0) -> None
     db.commit()
 
 
+def prune_hints(challenge_id: int, keep_levels: list[int]) -> None:
+    """Delete hints (and their unlock records) whose level is no longer in the manifest."""
+    db = get_db()
+    rows = db.execute("SELECT id, level FROM hints WHERE challenge_id=?",
+                      (challenge_id,)).fetchall()
+    stale = [r["id"] for r in rows if r["level"] not in set(keep_levels)]
+    for hid in stale:
+        db.execute("DELETE FROM hint_unlocks WHERE hint_id=?", (hid,))
+        db.execute("DELETE FROM hints WHERE id=?", (hid,))
+    if stale:
+        db.commit()
+
+
 def list_hints(challenge_id: int):
     return get_db().execute(
         "SELECT * FROM hints WHERE challenge_id=? ORDER BY level", (challenge_id,)

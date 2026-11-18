@@ -14,10 +14,10 @@ hints:
   cost: 0
   body: Count requests per IP.
 - level: 2
-  cost: 5
+  cost: 0
   body: Look for 400 and 401 responses and unusual payloads.
 - level: 3
-  cost: 10
+  cost: 0
   body: The attacker IP is the one with the highest request count to /api/login.
 remediation: Rate limiting, a WAF, and alerting on fuzzing patterns.
 walkthrough: awk '{print $1}' access.log | sort | uniq -c | sort -nr shows the top requester. Inspect

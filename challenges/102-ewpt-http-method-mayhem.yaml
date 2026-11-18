@@ -12,10 +12,10 @@ hints:
   cost: 0
   body: Send OPTIONS /uploads/.
 - level: 2
-  cost: 5
+  cost: 0
   body: Check the Allow header.
 - level: 3
-  cost: 10
+  cost: 0
   body: If PUT is enabled, upload probe.txt, then request it.
 remediation: Disable unused methods (PUT, DELETE, TRACE), enforce authorization, harden the Apache/nginx
   configuration.

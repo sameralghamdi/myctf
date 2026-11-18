@@ -16,7 +16,7 @@ hints:
   cost: 0
   body: Plain `ls` hides dot-entries. Use `ls -a` to reveal hidden directories.
 - level: 3
-  cost: 5
+  cost: 0
   body: '`ls -a` shows .secret — then `cat .secret/flag.txt`.'
 remediation: 'Not a vulnerability — a fundamentals exercise. Hidden files are not a security control;
   never rely on obscurity to protect secrets.

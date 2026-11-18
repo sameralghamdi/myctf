@@ -12,10 +12,10 @@ hints:
   cost: 0
   body: Query version.bind.
 - level: 2
-  cost: 5
+  cost: 0
   body: Query TXT records.
 - level: 3
-  cost: 10
+  cost: 0
   body: Use @192.168.0.2 to target the server.
 remediation: Restrict recursion, hide the version, limit zone data.
 walkthrough: dig TXT flag.lumoratech.lab @192.168.0.2 returns the flag in the TXT record.

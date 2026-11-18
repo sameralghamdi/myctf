@@ -76,7 +76,7 @@
     <div class="lab-toolbar">
       <span class="dot run"></span> <span>running</span>
       <span class="mono">{{ c.lab.instance_id[:8] }}</span>
-      <span class="muted">· expires {{ c.lab.expires_at }}</span>
+      <span class="muted">· expires {{ c.lab.expires_at|sa_time }}</span>
       <span style="margin-left:auto" class="row">
         <a class="btn ghost sm" href="{{ c.lab.url }}" target="_blank" rel="noopener">Open in tab ↗</a>
         <button class="btn ghost sm" onclick="Challenge.resetLab('{{ c.lab.instance_id }}')">Restart</button>

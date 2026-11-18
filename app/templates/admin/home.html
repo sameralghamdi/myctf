@@ -63,7 +63,7 @@
       <tbody>
       {% for l in running %}
         <tr><td>{{ l['username'] }}</td><td>{{ l['challenge_name'] }}</td>
-          <td class="tiny muted">{{ l['expires_at'] }}</td>
+          <td class="tiny muted">{{ l['expires_at']|sa_time }}</td>
           <td><button class="btn secondary sm" onclick="restart('{{ l['id'] }}')">Restart</button></td></tr>
       {% else %}<tr><td colspan="4"><div class="muted small">No running labs.</div></td></tr>{% endfor %}
       </tbody>
@@ -78,7 +78,7 @@
       <thead><tr><th>When</th><th>User</th><th>Action</th><th>Detail</th></tr></thead>
       <tbody>
       {% for a in audit %}
-        <tr><td class="tiny muted">{{ a['created_at'] }}</td><td>{{ a['username'] or '—' }}</td>
+        <tr><td class="tiny muted">{{ a['created_at']|sa_time }}</td><td>{{ a['username'] or '—' }}</td>
           <td><span class="mono small">{{ a['action'] }}</span></td>
           <td class="muted tiny">{{ a['detail'] }}</td></tr>
       {% endfor %}

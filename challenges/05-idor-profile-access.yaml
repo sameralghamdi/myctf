@@ -11,13 +11,13 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: The portal fetches GET <lab>/api/account/1001. What is 1001?
+  body: Look closely at the number in the API address. Is it tied to who you are?
 - level: 2
-  cost: 5
-  body: Try requesting a different account id directly.
+  cost: 0
+  body: The portal trusts the address you ask for. Other accounts exist besides yours.
 - level: 3
-  cost: 10
-  body: GET <lab>/api/account/1002 and read the note field.
+  cost: 0
+  body: Account numbers are handed out in order. Think about which neighbours of your own number might hold something more interesting, and what the server checks before answering.
 remediation: 'Enforce object-level authorization on every request: verify the authenticated principal
   owns (or may access) the requested object before returning it. Use unguessable ids only as defence-in-depth,
   never as the access control itself.

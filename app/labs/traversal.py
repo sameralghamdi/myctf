@@ -5,8 +5,8 @@ viewer joins a fixed base dir with user input and normalises it — exactly the
 real-world bug — but resolution happens against the in-memory dict, so traversal
 is demonstrable while being completely harmless to the host.
 
-Intended base dir: ``docs/``. The flag file lives at ``secret/flag.txt``, outside
-``docs``. Intended solution: ``?file=../secret/flag.txt``.
+Intended base dir: ``docs/``. The flag file lives at ``flag.txt``, outside
+``docs``, one level up. Intended solution: ``?file=../flag.txt``.
 
 Remediation: resolve the canonical path and verify it stays within the intended
 directory (e.g. os.path.realpath + prefix check), or map to an allow-list of ids.
@@ -30,8 +30,8 @@ class PathTraversalLab(LabHandler):
             "docs/welcome.txt": "Welcome to DocuView. Pick a document to read.",
             "docs/handbook.txt": "Employee handbook: be excellent to each other.",
             "docs/changelog.txt": "v1.2 - added the document viewer.",
-            "secret/flag.txt": instance["flag"],
-            "secret/admin_notes.txt": "Rotate the viewer credentials quarterly.",
+            "flag.txt": instance["flag"],
+            "admin_notes.txt": "Rotate the viewer credentials quarterly.",
         }
 
     def dispatch(self, instance, subpath: str, request) -> LabResult:

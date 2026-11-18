@@ -12,10 +12,10 @@ hints:
   cost: 0
   body: Try /static../flag.txt.
 - level: 2
-  cost: 5
+  cost: 0
   body: Try URL-encoded variants.
 - level: 3
-  cost: 10
+  cost: 0
   body: Compare /static/ and /static.. responses.
 remediation: Avoid an ambiguous alias; use root where possible; normalize paths.
 walkthrough: curl --path-as-is "http://target.lab.local:5000/static../flag.txt" returns the flag.

@@ -12,10 +12,10 @@ hints:
   cost: 0
   body: Send OPTIONS /.
 - level: 2
-  cost: 5
+  cost: 0
   body: If TRACE is listed, send TRACE /.
 - level: 3
-  cost: 10
+  cost: 0
   body: Inspect the response body.
 remediation: Disable TRACE; harden web server methods.
 walkthrough: 'curl -X OPTIONS http://target.lab.local/ lists TRACE. curl -X TRACE http://target.lab.local/

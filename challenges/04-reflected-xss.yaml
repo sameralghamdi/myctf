@@ -11,19 +11,12 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: Search for something like  <b>hi</b>  and view source — is it rendered as HTML?
-- level: 2
-  cost: 10
-  body: The page defines a function myctfSolve(). Your payload needs to call it.
-- level: 3
-  cost: 20
-  body: Try  q=<script>myctfSolve()</script>  or  <img src=x onerror=myctfSolve()>
+  body: Whatever you search for is shown back on the page. Does the page treat your text as plain text, or as something the browser might act on?
 remediation: 'Contextually escape all output (HTML-encode by default), prefer templating that auto-escapes,
   and deploy a strict Content-Security-Policy that forbids inline script so a reflection cannot execute.
 
   '
-walkthrough: 'The q parameter is reflected verbatim. Supplying <img src=x onerror=myctfSolve()> (or a
-  <script> tag) creates an executing context that calls the proof function; the server-side checker recognises
-  the working payload and returns the flag.
+walkthrough: 'The q parameter is reflected verbatim. Any payload that executes script — for example <img
+  src=x onerror=alert(1)> or <script>alert(1)</script> — makes the server-side checker return the flag.
 
   '

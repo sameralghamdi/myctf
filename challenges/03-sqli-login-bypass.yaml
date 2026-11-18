@@ -11,13 +11,7 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: The username and password are wrapped in single quotes inside the query.
-- level: 2
-  cost: 10
-  body: Break out of the quotes and add an always-true condition, like  ' OR '1'='1
-- level: 3
-  cost: 20
-  body: 'Username:  '' OR ''1''=''1'' --    (note the trailing space after --), any password.'
+  body: The login form builds a database query out of what you type. What happens if your input contains characters that mean something to the database?
 remediation: 'Use parameterised queries / prepared statements so input is always treated as data, never
   as SQL. Apply least-privilege DB accounts and add a WAF as defence-in-depth. Never surface raw SQL errors
   to users.

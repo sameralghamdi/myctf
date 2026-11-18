@@ -13,10 +13,10 @@ hints:
   cost: 0
   body: Post a comment containing HTML like <b>hi</b> and view the page source.
 - level: 2
-  cost: 10
+  cost: 0
   body: The page defines myctfSolve(). Store a comment that calls it, then open /admin.
 - level: 3
-  cost: 20
+  cost: 0
   body: Post <img src=x onerror=myctfSolve()> then visit the moderator review (/admin).
 remediation: 'Escape on output, sanitise stored HTML with an allow-list, and set a strict Content-Security-Policy
   so inline script cannot run.

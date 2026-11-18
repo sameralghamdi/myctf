@@ -13,10 +13,10 @@ hints:
   body: Use ffuf -u http://target.lab.local/api/login -X POST -d "username=FUZZ&password=test" -w sqli-payloads.txt
     -mc 200.
 - level: 2
-  cost: 5
+  cost: 0
   body: Fuzz username with an SQL injection payload list.
 - level: 3
-  cost: 10
+  cost: 0
   body: Look for a different response length or status than the 401s.
 remediation: Parameterized queries, input validation, generic login errors, rate limiting.
 walkthrough: Fuzz username with sqli-payloads.txt. Replay the successful SQL payload using curl -c cookies.txt,

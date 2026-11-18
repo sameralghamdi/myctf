@@ -14,10 +14,10 @@ hints:
   cost: 0
   body: Use ffuf with an API wordlist.
 - level: 2
-  cost: 5
+  cost: 0
   body: 'Use -mc all or -mc 200,403: a 403 still reveals an existing protected endpoint.'
 - level: 3
-  cost: 10
+  cost: 0
   body: 'Try X-Forwarded-For: 127.0.0.1.'
 remediation: Do not trust forwarding headers; disable debug endpoints; authenticate APIs.
 walkthrough: 'ffuf -u http://target.lab.local/api/FUZZ -w api-wordlist.txt -mc 200,403 reveals /api/debug
