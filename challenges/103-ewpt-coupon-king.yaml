@@ -12,13 +12,13 @@ hints:
   cost: 0
   body: Intercept the "apply coupon" request.
 - level: 2
-  cost: 5
+  cost: 0
   body: Try applying the same coupon more than once.
 - level: 3
-  cost: 10
+  cost: 0
   body: Try a negative quantity.
 - level: 4
-  cost: 10
+  cost: 0
   body: Check whether the final price is validated server-side.
 remediation: Server-side price calculation, one-time coupon state, positive quantity validation, a workflow
   state machine.

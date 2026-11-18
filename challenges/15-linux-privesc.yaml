@@ -13,10 +13,10 @@ hints:
   cost: 0
   body: Try to `cat /root/flag.txt` directly — what happens? Then enumerate sudo.
 - level: 2
-  cost: 10
+  cost: 0
   body: Run `sudo -l` to see what you can run as root without a password.
 - level: 3
-  cost: 20
+  cost: 0
   body: sudo allows cat as root — `sudo cat /root/flag.txt`.
 remediation: 'Grant sudo narrowly and avoid NOPASSWD for file-reading binaries. Any command that can read
   arbitrary files as root is equivalent to full root access.

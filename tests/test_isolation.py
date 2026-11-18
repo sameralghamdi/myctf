@@ -53,12 +53,12 @@ def test_reset_rotates_the_flag(client):
     iid = start_lab(client, token, "path-traversal")
     f1 = FLAG_RE.search(client.get(
         f"/labs/{iid}/", headers=auth_headers(token),
-        query_string={"file": "../secret/flag.txt"}).get_data(as_text=True)).group(0)
+        query_string={"file": "../flag.txt"}).get_data(as_text=True)).group(0)
     reset = client.post(f"/api/labs/{iid}/reset", headers=auth_headers(token))
     iid2 = reset.get_json()["instance_id"]
     f2 = FLAG_RE.search(client.get(
         f"/labs/{iid2}/", headers=auth_headers(token),
-        query_string={"file": "../secret/flag.txt"}).get_data(as_text=True)).group(0)
+        query_string={"file": "../flag.txt"}).get_data(as_text=True)).group(0)
     assert f1 != f2  # a fresh instance has a fresh flag
 
 

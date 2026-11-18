@@ -45,9 +45,8 @@ def test_http_basics(client, user):
     iid = start_lab(client, token, "http-basics")
     # wrong method -> 405 with Allow header
     assert client.get(_lab(iid, "flag"), headers=auth_headers(token)).status_code == 405
-    # correct exploit: POST with the required header
-    r = client.post(_lab(iid, "flag"), headers={**auth_headers(token),
-                                                 "X-MyCTF-Access": "let-me-in"})
+    # correct exploit: POST (PUT also works) reveals the flag
+    r = client.post(_lab(iid, "flag"), headers=auth_headers(token))
     assert r.status_code == 200
     flag = _find_flag(r.get_data(as_text=True))
     _solve_and_assert(client, token, "http-basics", flag, 50)
@@ -105,7 +104,7 @@ def test_path_traversal(client, user):
     token = user["token"]
     iid = start_lab(client, token, "path-traversal")
     r = client.get(_lab(iid), headers=auth_headers(token),
-                   query_string={"file": "../secret/flag.txt"})
+                   query_string={"file": "../flag.txt"})
     flag = _find_flag(r.get_data(as_text=True))
     _solve_and_assert(client, token, "path-traversal", flag, 100)
 
@@ -129,3 +128,35 @@ def test_wrong_flag_is_rejected(client, user, slug):
     r = submit_flag(client, token, slug, "MYCTF{not_the_flag}")
     assert r.status_code == 400
     assert r.get_json()["correct"] is False
+
+
+def test_http_basics_put_and_no_header_needed(client, user):
+    token = user["token"]
+    iid = start_lab(client, token, "http-basics")
+    r = client.put(_lab(iid, "flag"), headers=auth_headers(token))
+    assert r.status_code == 200 and _find_flag(r.get_data(as_text=True))
+    assert "POST" in client.get(_lab(iid, "flag"), headers=auth_headers(token)).headers["Allow"]
+
+
+def test_reflected_xss_any_payload_reveals_flag_and_is_sandboxed(client, user):
+    token = user["token"]
+    iid = start_lab(client, token, "reflected-xss")
+    r = client.get(_lab(iid), headers=auth_headers(token),
+                   query_string={"q": "<script>alert(1)</script>"})
+    assert _find_flag(r.get_data(as_text=True))
+    csp = r.headers["Content-Security-Policy"]
+    assert "sandbox" in csp and "allow-same-origin" not in csp
+
+
+def test_lab_reachable_by_plain_curl_and_sets_referrer_policy(client, user):
+    token = user["token"]
+    iid = start_lab(client, token, "idor-profile-access")
+    r = client.get(_lab(iid, "api/account/1001"))  # no cookie / token
+    assert r.status_code == 200
+    assert r.headers["Referrer-Policy"] == "same-origin"
+
+
+def test_hints_are_free(client, user):
+    r = client.get("/api/challenges/sqli-login-bypass", headers=auth_headers(user["token"]))
+    hints = r.get_json()["hints"]
+    assert len(hints) == 1 and all(h["cost"] == 0 for h in hints)

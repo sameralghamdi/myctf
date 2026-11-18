@@ -13,10 +13,10 @@ hints:
   cost: 0
   body: Scan each packet's Info/payload column. Which one carries form data?
 - level: 2
-  cost: 5
+  cost: 0
   body: The POST to /api/sync has a 'recovery' field that looks Base64-encoded.
 - level: 3
-  cost: 10
+  cost: 0
   body: Base64-decode the recovery value (use the decode bench) to get the flag.
 remediation: 'Never transmit credentials over plaintext HTTP, and don''t mistake Base64 for encryption.
   Use TLS and proper secret management.

@@ -12,7 +12,7 @@ hints:
   cost: 0
   body: Fuzz for www.zip, backup.zip, and .git.
 - level: 2
-  cost: 5
+  cost: 0
   body: Download with curl -O http://target.lab.local/www.zip, then unzip www.zip. Inspect ls -a www and
     cat www/flag.txt.
 remediation: Remove backups from the web root; deny dotfiles and archives; add deploy pipeline checks.

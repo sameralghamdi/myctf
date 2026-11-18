@@ -13,10 +13,10 @@ hints:
   cost: 0
   body: Your key works for GET /api/orders/5001 (your order). Try another id.
 - level: 2
-  cost: 5
+  cost: 0
   body: The API checks your key but not whether the order is yours.
 - level: 3
-  cost: 10
+  cost: 0
   body: GET /api/orders/5002 with the X-API-Key header; read the notes field.
 remediation: 'Enforce object-level authorization on every endpoint: verify the authenticated principal
   owns or may access the object before returning it.

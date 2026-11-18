@@ -12,7 +12,7 @@ hints:
   cost: 0
   body: Match each port to its service.
 - level: 2
-  cost: 5
+  cost: 0
   body: 'Order: frontend proxy, Python API, Java app server, CMS.'
 remediation: Reduce banner disclosure; segment services; restrict management ports.
 walkthrough: 'Name each service in port order: nginx, uvicorn, tomcat, apache. Run answer nginx_uvicorn_tomcat_apache

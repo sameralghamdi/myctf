@@ -13,10 +13,10 @@ hints:
   cost: 0
   body: A JWT is header.payload.signature, each Base64url. Decode the payload.
 - level: 2
-  cost: 10
+  cost: 0
   body: The verifier honours the header's alg. What if alg is "none"?
 - level: 3
-  cost: 20
+  cost: 0
   body: Build header {"alg":"none"} . payload {"role":"admin"} . (empty signature) and send it to /admin.
 remediation: 'Never trust the token''s alg header. Pin the algorithm server-side, reject "none", and verify
   signatures with a vetted library and a strong key.

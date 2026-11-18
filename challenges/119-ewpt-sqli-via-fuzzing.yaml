@@ -12,13 +12,13 @@ hints:
   cost: 0
   body: Fuzz with SQL injection payloads.
 - level: 2
-  cost: 5
+  cost: 0
   body: Determine the number of columns with ORDER BY.
 - level: 3
-  cost: 10
+  cost: 0
   body: Use UNION SELECT.
 - level: 4
-  cost: 10
+  cost: 0
   body: Extract from flags.flag.
 remediation: Prepared statements; a least-privilege DB user; input validation.
 walkthrough: ffuf -u "http://target.lab.local/product?id=FUZZ" -w sqli-payloads.txt -mc all reveals column-count

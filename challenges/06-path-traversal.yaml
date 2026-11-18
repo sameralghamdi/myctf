@@ -11,18 +11,15 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: The viewer reads docs/<file>. The file parameter is fully under your control.
+  body: The viewer opens a file from a folder, using the name you give it. Does it care where that name leads?
 - level: 2
-  cost: 5
-  body: Use ../ to climb above docs/. There is a secret/ directory next to it.
-- level: 3
-  cost: 10
-  body: Request  ?file=../secret/flag.txt
+  cost: 0
+  body: File names can describe a location relative to where you are, including going back up. The flag is a plain text file sitting just outside the documents folder.
 remediation: 'Canonicalise the resolved path and verify it stays within the intended root (realpath +
   prefix check), or avoid filesystem paths entirely by mapping an allow-list of ids to known files.
 
   '
-walkthrough: 'The viewer does normpath(join(''docs'', file)). Supplying ../secret/flag.txt resolves to
-  secret/flag.txt, outside docs/, revealing the flag.
+walkthrough: 'The viewer does normpath(join(''docs'', file)). Supplying ../flag.txt resolves to
+  flag.txt, outside docs/, revealing the flag.
 
   '

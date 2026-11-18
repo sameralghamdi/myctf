@@ -12,13 +12,13 @@ hints:
   cost: 0
   body: Use gobuster or ffuf to find /backup/.
 - level: 2
-  cost: 5
+  cost: 0
   body: Download id_rsa.
 - level: 3
-  cost: 10
+  cost: 0
   body: chmod 600 id_rsa.
 - level: 4
-  cost: 10
+  cost: 0
   body: SSH as the ctf user.
 remediation: Never store keys in the web root; rotate keys; restrict SSH access.
 walkthrough: curl -O http://target.lab.local/backup/id_rsa, then chmod 600 id_rsa, then ssh -i id_rsa

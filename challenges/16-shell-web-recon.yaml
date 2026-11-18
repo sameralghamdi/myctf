@@ -13,11 +13,11 @@ hints:
   cost: 0
   body: Start with `cat README.txt`, then `curl http://10.10.10.5/`. Read the HTML comment.
 - level: 2
-  cost: 5
+  cost: 0
   body: '`curl http://10.10.10.5/robots.txt` lists two paths the site does not want indexed. Look inside
     the backup one.'
 - level: 3
-  cost: 10
+  cost: 0
   body: The backup config contains the admin username and password. Send them with `curl -u user:password
     http://10.10.10.5/admin/`.
 remediation: 'Never leave backup or config copies inside the web root, and do not rely on robots.txt to

@@ -55,7 +55,7 @@
         <tr>
           <td><a href="{{ url_for('core.challenge_page', slug='case-' ~ r['challenge_id']) }}">{{ r['name'] }}</a></td>
           <td style="text-align:right"><span class="badge solved">✓</span>
-            <span class="muted tiny">{{ r['created_at'] }}</span></td>
+            <span class="muted tiny">{{ r['created_at']|sa_time }}</span></td>
         </tr>
       {% endfor %}
       </tbody>

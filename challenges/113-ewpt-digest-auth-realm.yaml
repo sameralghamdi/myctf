@@ -12,10 +12,10 @@ hints:
   cost: 0
   body: Use curl --digest.
 - level: 2
-  cost: 5
+  cost: 0
   body: Try admin as both username and password.
 - level: 3
-  cost: 10
+  cost: 0
   body: Request /flag.
 remediation: Use strong credentials; avoid default accounts; consider modern authentication.
 walkthrough: curl --digest -u admin:admin http://target.lab.local/flag returns the flag.

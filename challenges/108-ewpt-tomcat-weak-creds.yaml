@@ -12,10 +12,10 @@ hints:
   cost: 0
   body: Try common Tomcat manager credentials.
 - level: 2
-  cost: 5
+  cost: 0
   body: Check tomcat-users.xml examples.
 - level: 3
-  cost: 10
+  cost: 0
   body: Look at the page source after login.
 remediation: Remove the manager app from production; use strong passwords; restrict by network.
 walkthrough: 'curl -i http://target.lab.local:8080/manager/html shows Basic authentication. Try common

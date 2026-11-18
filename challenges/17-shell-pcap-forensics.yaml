@@ -13,11 +13,11 @@ hints:
   cost: 0
   body: '`cat case-notes.txt` first. Then `tshark -r evidence/capture.pcap` shows every packet.'
 - level: 2
-  cost: 10
+  cost: 0
   body: 'Filter with `-Y http`: one POST request carries a `data=` value. That is the stolen, encoded
     text.'
 - level: 3
-  cost: 15
+  cost: 0
   body: The key is the FTP password (`-Y ftp`). Run `./decode.py <data> <key>`.
 remediation: 'FTP sends passwords in cleartext: replace it with SFTP. Do not reuse passwords as encryption
   keys, and remember XOR with a short repeating key is encoding, not encryption. Egress filtering and

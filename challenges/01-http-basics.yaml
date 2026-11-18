@@ -11,21 +11,4 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: The index page tells you exactly which method and header are required.
-- level: 2
-  cost: 5
-  body: 'GET the flag endpoint and you''ll get 405 Method Not Allowed with an Allow header. Switch to
-    POST.
-
-    '
-- level: 3
-  cost: 10
-  body: 'Send: POST /flag with header  X-MyCTF-Access: let-me-in'
-remediation: 'This is a teaching exercise, not a vulnerability. The lesson is that clients fully control
-  method and headers — never trust them for security decisions on the server without validation.
-
-  '
-walkthrough: 'Open the lab, read the instructions, then issue `curl -X POST <lab>/flag -H ''X-MyCTF-Access:
-  let-me-in''`. The flag is returned in the response body. Wrong attempts return an X-Hint response header.
-
-  '
+  body: The server tells you which HTTP methods it accepts when you use the wrong one. Read the response headers.

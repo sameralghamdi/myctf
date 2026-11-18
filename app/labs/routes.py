@@ -3,7 +3,8 @@ served. It is deliberately separate from the platform API and auth.
 
 Isolation enforced here:
   * the instance id in the URL is an unguessable routing token;
-  * the lab is bound to a user — only the owner may reach it;
+  * the lab is bound to a user — a signed-in non-owner is refused (anonymous
+    callers holding the unguessable URL, e.g. curl, are allowed);
   * expired instances are swept before dispatch;
   * responses carry hardening headers and a banner marking them as lab content.
 
@@ -29,13 +30,15 @@ def lab_dispatch(instance_id: str, subpath: str):
 
     sweep_expired()
     user = current_user()
-    if user is None:
-        abort(401)
 
     instance = models.get_lab_instance(instance_id)
     if instance is None:
         abort(404, "Lab instance not found or expired.")
-    if instance["user_id"] != user["id"]:
+    # The unguessable instance id is a capability: it lets learners use plain
+    # `curl <lab-url>` without a session cookie. A *signed-in* user who is not
+    # the owner is still refused, and flags are per-instance and validated
+    # per-user by the core API, so a shared URL cannot score for anyone else.
+    if user is not None and instance["user_id"] != user["id"]:
         # Core isolation guarantee: you cannot touch another user's lab.
         abort(403, "This lab instance belongs to another user.")
 
@@ -54,6 +57,9 @@ def lab_dispatch(instance_id: str, subpath: str):
     resp.headers["X-Frame-Options"] = "SAMEORIGIN"
     resp.headers["X-Content-Type-Options"] = "nosniff"
     resp.headers["X-MyCTF-Lab"] = instance_id
+    # Same-origin form posts must carry their real Origin (with the platform-wide
+    # "no-referrer" they send "Origin: null" and the CSRF guard rejects them).
+    resp.headers["Referrer-Policy"] = "same-origin"
     for k, v in result.headers.items():
         resp.headers[k] = v
     return resp

@@ -12,10 +12,10 @@ hints:
   cost: 0
   body: Use xfreerdp or Remmina.
 - level: 2
-  cost: 5
+  cost: 0
   body: The account is ctf, and the password is the same as the username.
 - level: 3
-  cost: 10
+  cost: 0
   body: Check the desktop for flag.txt.
 remediation: Restrict RDP/xrdp to a VPN, enforce MFA, use strong passwords.
 walkthrough: xfreerdp /v:target.lab.local /u:ctf /p:ctf authenticates and mounts the virtual desktop.

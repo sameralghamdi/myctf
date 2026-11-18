@@ -164,6 +164,16 @@ def _register_blueprints(app: Flask) -> None:
 def _register_jinja(app: Flask) -> None:
     from .auth import current_user
 
+    @app.template_filter("sa_time")
+    def sa_time(value):
+        """Stored UTC "YYYY-MM-DD HH:MM:SS" -> Saudi Arabia time (UTC+3, no DST)."""
+        from datetime import datetime, timedelta
+        try:
+            dt = datetime.strptime(str(value), "%Y-%m-%d %H:%M:%S") + timedelta(hours=3)
+        except ValueError:
+            return value
+        return dt.strftime("%Y-%m-%d %H:%M") + " AST"
+
     @app.context_processor
     def inject_globals():
         from . import models
