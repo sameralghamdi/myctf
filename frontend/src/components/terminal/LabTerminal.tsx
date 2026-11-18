@@ -41,7 +41,7 @@ export function LabTerminal({ labUrl }: LabTerminalProps) {
       initialCwd={session.cwd}
       banner={session.motd}
       execute={execute}
-      className="flex-1"
+      className="min-h-0 flex-1"
     />
   );
 }

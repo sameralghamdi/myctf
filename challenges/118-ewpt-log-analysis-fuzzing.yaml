@@ -7,18 +7,17 @@ difficulty: easy
 lab_kind: ewpt_118
 est_minutes: 15
 sort: 118
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: Count requests per IP.
+  body: "Count and compare: who talks the most, and to what?"
 - level: 2
   cost: 0
-  body: Look for 400 and 401 responses and unusual payloads.
-- level: 3
-  cost: 0
-  body: The attacker IP is the one with the highest request count to /api/login.
+  body: "Unusual characters in requests are a giveaway of automated probing."
 remediation: Rate limiting, a WAF, and alerting on fuzzing patterns.
 walkthrough: awk '{print $1}' access.log | sort | uniq -c | sort -nr shows the top requester. Inspect
   the malformed /api/login requests, then run answer 192.168.0.66 to receive your session flag.

@@ -170,7 +170,7 @@ export function TerminalEmulator({
   return (
     <div
       className={cn(
-        "flex min-h-96 flex-col overflow-hidden rounded-xl border border-gray-800 bg-black shadow-md",
+        "flex min-h-96 max-h-[85vh] flex-col overflow-hidden rounded-xl border border-gray-800 bg-black shadow-md",
         "transition-colors duration-200",
         focused && "border-gray-700",
         className,

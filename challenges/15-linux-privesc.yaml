@@ -11,13 +11,10 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: Try to `cat /root/flag.txt` directly — what happens? Then enumerate sudo.
+  body: "You cannot read it as yourself. What are you allowed to borrow?"
 - level: 2
   cost: 0
-  body: Run `sudo -l` to see what you can run as root without a password.
-- level: 3
-  cost: 0
-  body: sudo allows cat as root — `sudo cat /root/flag.txt`.
+  body: "Check what the system lets you run with extra privilege."
 remediation: 'Grant sudo narrowly and avoid NOPASSWD for file-reading binaries. Any command that can read
   arbitrary files as root is equivalent to full root access.
 

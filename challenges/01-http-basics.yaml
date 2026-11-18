@@ -11,4 +11,4 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: The server tells you which HTTP methods it accepts when you use the wrong one. Read the response headers.
+  body: "Servers answer differently depending on how you ask. Pay attention to what a refusal tells you."

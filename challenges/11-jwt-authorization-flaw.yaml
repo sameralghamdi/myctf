@@ -11,13 +11,13 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: A JWT is header.payload.signature, each Base64url. Decode the payload.
+  body: "The pass is made of readable parts. Decode what you were issued."
 - level: 2
   cost: 0
-  body: The verifier honours the header's alg. What if alg is "none"?
+  body: "Think about what the server trusts the pass itself to say about how it should be checked."
 - level: 3
   cost: 0
-  body: Build header {"alg":"none"} . payload {"role":"admin"} . (empty signature) and send it to /admin.
+  body: "Forge one that claims more privilege than you have."
 remediation: 'Never trust the token''s alg header. Pin the algorithm server-side, reject "none", and verify
   signatures with a vetted library and a strong key.
 

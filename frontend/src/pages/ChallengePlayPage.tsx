@@ -1,6 +1,7 @@
 import { ExternalLink, Play, RotateCcw, Square } from "lucide-react";
 import {
   useCallback,
+  useEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -30,6 +31,20 @@ type View = "brief" | "split" | "lab";
 
 const MIN_BRIEF = 320;
 const MAX_BRIEF = 720;
+
+/**
+ * Labs close themselves when the player leaves the challenge page. The stop is
+ * deferred briefly so a quick remount (dev StrictMode, a re-render) cancels it.
+ */
+const pendingStops = new Map<string, number>();
+
+function stopLabInBackground(instanceId: string) {
+  void fetch(`/api/labs/${instanceId}/stop`, {
+    method: "POST",
+    credentials: "same-origin",
+    keepalive: true,
+  }).catch(() => undefined);
+}
 
 /** Route entry: remounts the screen when the slug changes so no state leaks across challenges. */
 export function ChallengePlayPage() {
@@ -63,6 +78,32 @@ function PlayScreen({ slug }: { slug: string }) {
   const [result, setResult] = useState<{ tone: AlertTone; text: string } | null>(null);
   const [labBusy, setLabBusy] = useState(false);
   const [labError, setLabError] = useState<string | null>(null);
+  const [frameUrl, setFrameUrl] = useState<string | null>(null);
+  const instanceId = challenge?.lab?.instance_id ?? null;
+
+  // Close the lab automatically when leaving the page (route change or tab close).
+  useEffect(() => {
+    if (!instanceId) return;
+    const timer = pendingStops.get(instanceId);
+    if (timer !== undefined) {
+      window.clearTimeout(timer);
+      pendingStops.delete(instanceId);
+    }
+    const onPageHide = (event: PageTransitionEvent) => {
+      if (!event.persisted) stopLabInBackground(instanceId);
+    };
+    window.addEventListener("pagehide", onPageHide);
+    return () => {
+      window.removeEventListener("pagehide", onPageHide);
+      pendingStops.set(
+        instanceId,
+        window.setTimeout(() => {
+          pendingStops.delete(instanceId);
+          stopLabInBackground(instanceId);
+        }, 1500),
+      );
+    };
+  }, [instanceId]);
 
   const runLabAction = useCallback(
     async (action: string) => {
@@ -145,7 +186,7 @@ function PlayScreen({ slug }: { slug: string }) {
   const showLab = view !== "brief";
 
   return (
-    <div className="flex flex-1 flex-col lg:h-app">
+    <div className="flex flex-1 flex-col lg:h-app lg:flex-none lg:overflow-hidden">
       {/* Title + view toggle */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-800 px-6 py-2">
         <h1 className="text-lg font-semibold text-gray-50">{challenge.name}</h1>
@@ -170,7 +211,7 @@ function PlayScreen({ slug }: { slug: string }) {
       <div
         ref={containerRef}
         style={{ "--play-left": `${briefWidth}px` } as CSSProperties}
-        className="flex min-h-0 flex-1 flex-col lg:flex-row"
+        className="flex min-h-0 flex-1 flex-col lg:flex-row lg:overflow-hidden"
       >
         {showBrief && (
           <section
@@ -287,7 +328,7 @@ function PlayScreen({ slug }: { slug: string }) {
         {showLab && (
           <section
             aria-label="Lab"
-            className="flex min-h-96 min-w-0 flex-1 flex-col border-t border-gray-800 lg:border-t-0"
+            className="flex min-h-96 min-w-0 flex-1 flex-col overflow-hidden border-t border-gray-800 lg:min-h-0 lg:border-t-0"
           >
             {lab ? (
               <>
@@ -298,15 +339,17 @@ function PlayScreen({ slug }: { slug: string }) {
                   </span>
                   <span className="font-mono text-gray-300">{lab.instance_id.slice(0, 8)}</span>
                   <span className="text-gray-400">Expires {formatDateTime(lab.expires_at)} (SA time)</span>
-                  <span className="flex min-w-0 items-center gap-2">
+                  <span className="flex min-w-0 basis-full items-center gap-2">
                     <span className="text-gray-400">URL</span>
-                    <code className="select-all truncate rounded bg-gray-950 px-2 py-0.5 font-mono text-xs text-gray-200">
-                      {window.location.origin}{lab.url}
+                    <code className="min-w-0 select-all truncate rounded bg-gray-950 px-2 py-0.5 font-mono text-xs text-gray-200">
+                      {frameUrl ?? `${window.location.origin}${lab.url}`}
                     </code>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => void navigator.clipboard?.writeText(`${window.location.origin}${lab.url}`)}
+                      onClick={() =>
+                        void navigator.clipboard?.writeText(frameUrl ?? `${window.location.origin}${lab.url}`)
+                      }
                     >
                       Copy
                     </Button>
@@ -350,18 +393,38 @@ function PlayScreen({ slug }: { slug: string }) {
                     </Button>
                   </div>
                 )}
-                {challenge.is_shell && (!challenge.has_web_ui || (labView ?? challenge.default_lab_view) === "terminal") ? (
-                  <div className="flex min-h-0 flex-1 flex-col p-4">
-                    <LabTerminal key={lab.instance_id} labUrl={lab.url} />
-                  </div>
-                ) : (
-                  <iframe
-                    key={lab.instance_id}
-                    src={lab.url}
-                    title="Lab target"
-                    className="min-h-96 w-full flex-1 border-0 bg-white"
-                  />
-                )}
+                {(() => {
+                  const activeView = labView ?? challenge.default_lab_view;
+                  const showTerminal = challenge.is_shell && (!challenge.has_web_ui || activeView === "terminal");
+                  const hasPage = !challenge.is_shell || challenge.has_web_ui;
+                  // Both panes stay mounted (one hidden) so switching tabs keeps the
+                  // terminal history and the page the player was on.
+                  return (
+                    <>
+                      {challenge.is_shell && (
+                        <div className={cn("min-h-0 flex-1 flex-col overflow-hidden p-4", showTerminal ? "flex" : "hidden")}>
+                          <LabTerminal key={lab.instance_id} labUrl={lab.url} />
+                        </div>
+                      )}
+                      {hasPage && (
+                        <iframe
+                          key={lab.instance_id}
+                          src={lab.url}
+                          title="Lab target"
+                          onLoad={(event) => {
+                            try {
+                              const href = event.currentTarget.contentWindow?.location.href;
+                              setFrameUrl(href && href !== "about:blank" ? href : null);
+                            } catch {
+                              setFrameUrl(null); // cross-origin / sandboxed page: keep the lab address
+                            }
+                          }}
+                          className={cn("min-h-0 w-full flex-1 border-0 bg-white", showTerminal && "hidden")}
+                        />
+                      )}
+                    </>
+                  );
+                })()}
               </>
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">

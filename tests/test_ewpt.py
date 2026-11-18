@@ -55,7 +55,7 @@ SOLUTIONS = {
 }
 
 
-@pytest.mark.parametrize('number', TARGETS)
+@pytest.mark.parametrize('number', [n for n in TARGETS if n != 104])  # 104 is withdrawn
 def test_ewpt_end_to_end(client, user, number):
     token, slug = user['token'], 'ewpt-' + SLUGS[number]
     detail = client.get('/api/challenges/' + slug, headers=auth_headers(token)).get_json()
@@ -73,7 +73,6 @@ def test_ewpt_end_to_end(client, user, number):
     (101, 'curl -i http://login.lab.local/admin'),
     (102, 'curl http://methods.lab.local/uploads/probe.txt'),
     (103, 'curl -X POST http://shop.lab.local/checkout'),
-    (104, 'answer wrong'),
     (105, 'curl http://api.lab.local:8000/api/v1/admin/flag'),
     (106, 'curl http://flask.lab.local/flag'),
     (107, 'curl http://cms.lab.local:8082/flag.txt'),
@@ -143,3 +142,22 @@ def test_ewpt_owner_scope_reset_and_fresh_flags(client, user):
     for command in SOLUTIONS[102]: out = sh(client, token, fresh, command)
     assert FLAG.search(out).group() != old_flag
     assert submit_flag(client, token, slug, old_flag).get_json()['correct'] is False
+
+
+def test_each_lab_ships_only_its_own_wordlists(client, user):
+    token = user['token']
+    def files(number):
+        iid = start_lab(client, token, 'ewpt-' + SLUGS[number])
+        return sh(client, token, iid, 'ls')
+    assert 'sqli-payloads.txt' in files(101) and 'wordlist.txt' not in files(101)
+    assert 'api-wordlist.txt' not in files(101)
+    assert 'api-wordlist.txt' in files(115) and 'sqli-payloads.txt' not in files(115)
+    assert 'scope.txt' not in files(101)
+
+
+def test_scope_is_not_in_the_terminal_and_bare_method_curl_works(client, user):
+    token = user['token']
+    iid = start_lab(client, token, 'ewpt-http-method-mayhem')
+    assert 'target.lab.local' not in sh(client, token, iid, 'cat README.txt')
+    out = sh(client, token, iid, 'curl -i OPTIONS target.lab.local/uploads/')
+    assert 'PUT' in out

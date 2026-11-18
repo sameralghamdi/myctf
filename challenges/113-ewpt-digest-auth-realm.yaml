@@ -5,18 +5,17 @@ difficulty: easy
 lab_kind: ewpt_113
 est_minutes: 10
 sort: 113
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: Use curl --digest.
+  body: "The server asks for proof in a particular way, and your tool has to speak that scheme."
 - level: 2
   cost: 0
-  body: Try admin as both username and password.
-- level: 3
-  cost: 0
-  body: Request /flag.
+  body: "Administrators often reuse the simplest credentials."
 remediation: Use strong credentials; avoid default accounts; consider modern authentication.
 walkthrough: curl --digest -u admin:admin http://target.lab.local/flag returns the flag.
 dynamic_flag: true

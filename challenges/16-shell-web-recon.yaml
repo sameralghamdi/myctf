@@ -11,15 +11,13 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: Start with `cat README.txt`, then `curl http://10.10.10.5/`. Read the HTML comment.
+  body: "Read the briefing first, then look at what the website says about itself, including the parts a visitor does not see."
 - level: 2
   cost: 0
-  body: '`curl http://10.10.10.5/robots.txt` lists two paths the site does not want indexed. Look inside
-    the backup one.'
+  body: "Sites list places they would rather search engines skip. Some contain forgotten copies."
 - level: 3
   cost: 0
-  body: The backup config contains the admin username and password. Send them with `curl -u user:password
-    http://10.10.10.5/admin/`.
+  body: "Credentials found in a leftover file may open a protected area."
 remediation: 'Never leave backup or config copies inside the web root, and do not rely on robots.txt to
   hide anything: it is a public list of the paths you care about. Rotate any credential that was ever
   stored in a served file.

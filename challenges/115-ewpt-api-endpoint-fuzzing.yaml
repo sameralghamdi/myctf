@@ -7,18 +7,17 @@ difficulty: medium
 lab_kind: ewpt_115
 est_minutes: 25
 sort: 115
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: Use ffuf with an API wordlist.
+  body: "Endpoints that answer 'forbidden' still exist. Widen which responses you keep."
 - level: 2
   cost: 0
-  body: 'Use -mc all or -mc 200,403: a 403 still reveals an existing protected endpoint.'
-- level: 3
-  cost: 0
-  body: 'Try X-Forwarded-For: 127.0.0.1.'
+  body: "Some protected routes only trust requests that look as if they came from the machine itself."
 remediation: Do not trust forwarding headers; disable debug endpoints; authenticate APIs.
 walkthrough: 'ffuf -u http://target.lab.local/api/FUZZ -w api-wordlist.txt -mc 200,403 reveals /api/debug
   with 403. curl -H "X-Forwarded-For: 127.0.0.1" http://target.lab.local/api/debug returns the flag.'

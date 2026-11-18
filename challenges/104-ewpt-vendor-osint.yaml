@@ -7,18 +7,21 @@ difficulty: easy
 lab_kind: ewpt_104
 est_minutes: 10
 sort: 104
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+published: false
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: View the page source.
+  body: "Pages say more than they display. Look at what the browser receives, not only what it shows."
 - level: 2
   cost: 0
-  body: Look for HTML comments or JSON-LD.
+  body: "Machine-readable notes are sometimes left behind for search engines."
 - level: 3
   cost: 0
-  body: The correct service is the one most commonly offered alongside custom development.
+  body: "Think about which offering the company is best known for."
 remediation: OSINT awareness; remove sensitive comments from production pages.
 walkthrough: Inspect http://target.lab.local/lumoratech.html and find the comment listing the services.
   The additional service offered with custom development is maintenance and support. Run answer maintenance_and_support

@@ -11,13 +11,10 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: Run `ls` in your home directory. Then try `pwd` to see where you are.
+  body: "Not everything in a folder is shown by default."
 - level: 2
   cost: 0
-  body: Plain `ls` hides dot-entries. Use `ls -a` to reveal hidden directories.
-- level: 3
-  cost: 0
-  body: '`ls -a` shows .secret — then `cat .secret/flag.txt`.'
+  body: "Hidden things start with a dot."
 remediation: 'Not a vulnerability — a fundamentals exercise. Hidden files are not a security control;
   never rely on obscurity to protect secrets.
 

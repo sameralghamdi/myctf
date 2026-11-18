@@ -11,13 +11,10 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: Scan each packet's Info/payload column. Which one carries form data?
+  body: "Skim the traffic for the packet that carries user-submitted data."
 - level: 2
   cost: 0
-  body: The POST to /api/sync has a 'recovery' field that looks Base64-encoded.
-- level: 3
-  cost: 0
-  body: Base64-decode the recovery value (use the decode bench) to get the flag.
+  body: "Odd-looking text in a field is often encoded. Identify the encoding by its look."
 remediation: 'Never transmit credentials over plaintext HTTP, and don''t mistake Base64 for encryption.
   Use TLS and proper secret management.
 

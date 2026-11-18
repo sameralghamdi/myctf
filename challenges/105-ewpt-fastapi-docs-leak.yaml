@@ -7,21 +7,20 @@ difficulty: medium
 lab_kind: ewpt_105
 est_minutes: 20
 sort: 105
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local:8000
 hints:
 - level: 1
   cost: 0
-  body: Visit /docs.
+  body: "Frameworks often publish their own documentation. Is it still reachable?"
 - level: 2
   cost: 0
-  body: Fetch /openapi.json.
+  body: "A machine-readable description of every route may exist; look for ones not meant for you."
 - level: 3
   cost: 0
-  body: Look for an admin flag endpoint under /api/v1/.
-- level: 4
-  cost: 0
-  body: Check the required request headers.
+  body: "Restricted routes usually expect something extra in the request."
 remediation: Disable /docs and /openapi.json in production or protect them; require authentication.
 walkthrough: 'curl http://target.lab.local:8000/openapi.json reveals /api/v1/admin/flag, which requires
   X-Admin: true. curl -H ''X-Admin: true'' http://target.lab.local:8000/api/v1/admin/flag returns the

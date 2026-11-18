@@ -5,21 +5,20 @@ difficulty: medium
 lab_kind: ewpt_103
 est_minutes: 25
 sort: 103
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Goal: the shop's checkout may believe more than it should. See whether you can end up with an order that does not add up.
 hints:
 - level: 1
   cost: 0
-  body: Intercept the "apply coupon" request.
+  body: "Watch the requests the checkout sends as you add and change things."
 - level: 2
   cost: 0
-  body: Try applying the same coupon more than once.
+  body: "Numbers and codes the server receives are worth testing at their edges."
 - level: 3
   cost: 0
-  body: Try a negative quantity.
-- level: 4
-  cost: 0
-  body: Check whether the final price is validated server-side.
+  body: "Compare what you are charged with what you would expect."
 remediation: Server-side price calculation, one-time coupon state, positive quantity validation, a workflow
   state machine.
 walkthrough: Apply WELCOME10 repeatedly until the price reaches $0, or set quantity=-1 and watch the total.

@@ -22,8 +22,8 @@ for(const name of ['page','source','headers'])el(name+'-tab').addEventListener('
 // The target document has an opaque origin. It cannot read platform cookies,
 // access its parent DOM, navigate the platform, or make external connections.
 const bridge=`<script>
- document.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;e.preventDefault();parent.postMessage({type:'ewpt-navigation',path:a.getAttribute('href'),method:'GET',headers:{},data:''},'*');});
- document.addEventListener('submit',e=>{e.preventDefault();const form=e.target,params=new URLSearchParams(),headers={};for(const [key,value] of new FormData(form)){const input=form.elements.namedItem(key);if(input&&input.dataset.header){headers[input.dataset.header]=String(value);}else if(!(value instanceof File)){params.append(key,value);}}if(e.submitter&&e.submitter.name)params.set(e.submitter.name,e.submitter.value);let path=form.getAttribute('action')||'/',method=(form.getAttribute('method')||'GET').toUpperCase(),data='';if(method==='GET'){const query=params.toString();if(query)path+=(path.includes('?')?'&':'?')+query;}else{data=params.toString();headers['Content-Type']='application/x-www-form-urlencoded';}parent.postMessage({type:'ewpt-navigation',path,method,headers,data},'*');});
+ document.addEventListener('click',e=>{const a=e.target.closest('a[href]');if(!a)return;e.preventDefault();parent.postMessage({type:'lab-navigation',path:a.getAttribute('href'),method:'GET',headers:{},data:''},'*');});
+ document.addEventListener('submit',e=>{e.preventDefault();const form=e.target,params=new URLSearchParams(),headers={};for(const [key,value] of new FormData(form)){const input=form.elements.namedItem(key);if(input&&input.dataset.header){headers[input.dataset.header]=String(value);}else if(!(value instanceof File)){params.append(key,value);}}if(e.submitter&&e.submitter.name)params.set(e.submitter.name,e.submitter.value);let path=form.getAttribute('action')||'/',method=(form.getAttribute('method')||'GET').toUpperCase(),data='';if(method==='GET'){const query=params.toString();if(query)path+=(path.includes('?')?'&':'?')+query;}else{data=params.toString();headers['Content-Type']='application/x-www-form-urlencoded';}parent.postMessage({type:'lab-navigation',path,method,headers,data},'*');});
 <\/script>`;
 async function request(path,method='GET',headers={},data=''){
  const requestNumber=++sequence;pending=true;el('error').hidden=true;el('status').textContent='Loading…';
@@ -41,7 +41,7 @@ async function request(path,method='GET',headers={},data=''){
   frame.srcdoc=content.replace(/<\/body>/i,bridge+'</body>');
  }catch(error){if(requestNumber!==sequence)return;el('error').textContent=error.message;el('error').hidden=false;el('status').textContent='Request failed';}finally{if(requestNumber===sequence)pending=false;}
 }
-window.addEventListener('message',event=>{if(event.source!==frame.contentWindow||!event.data||event.data.type!=='ewpt-navigation')return;const d=event.data;if(typeof d.path!=='string'||typeof d.method!=='string')return;selectTab('page');request(d.path,d.method,d.headers,d.data);});
+window.addEventListener('message',event=>{if(event.source!==frame.contentWindow||!event.data||event.data.type!=='lab-navigation')return;const d=event.data;if(typeof d.path!=='string'||typeof d.method!=='string')return;selectTab('page');request(d.path,d.method,d.headers,d.data);});
 el('address').addEventListener('submit',e=>{e.preventDefault();selectTab('page');request(el('path').value);});
 el('home').addEventListener('click',()=>{selectTab('page');request('/');});
 el('request-toggle').addEventListener('click',()=>{const panel=el('request-panel');panel.hidden=!panel.hidden;el('request-toggle').setAttribute('aria-expanded',String(!panel.hidden));});

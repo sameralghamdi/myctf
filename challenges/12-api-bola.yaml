@@ -11,13 +11,10 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: Your key works for GET /api/orders/5001 (your order). Try another id.
+  body: "Your key opens your own records. What decides which records it opens?"
 - level: 2
   cost: 0
-  body: The API checks your key but not whether the order is yours.
-- level: 3
-  cost: 0
-  body: GET /api/orders/5002 with the X-API-Key header; read the notes field.
+  body: "The server checks who you are, but does it check whose record it is?"
 remediation: 'Enforce object-level authorization on every endpoint: verify the authenticated principal
   owns or may access the object before returning it.
 

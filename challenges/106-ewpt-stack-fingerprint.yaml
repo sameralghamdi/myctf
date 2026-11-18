@@ -5,18 +5,20 @@ difficulty: easy
 lab_kind: ewpt_106
 est_minutes: 15
 sort: 106
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: Check robots.txt.
+  body: "Sites tell crawlers where not to go. That is a map for you."
 - level: 2
   cost: 0
-  body: Look for a backup copy of the application source.
+  body: "Forgotten copies of source code are a common mistake."
 - level: 3
   cost: 0
-  body: Read the source for a hidden route and the header it expects.
+  body: "Source code reveals routes the interface never shows, and what they demand."
 remediation: Hide version banners, remove backups from the web root, disable debug routes.
 walkthrough: 'robots.txt disallows /backup/app.py. The source contains /flag, which requires the header
   X-Debug: 1. curl -H ''X-Debug: 1'' http://target.lab.local/flag returns the flag.'

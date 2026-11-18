@@ -17,7 +17,7 @@ def web(client, token, iid, path='/', method='GET', data='', headers=None):
     return response.get_json()
 
 
-@pytest.mark.parametrize('number', sorted(WEB_NUMBERS))
+@pytest.mark.parametrize('number', sorted(n for n in WEB_NUMBERS if n != 104))  # 104 is withdrawn
 def test_browser_target_available_without_pre_solve_flag(client, user, number):
     token, slug = user['token'], 'ewpt-' + SLUGS[number]
     detail = client.get('/api/challenges/' + slug, headers=auth_headers(token)).get_json()
@@ -151,7 +151,7 @@ def test_browser_owner_isolation_reset_and_no_auth_leak(client, user):
 def test_neutral_briefs_public_urls_and_no_objectives_resources(client, user):
     token = user['token']; headers = auth_headers(token)
     rows = client.get('/api/challenges', headers=headers).get_json()
-    assert len(rows) == 37
+    assert len(rows) == 34  # Notice Board, New Look and Public Record withdrawn
     for row in rows:
         assert row['public_slug'] == row['slug'] == f"case-{row['id']}"
         assert row['lab_kind'] in ('web', 'web_terminal', 'terminal')

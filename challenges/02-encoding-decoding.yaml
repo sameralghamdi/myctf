@@ -11,13 +11,10 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: The blob is text-safe and ends with '=' padding — a classic sign of one layer.
+  body: "The text looks like it has been through more than one transformation. Think about how data is commonly packaged for transport."
 - level: 2
   cost: 0
-  body: Base64-decode first. The result is letters shifted by a fixed amount.
-- level: 3
-  cost: 0
-  body: After Base64, apply ROT13 to the result to reveal the flag.
+  body: "Each layer has a recognisable look. Peel them off one at a time, outermost first."
 remediation: 'Never use encoding (Base64/hex) to protect secrets. Use authenticated encryption (e.g. AES-GCM)
   with keys managed outside the application.
 
