@@ -19,6 +19,7 @@ import re
 
 from .base import LabHandler, LabResult
 
+# Name of the benign proof function used by the stored-XSS lab.
 PROOF = "myctfSolve"
 
 
@@ -54,8 +55,7 @@ class ReflectedXssLab(LabHandler):
         solved_block = ""
         if q and payload_executes(reflected, q):
             solved_block = (
-                f'<div class="card"><p class="flag">myctfSolve() executed — '
-                f'flag: {instance["flag"]}</p></div>'
+                f'<div class="card"><p class="flag">Flag: {instance["flag"]}</p></div>'
             )
 
         body = f"""
@@ -70,15 +70,6 @@ class ReflectedXssLab(LabHandler):
 </div>
 {reflected}
 {solved_block}
-<script>
-  // Benign proof-of-execution hook. A successful XSS calls this.
-  window.{PROOF} = function(){{
-     document.title = 'XSS-OK';
-     var d = document.createElement('div');
-     d.className='card'; d.innerHTML='<p class="flag">myctfSolve() ran in your browser.</p>';
-     document.body.appendChild(d);
-  }};
-</script>
 """
         # SAFETY: the payload really executes in the learner's browser, so the
         # page is served in a CSP sandbox (no allow-same-origin): scripts run, but

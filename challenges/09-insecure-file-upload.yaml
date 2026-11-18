@@ -6,18 +6,16 @@ lab_kind: file_upload
 dynamic_flag: true
 est_minutes: 20
 sort: 9
+published: false
 description: You have permission to investigate this isolated environment. Explore what is available and
   recover the flag.
 hints:
 - level: 1
   cost: 0
-  body: The "images only" rule is not enforced on the server. What else can you send?
+  body: "The page says what it accepts, but who enforces that? Think about what the server actually checks."
 - level: 2
   cost: 0
-  body: Try uploading a file with a server-script extension instead of an image.
-- level: 3
-  cost: 0
-  body: Upload a file named shell.php (any content).
+  body: "What matters to a server is how a file is named, not only what it claims to be."
 remediation: 'Validate uploads server-side by content (magic bytes), enforce a safe-extension allow-list,
   store outside the web root with randomised names, and never serve user uploads as executable code.
 

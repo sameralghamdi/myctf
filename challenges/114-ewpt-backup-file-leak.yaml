@@ -5,16 +5,17 @@ difficulty: easy
 lab_kind: ewpt_114
 est_minutes: 15
 sort: 114
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: Fuzz for www.zip, backup.zip, and .git.
+  body: "Old deployments leave archives and repositories behind. Think about the names a developer would use."
 - level: 2
   cost: 0
-  body: Download with curl -O http://target.lab.local/www.zip, then unzip www.zip. Inspect ls -a www and
-    cat www/flag.txt.
+  body: "Once downloaded, unpack it and inspect everything, including hidden files."
 remediation: Remove backups from the web root; deny dotfiles and archives; add deploy pipeline checks.
 walkthrough: curl -O http://target.lab.local/www.zip downloads the virtual archive. Run unzip www.zip,
   then ls -a www, cat www/.env, and cat www/flag.txt. Each command is entered separately.

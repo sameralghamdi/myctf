@@ -5,18 +5,17 @@ difficulty: easy
 lab_kind: ewpt_120
 est_minutes: 10
 sort: 120
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: Send OPTIONS /.
+  body: "Servers can describe the methods they support."
 - level: 2
   cost: 0
-  body: If TRACE is listed, send TRACE /.
-- level: 3
-  cost: 0
-  body: Inspect the response body.
+  body: "One diagnostic method echoes back what it receives. See what it echoes."
 remediation: Disable TRACE; harden web server methods.
 walkthrough: 'curl -X OPTIONS http://target.lab.local/ lists TRACE. curl -X TRACE http://target.lab.local/
   -H ''X-Test: flag'' reflects the flag in the body.'

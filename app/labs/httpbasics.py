@@ -38,7 +38,5 @@ class HttpBasicsLab(LabHandler):
         body = f"""
 <h1>Internal Service</h1>
 <div class="card"><p>Service status: online.</p>
-<a href="{base}/flag">Restricted endpoint</a>
-<p class="muted">Try it from a terminal:</p>
-<pre class="laburl-cmd" data-path="{base}/flag"></pre></div>"""
+<a href="{base}/flag">Restricted endpoint</a></div>"""
         return LabResult(self.page(instance, "Internal Service", body))

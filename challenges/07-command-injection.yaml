@@ -11,13 +11,13 @@ description: You have permission to investigate this isolated environment. Explo
 hints:
 - level: 1
   cost: 0
-  body: The server runs  ping -c 1 <host>  with your host value appended directly.
+  body: "The page checks whether a host answers. Think about what the server does with the text you give it."
 - level: 2
   cost: 0
-  body: Shell separators like ; | && let you chain a second command after ping.
+  body: "A command line can often carry more than one instruction. Which characters does a shell treat specially?"
 - level: 3
   cost: 0
-  body: 'Host value:  127.0.0.1; cat flag.txt   (or  | cat flag.txt )'
+  body: "Once you can run your own command, look around the folder you land in."
 remediation: 'Never build shell strings from user input. Call the binary with an argument array and no
   shell (e.g. subprocess without shell=True), and validate/allow-list the host. Drop privileges for any
   command runner.

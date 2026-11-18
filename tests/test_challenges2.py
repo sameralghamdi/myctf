@@ -7,6 +7,7 @@ from __future__ import annotations
 import base64
 import io
 import json
+import pytest
 import re
 
 from conftest import auth_headers, register, start_lab, submit_flag
@@ -31,31 +32,14 @@ def _solve(client, token, slug, flag, pts):
     assert submit_flag(client, token, slug, flag).get_json()["already_solved"] is True
 
 
-def test_stored_xss(client, user):
+@pytest.mark.parametrize("slug", ["stored-xss", "insecure-file-upload", "ewpt-vendor-osint"])
+def test_removed_challenges_are_hidden_and_not_startable(client, user, slug):
+    """Notice Board, New Look and Public Record were withdrawn from the catalogue."""
     t = user["token"]
-    iid = start_lab(client, t, "stored-xss")
-    client.post(_lab(iid, "comment"), headers=auth_headers(t),
-                data={"body": "<img src=x onerror=myctfSolve()>"})
-    r = client.get(_lab(iid, "admin"), headers=auth_headers(t))
-    _solve(client, t, "stored-xss", _find(r.get_data(as_text=True)), 200)
-
-
-def test_insecure_file_upload(client, user):
-    t = user["token"]
-    iid = start_lab(client, t, "insecure-file-upload")
-    r = client.post(_lab(iid, "upload"), headers=auth_headers(t),
-                    data={"avatar": (io.BytesIO(b"<?php echo 1; ?>"), "shell.php")},
-                    content_type="multipart/form-data")
-    _solve(client, t, "insecure-file-upload", _find(r.get_data(as_text=True)), 200)
-
-
-def test_upload_image_is_not_solvable(client, user):
-    t = user["token"]
-    iid = start_lab(client, t, "insecure-file-upload")
-    r = client.post(_lab(iid, "upload"), headers=auth_headers(t),
-                    data={"avatar": (io.BytesIO(b"\x89PNG"), "cat.png")},
-                    content_type="multipart/form-data")
-    assert not FLAG_RE.search(r.get_data(as_text=True))
+    names = {c["name"] for c in client.get("/api/challenges", headers=auth_headers(t)).get_json()}
+    assert not names & {"Notice Board", "New Look", "Public Record"}
+    r = client.post(f"/api/challenges/{slug}/lab/start", headers=auth_headers(t))
+    assert r.status_code == 404
 
 
 def test_weak_password_reset(client, user):

@@ -83,6 +83,9 @@ class Request:
     path_as_is: bool = False
 
 
+BARE_METHODS = ('GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD', 'TRACE')
+
+
 def parse_request(args):
     r = Request()
     it = iter(args)
@@ -113,6 +116,7 @@ def parse_request(args):
             r.include = r.include or 'i' in a
             if 'I' in a: r.head, r.method = True, 'HEAD'
         elif a.startswith('-'): raise ValueError('unsupported curl option: ' + a)
+        elif a in BARE_METHODS: r.method = a  # e.g. `curl OPTIONS host/path`
         elif r.url: raise ValueError('one target URL per command')
         else: r.url = a
     if not r.url: raise ValueError('usage: curl [options] http://target/path')
@@ -149,7 +153,7 @@ def build_runtime(number, flag):
         """Return status, headers, body; target validation never makes a connection."""
         url = urlsplit(r.url if '://' in r.url else 'http://' + r.url)
         if url.scheme not in ('http', 'https') or url.hostname not in (host, LEGACY_TARGETS[number][0]) or (url.port or (443 if url.scheme == 'https' else 80)) != port:
-            raise ValueError('target is outside this lab scope; read scope.txt')
+            raise ValueError('target is outside this lab scope; see the challenge description')
         path = url.path or '/'
         # Match curl's normal removal of plain dot segments. Encoded dots survive.
         if not r.path_as_is:
@@ -366,7 +370,7 @@ def build_runtime(number, flag):
             return '', 'ffuf: ' + (str(exc) or 'usage: ffuf -u URL/FUZZ -w wordlist.txt')
 
     def nmap(shell, args, stdin, root):
-        if not args or not any(value in args for value in (host, LEGACY_TARGETS[number][0])): return '', 'nmap: target must match scope.txt'
+        if not args or not any(value in args for value in (host, LEGACY_TARGETS[number][0])): return '', 'nmap: target is outside this lab scope; see the challenge description'
         if number == 110: lines = ['53/tcp open domain EC2 DNS']
         elif number == 112: lines = ['3389/tcp open ms-wbt-server xrdp']
         elif number == 117: lines = ['5000/tcp open http nginx 1.25.1', '8000/tcp open http uvicorn', '8080/tcp open http Apache Tomcat 8.5.19', '8082/tcp open http Apache httpd 2.4.49']
@@ -466,19 +470,24 @@ def programs(number, flag):
     return build_runtime(number, flag)[0]
 
 
+WORDLIST_LABS = {105, 106, 111, 114}      # content discovery
+API_WORDLIST_LABS = {115}                 # API endpoint fuzzing
+SQLI_PAYLOAD_LABS = {101, 119}            # SQL injection fuzzing
+
+
 def scenario(number):
     host, port, label = TARGETS[number]
-    brief = 'Investigate the assigned environment and recover the flag. No credentials or service information have been provided.'
+    brief = 'Investigate the assigned environment and recover the flag. The scope is in the challenge description.'
     files = {
-        HOME + '/README.txt': f'ENGAGEMENT {number}\nScope: {host}\n{brief}\nType help for terminal controls.\nIf a finding must be reported, use answer <finding> to obtain a flag.\nSubmit captured flags in the challenge panel.',
-        HOME + '/scope.txt': host,
+        HOME + '/README.txt': f'ENGAGEMENT {number}\n{brief}\nType help for terminal controls.\nIf a finding must be reported, use answer <finding> to obtain a flag.\nSubmit captured flags in the challenge panel.',
     }
-    if number not in (110, 112, 117, 118):
-        files.update({
-            HOME + '/wordlist.txt': 'admin\nlogin\nbackup/\nbackup/id_rsa\nwww.zip\nbackup.zip\nrobots.txt\napi\ndocs\nopenapi.json\n',
-            HOME + '/api-wordlist.txt': 'health\nusers\nstatus\ndebug\nadmin\n',
-            HOME + '/sqli-payloads.txt': "test\nadmin\n' OR 1=1-- -\n1 ORDER BY 3-- -\n1 ORDER BY 4-- -\n-1 UNION SELECT 1,2,flag FROM flags-- -\n",
-        })
+    # Each lab ships only the word lists it actually uses.
+    if number in WORDLIST_LABS:
+        files[HOME + '/wordlist.txt'] = 'admin\nlogin\nbackup/\nbackup/id_rsa\nwww.zip\nbackup.zip\nrobots.txt\napi\ndocs\nopenapi.json\n'
+    if number in API_WORDLIST_LABS:
+        files[HOME + '/api-wordlist.txt'] = 'health\nusers\nstatus\ndebug\nadmin\n'
+    if number in SQLI_PAYLOAD_LABS:
+        files[HOME + '/sqli-payloads.txt'] = "test\nadmin\n' OR 1=1-- -\n1 ORDER BY 3-- -\n1 ORDER BY 4-- -\n-1 UNION SELECT 1,2,flag FROM flags-- -\n"
     if number == 110:
         files['/etc/resolv.conf'] = 'nameserver 192.168.0.2\nsearch lumoratech.lab'
     if number == 117:
@@ -491,7 +500,7 @@ def scenario(number):
         rows += [f'192.168.0.25 - - [15/Nov/2026:12:02:{i:02d} +0000] "GET /products HTTP/1.1" 200 512' for i in range(30)]
         files[HOME + '/access.log'] = '\n'.join(rows)
     return ShellScenario(kind=f'ewpt_{number}', title='Terminal — ' + label, user='ctf', host='kali-web', home=HOME,
-                         motd=f'Engagement {number}. Scope: {host}. Type help for terminal controls.',
+                         motd=f'Engagement {number}. Type help for terminal controls.',
                          files=files, programs=lambda flag: programs(number, flag))
 
 

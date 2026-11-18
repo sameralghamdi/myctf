@@ -6,18 +6,16 @@ lab_kind: stored_xss
 dynamic_flag: true
 est_minutes: 25
 sort: 8
+published: false
 description: You have permission to investigate this isolated environment. Explore what is available and
   recover the flag.
 hints:
 - level: 1
   cost: 0
-  body: Post a comment containing HTML like <b>hi</b> and view the page source.
+  body: "Anything you post comes back to someone else. Does the page treat it as plain text?"
 - level: 2
   cost: 0
-  body: The page defines myctfSolve(). Store a comment that calls it, then open /admin.
-- level: 3
-  cost: 0
-  body: Post <img src=x onerror=myctfSolve()> then visit the moderator review (/admin).
+  body: "Somebody reviews the board. Think about what their browser would do with what you wrote."
 remediation: 'Escape on output, sanitise stored HTML with an allow-list, and set a strict Content-Security-Policy
   so inline script cannot run.
 

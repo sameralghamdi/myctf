@@ -5,15 +5,17 @@ difficulty: easy
 lab_kind: ewpt_117
 est_minutes: 10
 sort: 117
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local (all ports)
 hints:
 - level: 1
   cost: 0
-  body: Match each port to its service.
+  body: "Banners and responses name the software behind each port."
 - level: 2
   cost: 0
-  body: 'Order: frontend proxy, Python API, Java app server, CMS.'
+  body: "Arrange them as the question asks and report names only."
 remediation: Reduce banner disclosure; segment services; restrict management ports.
 walkthrough: 'Name each service in port order: nginx, uvicorn, tomcat, apache. Run answer nginx_uvicorn_tomcat_apache
   to receive your session flag.'

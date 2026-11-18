@@ -115,19 +115,12 @@ class LabHandler:
 </style>{head}</head><body><div class="wrap">
 <div class="labbar"><b>MyCTF</b> lab · <span class="tag">training target</span>
  <span class="muted">isolated training target — instance {instance['id'][:8]}</span></div>
-<div class="card" style="margin-top:0"><span class="muted">Target URL</span><br>
- <code id="laburl" data-path="{self.base_url(instance)}/">{self.base_url(instance)}/</code></div>
 {body}
 </div>
 <script>
- // Show the full address (scheme + host) so it can be copied into curl.
+ // Fill in the full address (scheme + host) for copy-paste curl commands.
  (function(){{
    var o = location.origin;
-   var u = document.getElementById('laburl');
-   if (u) u.textContent = o + u.getAttribute('data-path');
-   document.querySelectorAll('.laburl-cmd').forEach(function(el){{
-     el.textContent = 'curl -i -X POST ' + o + el.getAttribute('data-path');
-   }});
    document.querySelectorAll('[data-curl]').forEach(function(el){{
      el.textContent = 'curl ' + o + el.getAttribute('data-curl');
    }});

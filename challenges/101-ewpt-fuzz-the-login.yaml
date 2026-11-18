@@ -5,19 +5,17 @@ difficulty: easy
 lab_kind: ewpt_101
 est_minutes: 15
 sort: 101
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: Use ffuf -u http://target.lab.local/api/login -X POST -d "username=FUZZ&password=test" -w sqli-payloads.txt
-    -mc 200.
+  body: "The login passes what you type straight to a database. A list of unusual inputs fed in automatically can reveal the one that behaves differently."
 - level: 2
   cost: 0
-  body: Fuzz username with an SQL injection payload list.
-- level: 3
-  cost: 0
-  body: Look for a different response length or status than the 401s.
+  body: "Compare responses, not just success: size and status often betray the odd one out."
 remediation: Parameterized queries, input validation, generic login errors, rate limiting.
 walkthrough: Fuzz username with sqli-payloads.txt. Replay the successful SQL payload using curl -c cookies.txt,
   then curl -b cookies.txt http://target.lab.local/admin.

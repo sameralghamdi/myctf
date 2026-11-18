@@ -5,18 +5,17 @@ difficulty: medium
 lab_kind: ewpt_108
 est_minutes: 20
 sort: 108
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local:8080
 hints:
 - level: 1
   cost: 0
-  body: Try common Tomcat manager credentials.
+  body: "Management consoles often ship with defaults nobody changed."
 - level: 2
   cost: 0
-  body: Check tomcat-users.xml examples.
-- level: 3
-  cost: 0
-  body: Look at the page source after login.
+  body: "Once you are in, look at what the pages themselves reveal."
 remediation: Remove the manager app from production; use strong passwords; restrict by network.
 walkthrough: 'curl -i http://target.lab.local:8080/manager/html shows Basic authentication. Try common
   defaults: curl -u tomcat:tomcat http://target.lab.local:8080/manager/html. Read the HTML comment.'

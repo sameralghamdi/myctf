@@ -5,18 +5,17 @@ difficulty: easy
 lab_kind: ewpt_112
 est_minutes: 15
 sort: 112
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local:3389
 hints:
 - level: 1
   cost: 0
-  body: Use xfreerdp or Remmina.
+  body: "A remote desktop service is exposed. Think about what lazy credentials look like."
 - level: 2
   cost: 0
-  body: The account is ctf, and the password is the same as the username.
-- level: 3
-  cost: 0
-  body: Check the desktop for flag.txt.
+  body: "Once you are in, look around the desktop."
 remediation: Restrict RDP/xrdp to a VPN, enforce MFA, use strong passwords.
 walkthrough: xfreerdp /v:target.lab.local /u:ctf /p:ctf authenticates and mounts the virtual desktop.
   Then cat ~/Desktop/flag.txt.

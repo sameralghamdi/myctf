@@ -5,18 +5,17 @@ difficulty: easy
 lab_kind: ewpt_110
 est_minutes: 10
 sort: 110
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: 192.168.0.2 (DNS resolver)
 hints:
 - level: 1
   cost: 0
-  body: Query version.bind.
+  body: "Name servers answer more than addresses; they sometimes describe themselves."
 - level: 2
   cost: 0
-  body: Query TXT records.
-- level: 3
-  cost: 0
-  body: Use @192.168.0.2 to target the server.
+  body: "Ask the right resolver directly, and try record types besides the obvious ones."
 remediation: Restrict recursion, hide the version, limit zone data.
 walkthrough: dig TXT flag.lumoratech.lab @192.168.0.2 returns the flag in the TXT record.
 dynamic_flag: true

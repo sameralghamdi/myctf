@@ -5,18 +5,17 @@ difficulty: easy
 lab_kind: ewpt_102
 est_minutes: 15
 sort: 102
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: Send OPTIONS /uploads/.
+  body: "Servers will tell you what they allow if you ask the right way."
 - level: 2
   cost: 0
-  body: Check the Allow header.
-- level: 3
-  cost: 0
-  body: If PUT is enabled, upload probe.txt, then request it.
+  body: "Some methods let you place files on a server rather than just read them. Prove it with a harmless file of your own."
 remediation: Disable unused methods (PUT, DELETE, TRACE), enforce authorization, harden the Apache/nginx
   configuration.
 walkthrough: 'curl -X OPTIONS http://target.lab.local/uploads/ shows Allow: GET,HEAD,POST,PUT,DELETE,OPTIONS.

@@ -5,21 +5,17 @@ difficulty: medium
 lab_kind: ewpt_111
 est_minutes: 20
 sort: 111
-description: You have permission to investigate this isolated environment. Explore what is available and
-  recover the flag.
+description: |-
+  You have permission to investigate this isolated environment. Explore what is available and recover the flag.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: Use gobuster or ffuf to find /backup/.
+  body: "Web servers sometimes expose folders that were never meant to be public. Search for them."
 - level: 2
   cost: 0
-  body: Download id_rsa.
-- level: 3
-  cost: 0
-  body: chmod 600 id_rsa.
-- level: 4
-  cost: 0
-  body: SSH as the ctf user.
+  body: "What you find may let you log in elsewhere. Mind file permissions when you use it."
 remediation: Never store keys in the web root; rotate keys; restrict SSH access.
 walkthrough: curl -O http://target.lab.local/backup/id_rsa, then chmod 600 id_rsa, then ssh -i id_rsa
   ctf@target.lab.local. Each command is entered separately. The remote home mounts in the terminal; cat
