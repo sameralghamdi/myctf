@@ -8,14 +8,16 @@ sort: 109
 description: |-
   You have permission to investigate this isolated environment. Explore what is available and recover the flag.
 
-  Scope: target.lab.local:5000
+  Goal: the site serves files from /static/. The flag is in flag.txt, next to that folder rather than inside it. See whether the path handling lets you step outside.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: "Compare how the server treats a folder name with and without small changes at its end."
+  body: "Compare how the server answers /static/ with how it answers paths that continue right after the name /static."
 - level: 2
   cost: 0
-  body: "A small slip in a path mapping can let you step outside the folder it was meant to serve."
+  body: "A path mapping with a missing trailing slash can be stretched: try adding two dots directly after the folder name, with no slash between, and then the flag file name."
 remediation: Avoid an ambiguous alias; use root where possible; normalize paths.
-walkthrough: curl --path-as-is "http://target.lab.local:5000/static../flag.txt" returns the flag.
+walkthrough: curl --path-as-is "http://target.lab.local/static../flag.txt" returns the flag.
 dynamic_flag: true

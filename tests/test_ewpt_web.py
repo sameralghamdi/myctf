@@ -17,7 +17,7 @@ def web(client, token, iid, path='/', method='GET', data='', headers=None):
     return response.get_json()
 
 
-@pytest.mark.parametrize('number', sorted(n for n in WEB_NUMBERS if n != 104))  # 104 is withdrawn
+@pytest.mark.parametrize('number', sorted(WEB_NUMBERS))
 def test_browser_target_available_without_pre_solve_flag(client, user, number):
     token, slug = user['token'], 'ewpt-' + SLUGS[number]
     detail = client.get('/api/challenges/' + slug, headers=auth_headers(token)).get_json()
@@ -151,7 +151,7 @@ def test_browser_owner_isolation_reset_and_no_auth_leak(client, user):
 def test_neutral_briefs_public_urls_and_no_objectives_resources(client, user):
     token = user['token']; headers = auth_headers(token)
     rows = client.get('/api/challenges', headers=headers).get_json()
-    assert len(rows) == 34  # Notice Board, New Look and Public Record withdrawn
+    assert len(rows) == 32  # five challenges withdrawn from the catalogue
     for row in rows:
         assert row['public_slug'] == row['slug'] == f"case-{row['id']}"
         assert row['lab_kind'] in ('web', 'web_terminal', 'terminal')
@@ -159,14 +159,14 @@ def test_neutral_briefs_public_urls_and_no_objectives_resources(client, user):
         detail = client.get('/api/challenges/' + row['public_slug'], headers=headers).get_json()
         assert not detail['objectives'] and not detail['references']
         assert not re.search(r'(?i)objective|exam topics|apache|2\.4\.49|SQL|Tomcat|nginx', detail['description'])
-    target = next(row for row in rows if row['name'] == 'Operations Center')
-    old_link = client.get('/challenges/ewpt-tomcat-weak-creds', headers=headers)
+    target = next(row for row in rows if row['name'] == 'Restricted Area')
+    old_link = client.get('/challenges/ewpt-digest-auth-realm', headers=headers)
     assert old_link.status_code == 302 and old_link.headers['Location'].endswith(target['public_slug'])
     iid = start_lab(client, token, target['public_slug'])
     page = client.get('/challenges/' + target['public_slug'], headers=headers).get_data(as_text=True)
     assert 'Target page' in page and 'Terminal' in page
     assert 'Objectives</' not in page and 'Resources</' not in page
-    assert 'tomcat' not in sh(client, token, iid, 'cat README.txt').lower()
+    assert 'digest' not in sh(client, token, iid, 'cat README.txt').lower()
 
 
 def test_dns_can_be_discovered_without_a_domain_in_the_brief(client, user):

@@ -8,15 +8,20 @@ sort: 107
 description: |-
   You have permission to investigate this isolated environment. Explore what is available and recover the flag.
 
-  Scope: target.lab.local:8082
+  Goal: read flag.txt, a file the web server was never meant to serve. It is not linked from anywhere. The server's file-path handling may let you reach it.
+
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
-  body: "The version in the server's banner matters. Does it have a known flaw?"
+  body: "The server's banner names an Apache release with a known path-handling flaw. Which version is it?"
 - level: 2
   cost: 0
-  body: "Filters that check paths literally can be fooled when the path is written differently."
+  body: "The flaw lets encoded dots (%2e) slip past the server's check. Try them inside a folder the server exposes, such as /cgi-bin/ or /icons/, and climb upward toward the flag file."
+- level: 3
+  cost: 0
+  body: "Write the dots encoded yourself so neither curl nor the server tidies them away. The file you are after is called flag.txt."
 remediation: Patch Apache; disable unnecessary CGI; restrict filesystem access.
-walkthrough: curl --path-as-is "http://target.lab.local:8082/cgi-bin/.%2e/.%2e/.%2e/.%2e/flag.txt" returns
+walkthrough: curl --path-as-is "http://target.lab.local/cgi-bin/.%2e/.%2e/.%2e/.%2e/flag.txt" returns
   the flag.
 dynamic_flag: true

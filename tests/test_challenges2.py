@@ -32,12 +32,12 @@ def _solve(client, token, slug, flag, pts):
     assert submit_flag(client, token, slug, flag).get_json()["already_solved"] is True
 
 
-@pytest.mark.parametrize("slug", ["stored-xss", "insecure-file-upload", "ewpt-vendor-osint"])
+@pytest.mark.parametrize("slug", ["stored-xss", "insecure-file-upload", "ewpt-vendor-osint", "ewpt-tomcat-weak-creds", "ewpt-xrdp-exposure"])
 def test_removed_challenges_are_hidden_and_not_startable(client, user, slug):
-    """Notice Board, New Look and Public Record were withdrawn from the catalogue."""
+    """Notice Board, New Look, Public Record, Operations Center and Workstation were withdrawn."""
     t = user["token"]
     names = {c["name"] for c in client.get("/api/challenges", headers=auth_headers(t)).get_json()}
-    assert not names & {"Notice Board", "New Look", "Public Record"}
+    assert not names & {"Notice Board", "New Look", "Public Record", "Operations Center", "Workstation"}
     r = client.post(f"/api/challenges/{slug}/lab/start", headers=auth_headers(t))
     assert r.status_code == 404
 

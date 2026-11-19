@@ -74,3 +74,24 @@ def submit_flag(client, token, slug: str, flag: str):
 def user(client):
     username, token = register(client)
     return {"username": username, "token": token}
+
+
+WITHDRAWN_SLUGS = ("ewpt-vendor-osint", "ewpt-tomcat-weak-creds", "ewpt-xrdp-exposure")
+
+
+@pytest.fixture()
+def withdrawn_labs_published(app):
+    """Withdrawn challenges keep their lab code. Publish them so it stays covered."""
+    from app import models
+    with app.app_context():
+        for slug in WITHDRAWN_SLUGS:
+            models.set_challenge_published(models.get_challenge_by_slug(slug)["id"], True)
+
+
+@pytest.fixture(autouse=True)
+def _publish_withdrawn_for_lab_suites(request):
+    """The terminal/browser suites exercise the withdrawn labs too; the catalogue
+    tests (which check they are hidden) must not get them published."""
+    module = request.module.__name__
+    if module in ("test_ewpt", "test_ewpt_web") and not request.node.name.startswith("test_neutral_briefs"):
+        request.getfixturevalue("withdrawn_labs_published")

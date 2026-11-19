@@ -15,7 +15,7 @@ hints:
   body: "The login passes what you type straight to a database. A list of unusual inputs fed in automatically can reveal the one that behaves differently."
 - level: 2
   cost: 0
-  body: "Compare responses, not just success: size and status often betray the odd one out."
+  body: "ffuf can feed a word list into the login form for you. The list is in your home folder; check the tool's help for how to filter responses by size or status."
 remediation: Parameterized queries, input validation, generic login errors, rate limiting.
 walkthrough: Fuzz username with sqli-payloads.txt. Replay the successful SQL payload using curl -c cookies.txt,
   then curl -b cookies.txt http://target.lab.local/admin.

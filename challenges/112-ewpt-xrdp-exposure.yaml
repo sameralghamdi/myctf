@@ -5,10 +5,11 @@ difficulty: easy
 lab_kind: ewpt_112
 est_minutes: 15
 sort: 112
+published: false
 description: |-
   You have permission to investigate this isolated environment. Explore what is available and recover the flag.
 
-  Scope: target.lab.local:3389
+  Scope: target.lab.local
 hints:
 - level: 1
   cost: 0
