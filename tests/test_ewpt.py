@@ -6,6 +6,7 @@ import pytest
 from conftest import auth_headers, register, start_lab, submit_flag
 from app.labs.ewpt import TARGETS
 
+
 FLAG = re.compile(r'MYCTF\{(?!\.\.\.)[^}]+\}')
 SLUGS = {
     101: 'fuzz-the-login', 102: 'http-method-mayhem', 103: 'coupon-king',
@@ -55,7 +56,7 @@ SOLUTIONS = {
 }
 
 
-@pytest.mark.parametrize('number', [n for n in TARGETS if n != 104])  # 104 is withdrawn
+@pytest.mark.parametrize('number', TARGETS)
 def test_ewpt_end_to_end(client, user, number):
     token, slug = user['token'], 'ewpt-' + SLUGS[number]
     detail = client.get('/api/challenges/' + slug, headers=auth_headers(token)).get_json()
@@ -115,7 +116,7 @@ def test_ewpt_downloads_respect_cwd_and_require_authentication(client, user):
     token = user['token']; iid = start_lab(client, token, 'ewpt-ssh-key-leak')
     sh(client, token, iid, 'cd /')
     sh(client, token, iid, 'curl -o key http://ssh.lab.local/backup/id_rsa')
-    assert 'SIMULATED-KEY' in sh(client, token, iid, 'cat /key')
+    assert 'BEGIN OPENSSH PRIVATE KEY' in sh(client, token, iid, 'cat /key')
     response = client.post(f'/labs/{iid}/shell', headers=auth_headers(token), json={'command': 'ssh -i key ctf@ssh.lab.local'}).get_json()
     assert 'UNPROTECTED' in response['stderr']
     assert 'No such file' in client.post(f'/labs/{iid}/shell', headers=auth_headers(token), json={'command': 'cat /home/ctf/flag.txt'}).get_json()['stderr']
@@ -161,3 +162,38 @@ def test_scope_is_not_in_the_terminal_and_bare_method_curl_works(client, user):
     assert 'target.lab.local' not in sh(client, token, iid, 'cat README.txt')
     out = sh(client, token, iid, 'curl -i OPTIONS target.lab.local/uploads/')
     assert 'PUT' in out
+
+
+def test_flags_never_name_the_track_or_technique(client, user):
+    token = user['token']
+    for number in (101, 102, 111, 114):
+        iid = start_lab(client, token, 'ewpt-' + SLUGS[number])
+        for command in SOLUTIONS[number]: out = sh(client, token, iid, command)
+        flag = FLAG.search(out).group().lower()
+        assert 'ewpt' not in flag and SLUGS[number].split('-')[0] not in flag
+
+
+def test_port_numbers_are_optional_in_urls(client, user):
+    token = user['token']
+    iid = start_lab(client, token, 'ewpt-fastapi-docs-leak')  # service listens on 8000
+    assert 'openapi' in sh(client, token, iid, 'curl http://target.lab.local/docs').lower()
+    assert 'openapi' in sh(client, token, iid, 'curl http://target.lab.local:8000/docs').lower()
+
+
+def test_save_key_with_redirect_curl_wget_and_unzip(client, user):
+    token = user['token']
+    iid = start_lab(client, token, 'ewpt-ssh-key-leak')
+    key = sh(client, token, iid, 'curl http://target.lab.local/backup/id_rsa')
+    assert 'BEGIN OPENSSH PRIVATE KEY' in key and 'SIMULATED' not in key
+    sh(client, token, iid, 'curl http://target.lab.local/backup/id_rsa > id_rsa')
+    sh(client, token, iid, 'chmod 600 id_rsa')
+    assert FLAG.search(sh(client, token, iid, 'ssh -i id_rsa ctf@target.lab.local cat /home/ctf/flag.txt'))
+    iid = start_lab(client, token, 'ewpt-backup-file-leak')
+    sh(client, token, iid, 'wget http://target.lab.local/www.zip')
+    assert 'extracting' in sh(client, token, iid, 'unzip www.zip')
+
+
+def test_options_shows_allow_header_without_dash_i(client, user):
+    token = user['token']
+    iid = start_lab(client, token, 'ewpt-http-method-mayhem')
+    assert 'PUT' in sh(client, token, iid, 'curl -X OPTIONS target.lab.local/uploads/')

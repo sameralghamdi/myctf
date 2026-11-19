@@ -45,7 +45,7 @@ CASE_NAMES = {
     103: 'The Last Item',
     104: 'Public Record',
     105: 'Service Desk',
-    106: 'Control Room',
+    106: 'Robot Room',
     107: 'Old Office',
     108: 'Operations Center',
     109: 'Side Entrance',
@@ -124,10 +124,21 @@ def parse_request(args):
     return r
 
 
+def fake_private_key():
+    """A random, throwaway key-shaped blob (not a usable key) for the training lab."""
+    import base64, os
+    body = base64.b64encode(os.urandom(240)).decode()
+    lines = [body[i:i + 70] for i in range(0, len(body), 70)]
+    return '\n'.join(['-----BEGIN OPENSSH PRIVATE KEY-----', *lines, '-----END OPENSSH PRIVATE KEY-----'])
+
+
+ARCHIVE_MARK = 'PK_ARCHIVE\n'
+
+
 def build_runtime(number, flag):
     host, port, _ = TARGETS[number]
     state = {'uploads': {}, 'coupons': 0, 'quantity': 1, 'password': secrets.token_hex(16),
-             'session': secrets.token_hex(16), 'key': 'SIMULATED-KEY-' + secrets.token_hex(24),
+             'session': secrets.token_hex(16), 'key': fake_private_key(),
              'modes': {}, 'applications': {'/': True, '/docs': True, '/examples': True, '/host-manager': True, '/manager': True}}
 
     def file_path(shell, name):
@@ -152,7 +163,7 @@ def build_runtime(number, flag):
     def target(r):
         """Return status, headers, body; target validation never makes a connection."""
         url = urlsplit(r.url if '://' in r.url else 'http://' + r.url)
-        if url.scheme not in ('http', 'https') or url.hostname not in (host, LEGACY_TARGETS[number][0]) or (url.port or (443 if url.scheme == 'https' else 80)) != port:
+        if url.scheme not in ('http', 'https') or url.hostname not in (host, LEGACY_TARGETS[number][0]) or (url.port is not None and url.port != port):
             raise ValueError('target is outside this lab scope; see the challenge description')
         path = url.path or '/'
         # Match curl's normal removal of plain dot segments. Encoded dots survive.
@@ -272,7 +283,7 @@ def build_runtime(number, flag):
                 return response('Unauthorized', 401, {'WWW-Authenticate': 'Digest realm="example.com", nonce="training-nonce", qop="auth"'})
         elif number == 114:
             if path == '/': return response('Company website. Old deployment archives may remain.')
-            if path == '/www.zip': return response('MYCTF_SIMULATED_ARCHIVE\n' + state['key'], extra={'Content-Type': 'application/zip'})
+            if path == '/www.zip': return response(ARCHIVE_MARK + state['key'], extra={'Content-Type': 'application/zip'})
         elif number == 115:
             if path == '/': return response('API root: /api/. Use api-wordlist.txt.')
             if path == '/api/health': return response('{"status":"ok"}')
@@ -335,9 +346,26 @@ def build_runtime(number, flag):
                 return '', ''
             reasons = {200: 'OK', 201: 'Created', 204: 'No Content', 400: 'Bad Request', 401: 'Unauthorized', 402: 'Payment Required', 403: 'Forbidden', 404: 'Not Found', 500: 'Internal Server Error'}
             prefix = 'HTTP/1.1 %d %s\n%s\n\n' % (status, reasons.get(status, ''), '\n'.join(k + ': ' + v for k, v in headers.items()))
-            return (prefix if r.include or r.head else '') + ('' if r.head else body), ''
+            return (prefix if r.include or r.head or r.method == 'OPTIONS' else '') + ('' if r.head else body), ''
         except (ValueError, StopIteration, TypeError) as exc:
             return '', 'curl: ' + (str(exc) or 'missing option value')
+
+    def wget(shell, args, stdin, root):
+        try:
+            name, urls, it = '', [], iter(args)
+            for a in it:
+                if a in ('-O', '--output-document'): name = next(it)
+                elif a in ('-q', '-nv', '--quiet'): pass
+                elif a.startswith('-'): raise ValueError('unsupported wget option: ' + a)
+                else: urls.append(a)
+            if len(urls) != 1: raise ValueError('usage: wget [-O file] http://target/path')
+            status, _, body = target(Request(url=urls[0]))
+            if status != 200: return '', f'wget: server returned error: HTTP/1.1 {status}'
+            name = name or urlsplit(urls[0] if '://' in urls[0] else 'http://' + urls[0]).path.rsplit('/', 1)[-1] or 'index.html'
+            write(shell, name, body)
+            return f"'{name}' saved", ''
+        except (ValueError, StopIteration) as exc:
+            return '', 'wget: ' + (str(exc) or 'missing option value')
 
     def ffuf(shell, args, stdin, root):
         options, it = {}, iter(args)
@@ -405,7 +433,7 @@ def build_runtime(number, flag):
             destination = next((value for value in args if value in ('ctf@target.lab.local', 'ctf@ssh.lab.local')), None)
             if not destination: return '', 'ssh: target must match the assigned host and account'
             p = file_path(shell, key)
-            if shell.files.get(p) != state['key']: return '', 'ssh: Permission denied (publickey)'
+            if shell.files.get(p, '').strip() != state['key']: return '', 'ssh: Permission denied (publickey)'
             if state['modes'].get(p) != '600': return '', 'ssh: UNPROTECTED PRIVATE KEY FILE! Use chmod 600.'
             shell.files['/home/ctf/flag.txt'] = flag
             # The simulated remote home maps to this terminal's home after login.
@@ -424,7 +452,7 @@ def build_runtime(number, flag):
     def unzip(shell, args, stdin, root):
         if len(args) != 1: return '', 'usage: unzip www.zip'
         content = shell.files.get(file_path(shell, args[0]))
-        if content != 'MYCTF_SIMULATED_ARCHIVE\n' + state['key']: return '', 'unzip: missing or invalid lab archive'
+        if (content or '').strip() != (ARCHIVE_MARK + state['key']).strip(): return '', 'unzip: missing or invalid lab archive'
         base = file_path(shell, 'www')
         shell.dirs.add(base)
         shell.files[base + '/.env'] = 'APP_ENV=production\nDB_PASSWORD=forgotten-backup-secret'
@@ -456,7 +484,7 @@ def build_runtime(number, flag):
         return '\n'.join(f'{count:7d} {line}' if '-c' in args else line for count, line in groups), ''
 
     result = {'nmap': nmap}
-    if number not in (110, 112, 117, 118): result.update(curl=curl, ffuf=ffuf)
+    if number not in (110, 112, 117, 118): result.update(curl=curl, ffuf=ffuf, wget=wget)
     if number == 110: result['dig'] = dig
     if number == 111: result.update(chmod=chmod, ssh=ssh)
     if number == 112: result['xfreerdp'] = rdp

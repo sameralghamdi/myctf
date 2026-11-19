@@ -12,10 +12,13 @@ description: |-
 hints:
 - level: 1
   cost: 0
-  body: "Old deployments leave archives and repositories behind. Think about the names a developer would use."
+  body: "ffuf with wordlist.txt can find old archives. Think about the names a developer would use for a site backup."
 - level: 2
   cost: 0
-  body: "Once downloaded, unpack it and inspect everything, including hidden files."
+  body: "Download it with curl -O <url> (keeps the file's name) or curl -o <name> <url>; wget works too."
+- level: 3
+  cost: 0
+  body: "Unpack it with unzip, then look through everything, including hidden files (ls -a)."
 remediation: Remove backups from the web root; deny dotfiles and archives; add deploy pipeline checks.
 walkthrough: curl -O http://target.lab.local/www.zip downloads the virtual archive. Run unzip www.zip,
   then ls -a www, cat www/.env, and cat www/flag.txt. Each command is entered separately.

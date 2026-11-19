@@ -12,10 +12,13 @@ description: |-
 hints:
 - level: 1
   cost: 0
-  body: "Web servers sometimes expose folders that were never meant to be public. Search for them."
+  body: "Web servers sometimes expose folders that were never meant to be public. gobuster or ffuf with wordlist.txt will find it."
 - level: 2
   cost: 0
-  body: "What you find may let you log in elsewhere. Mind file permissions when you use it."
+  body: "To save what a URL returns as a file in the terminal, use curl -o <filename> <url> (or curl ... > <filename>)."
+- level: 3
+  cost: 0
+  body: "SSH refuses key files that others could read, so tighten the file's mode with chmod, then connect as the ctf user with ssh -i <keyfile>."
 remediation: Never store keys in the web root; rotate keys; restrict SSH access.
 walkthrough: curl -O http://target.lab.local/backup/id_rsa, then chmod 600 id_rsa, then ssh -i id_rsa
   ctf@target.lab.local. Each command is entered separately. The remote home mounts in the terminal; cat

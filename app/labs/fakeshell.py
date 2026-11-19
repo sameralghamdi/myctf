@@ -100,15 +100,18 @@ class FakeShell:
             return {"stdout": "", "stderr": "", "cwd": cwd}
 
         try:
-            stages = self._split_pipeline(line)
+            stages, redirect = self._split_pipeline(line)
         except ValueError:
             return {"stdout": "", "stderr": "syntax error: unterminated quote", "cwd": cwd}
         if stages is None:
             return {"stdout": "", "cwd": cwd,
-                    "stderr": "This training shell supports single commands and "
-                              "pipes (|) only: no ;  &&  >  <  or $( )."}
+                    "stderr": "This training shell supports single commands, pipes (|) "
+                              "and one output redirect (> or >>) only: no ;  &&  <  or $( )."}
 
         stdin, errors = "", []
+        if redirect and redirect[1] is None:
+            return {"stdout": "", "cwd": cwd,
+                    "stderr": "syntax error: expected a file name after " + redirect[0]}
         for i, tokens in enumerate(stages):
             if not tokens:
                 return {"stdout": "", "stderr": "syntax error near unexpected token `|'",
@@ -119,26 +122,59 @@ class FakeShell:
             if err:
                 errors.append(err)
             stdin = out
+        if redirect:
+            err = self._redirect(cwd, redirect, stdin)
+            if err:
+                errors.append(err)
+            stdin = ""
         return {"stdout": stdin[:MAX_OUTPUT], "stderr": "\n".join(errors)[:MAX_OUTPUT],
                 "cwd": cwd}
+
+    def _redirect(self, cwd: str, redirect: tuple, text: str) -> str | None:
+        """Handle `> file` / `>> file` after the last command. Returns an error or None."""
+        op, name = redirect
+        path = self._resolve(cwd, name)
+        parent = posixpath.dirname(path) or "/"
+        if parent not in self.dirs:
+            return f"bash: {name}: No such file or directory"
+        if path in self.dirs:
+            return f"bash: {name}: Is a directory"
+        if path in self.root_only or self._root_dir(path):
+            return f"bash: {name}: Permission denied"
+        body = text if text.endswith("\n") or not text else text + "\n"
+        self.files[path] = (self.files.get(path, "") + body) if op == ">>" else body
+        return None
 
     # -- parsing -----------------------------------------------------------
     @staticmethod
     def _split_pipeline(line: str):
-        """Tokenise into pipeline stages. None = uses unsupported shell syntax."""
+        """Tokenise into (pipeline stages, redirect). Stages None = unsupported syntax.
+
+        A single trailing `> file` or `>> file` is supported; redirect is (op, name).
+        """
         lex = shlex.shlex(line, posix=True, punctuation_chars=True)
         lex.whitespace_split = True
-        stages, current = [], []
+        stages, current, redirect = [], [], None
         for tok in lex:
+            if redirect is not None and redirect[1] is None:
+                if set(tok) <= _PUNCTUATION:
+                    return None, None
+                redirect = (redirect[0], tok)
+                continue
+            if redirect is not None:
+                return None, None        # nothing may follow the target file
+            if tok in (">", ">>"):
+                redirect = (tok, None)
+                continue
             if tok == "|":
                 stages.append(current)
                 current = []
             elif set(tok) <= _PUNCTUATION or "`" in tok:
-                return None   # ; && || > < ( ) or backticks
+                return None, None   # ; && || < ( ) or backticks
             else:
                 current.append(tok)
         stages.append(current)
-        return stages
+        return stages, redirect
 
     # -- dispatch ----------------------------------------------------------
     def _command(self, cwd, tokens, stdin, piped=False, as_root=False):

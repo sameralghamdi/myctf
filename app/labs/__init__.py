@@ -28,7 +28,8 @@ class LabError(Exception):
 
 
 def _flag_label(challenge) -> str:
-    return challenge["slug"].replace("-", "_")
+    # Neutral on purpose: slugs name the technique (and the track), flags must not.
+    return f"case_{challenge['id']}"
 
 
 def start(user_id: int, challenge) -> dict:

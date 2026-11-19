@@ -12,7 +12,7 @@ description: |-
 hints:
 - level: 1
   cost: 0
-  body: "The server asks for proof in a particular way, and your tool has to speak that scheme."
+  body: "Use curl: it can speak the scheme the server asks for. Look at its --digest option together with -u user:password."
 - level: 2
   cost: 0
   body: "Administrators often reuse the simplest credentials."

@@ -8,14 +8,19 @@ sort: 110
 description: |-
   You have permission to investigate this isolated environment. Explore what is available and recover the flag.
 
+  Goal: find out what this DNS server knows. The flag is stored in its records.
+
   Scope: 192.168.0.2 (DNS resolver)
 hints:
 - level: 1
   cost: 0
-  body: "Name servers answer more than addresses; they sometimes describe themselves."
+  body: "Ask the resolver what it is: dig @192.168.0.2 version.bind CHAOS TXT. Servers often reveal their software this way."
 - level: 2
   cost: 0
-  body: "Ask the right resolver directly, and try record types besides the obvious ones."
+  body: "Find the zone name (it is in /etc/resolv.conf, or try a reverse lookup with dig @192.168.0.2 -x 192.168.0.2), then ask for everything in it: dig @192.168.0.2 <zone> AXFR."
+- level: 3
+  cost: 0
+  body: "The zone transfer lists a record that holds the flag. You can also query it directly as a TXT record."
 remediation: Restrict recursion, hide the version, limit zone data.
 walkthrough: dig TXT flag.lumoratech.lab @192.168.0.2 returns the flag in the TXT record.
 dynamic_flag: true
