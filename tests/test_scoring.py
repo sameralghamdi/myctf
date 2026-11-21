@@ -114,3 +114,31 @@ def test_admin_can_validate_and_publish(client):
     _, stoken = register(client, "staticsolver")
     r = submit_flag(client, stoken, "starter-static", "MYCTF{static_demo}")
     assert r.get_json()["correct"] is True
+
+
+def test_dashboard_activity_rank_target_and_first_bloods(client):
+    _, leader = register(client, "leader1")
+    _solve_encoding(client, leader)
+    _, token = register(client, "chaser1")
+    dash = client.get("/api/dashboard", headers=auth_headers(token)).get_json()
+    assert len(dash["activity"]) == 112 and dash["activity"][-1]["solves"] == 0
+    assert dash["first_bloods"] == 0 and dash["players"] == 1
+    # unranked: the next target is the last ranked player, one point past their score
+    assert dash["next_target"]["display_name"] == "leader1"
+    assert dash["next_target"]["gap"] == 51
+    lead = client.get("/api/dashboard", headers=auth_headers(leader)).get_json()
+    assert lead["first_bloods"] == 1 and lead["activity"][-1]["solves"] == 1
+    assert lead["next_target"] is None  # rank 1 has nobody above
+
+
+def test_leaderboard_insights_race_and_feed(client):
+    _, a = register(client, "racer1")
+    _solve_encoding(client, a)
+    rows = client.get("/api/leaderboard", headers=auth_headers(a)).get_json()
+    assert rows[0]["first_bloods"] == 1 and rows[0]["last_solve"]
+    data = client.get("/api/leaderboard/insights", headers=auth_headers(a)).get_json()
+    assert data["players"] == 1
+    assert data["race"][0]["is_me"] and data["race"][0]["points"][-1]["score"] == 50
+    assert data["feed"][0]["display_name"] == "racer1" and data["feed"][0]["first_blood"] is True
+    assert data["feed"][0]["public_slug"].startswith("case-")
+    assert client.application.test_client().get("/api/leaderboard/insights").status_code == 401

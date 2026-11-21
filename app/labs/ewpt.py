@@ -388,7 +388,7 @@ def build_runtime(number, flag):
             words = [line for line in content.splitlines() if line and not line.startswith('#')]
             for word in words[:256]:
                 # URL payloads are encoded; form payloads preserve SQL quotes/spaces.
-                expanded = [value.replace('FUZZ', quote(word, safe='') if i == 0 else urlencode({'v': word})[2:]) for i, value in enumerate(template)]
+                expanded = [value.replace('FUZZ', quote(word, safe='/') if i == 0 else urlencode({'v': word})[2:]) for i, value in enumerate(template)]
                 status, _, body = target(parse_request(expanded))
                 size = len(body.encode())
                 if (selected == 'all' or str(status) in selected.split(',')) and str(status) not in rejected and str(size) not in options.get('-fs', [''])[0].split(',') and ('-ms' not in options or str(size) in options['-ms'][0].split(',')):

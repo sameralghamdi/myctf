@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
 import { RequireAdmin, RequireAuth } from "./components/layout/RouteGuards";
+import { ToastProvider } from "./components/feedback/Toast";
 import { Spinner } from "./components/ui/PageLoader";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AchievementsPage } from "./pages/AchievementsPage";
@@ -26,7 +27,10 @@ function AppRoutes() {
   const { status } = useAuth();
   if (status === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-950">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-950">
+        <span className="grid h-12 w-12 animate-pulse place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 font-mono text-xl font-bold text-white shadow-lg shadow-brand-900/40">
+          M
+        </span>
         <Spinner />
       </div>
     );
@@ -69,7 +73,9 @@ export function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <ToastProvider>
+          <AppRoutes />
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   );

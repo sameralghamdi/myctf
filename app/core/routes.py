@@ -300,10 +300,41 @@ def api_unlock_hint(slug, level):
 @login_required
 def api_leaderboard():
     rows = models.leaderboard(100)
+    extras = models.leaderboard_extras([r["id"] for r in rows])
     return jsonify([{"rank": i, "username": r["username"],
                      "display_name": r["display_name"] or r["username"],
-                     "score": r["score"], "solves": r["solves"]}
+                     "score": r["score"], "solves": r["solves"],
+                     "first_bloods": extras.get(r["id"], {}).get("first_bloods", 0),
+                     "last_solve": r["last_solve"]}
                     for i, r in enumerate(rows, 1)])
+
+
+@bp.get("/api/leaderboard/insights")
+@login_required
+def api_leaderboard_insights():
+    """Score race for the top five (plus you) and the live solve feed."""
+    user = current_user()
+    board = models.leaderboard(100000)
+    top = list(board[:5])
+    if user["role"] != "administrator" and all(r["id"] != user["id"] for r in top):
+        mine = next((r for r in board if r["id"] == user["id"]), None)
+        if mine is not None:
+            top.append(mine)
+    timelines = models.score_timeline([r["id"] for r in top])
+    race = []
+    for r in top:
+        total, points = 0, []
+        for event in timelines.get(r["id"], []):
+            total += event["delta"]
+            points.append({"at": event["at"], "score": total})
+        race.append({"username": r["username"], "rank": board.index(r) + 1,
+                     "display_name": r["display_name"] or r["username"],
+                     "is_me": r["id"] == user["id"], "points": points})
+    feed = [{"display_name": f["display_name"] or f["username"], "username": f["username"],
+             "challenge": f["challenge"], "public_slug": f"case-{f['challenge_id']}",
+             "points": f["points_awarded"], "first_blood": bool(f["first_blood"]),
+             "at": f["created_at"]} for f in models.recent_solves_feed(12)]
+    return jsonify({"race": race, "feed": feed, "players": len(board)})
 
 
 @bp.get("/api/public")
@@ -372,6 +403,14 @@ def _serialize_achievement(row, *, earned: bool) -> dict:
 
 
 
+def _activity_days(counts: dict[str, int], days: int = 112) -> list[dict]:
+    """A dense, oldest-first list of {date, solves} ending today (UTC)."""
+    from datetime import datetime, timedelta, timezone
+    today = datetime.now(timezone.utc).date()
+    return [{"date": d.isoformat(), "solves": counts.get(d.isoformat(), 0)}
+            for d in (today - timedelta(days=i) for i in range(days - 1, -1, -1))]
+
+
 def _dashboard_data(user) -> dict:
     solved_ids = models.user_solved_ids(user["id"])
     all_chals = models.list_challenges()
@@ -389,10 +428,23 @@ def _dashboard_data(user) -> dict:
                                     if c["id"] == sub["challenge_id"]), None)
                 if in_progress:
                     break
+    board = models.leaderboard(100000)
+    position = next((i for i, r in enumerate(board) if r["id"] == user["id"]), None)
+    score = models.user_score(user["id"])
+    above = board[position - 1] if position else None
+    if position is None and board:
+        above = board[-1]  # not ranked yet: the next target is the last ranked player
     return {
         "user": user,
-        "score": models.user_score(user["id"]),
+        "score": score,
         "rank": models.user_rank(user["id"]),
+        "players": len(board),
+        "first_bloods": models.user_first_bloods(user["id"]),
+        "next_target": ({"display_name": above["display_name"] or above["username"],
+                         "rank": board.index(above) + 1,
+                         "gap": max(0, int(above["score"]) - score + 1)}
+                        if above is not None else None),
+        "activity": _activity_days(models.daily_solve_counts(user["id"], 112)),
         "streak": models.current_streak(user["id"]),
         "completed": completed,
         "total": total,
