@@ -84,21 +84,6 @@ class Config:
     # purpose: a whole classroom can share one address.
     RATE_LIMIT_GLOBAL = int(os.environ.get("MYCTF_RL_GLOBAL", "1200"))
 
-    # --- email (sign-in codes, password reset) ---
-    # Without MYCTF_SMTP_HOST, emails are printed to the server log (dev) instead.
-    SMTP_HOST = os.environ.get("MYCTF_SMTP_HOST", "")
-    SMTP_PORT = int(os.environ.get("MYCTF_SMTP_PORT", "587"))
-    SMTP_USER = os.environ.get("MYCTF_SMTP_USER", "")
-    SMTP_PASSWORD = os.environ.get("MYCTF_SMTP_PASSWORD", "")
-    # "starttls" (port 587), "ssl" (port 465) or "none".
-    SMTP_SECURITY = os.environ.get("MYCTF_SMTP_SECURITY", "starttls").strip().lower()
-    MAIL_FROM = os.environ.get("MYCTF_MAIL_FROM", "MyCTF <no-reply@localhost>")
-    # Where links in emails point, e.g. https://myctf.app (defaults to the first allowed origin).
-    PUBLIC_URL = os.environ.get("MYCTF_PUBLIC_URL", "")
-    # Email a 6-digit code at every sign-in: "auto" = on when SMTP is configured, "1" = always, "0" = off.
-    LOGIN_EMAIL_OTP = os.environ.get("MYCTF_LOGIN_EMAIL_OTP", "auto").strip().lower()
-    LOGIN_CODE_TTL = 10 * 60
-
     TESTING = False
 
 

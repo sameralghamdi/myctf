@@ -23,15 +23,6 @@ CREATE TABLE IF NOT EXISTS users (
 );
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 
--- Email sign-in codes: one active code per user, stored hashed, with an attempt counter.
-CREATE TABLE IF NOT EXISTS login_codes (
-    user_id         INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-    code_hash       TEXT    NOT NULL,
-    expires_at      TEXT    NOT NULL,
-    attempts        INTEGER NOT NULL DEFAULT 0,
-    created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
-);
-
 -- Optional profile photo, validated and stripped of metadata on upload (app/images.py).
 CREATE TABLE IF NOT EXISTS user_avatars (
     user_id         INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,

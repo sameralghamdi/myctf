@@ -41,7 +41,6 @@ def create_app(config: type[Config] | None = None) -> Flask:
     _register_blueprints(app)
     _register_jinja(app)
     _register_errors(app)
-    _register_cli(app)
 
     from .seed import seed_all
     seed_all(app)
@@ -234,30 +233,3 @@ def _register_errors(app: Flask) -> None:
         if _is_json():
             return jsonify({"error": "internal server error"}), 500
         return render_template("error.html", code=500, message="Server error"), 500
-
-
-def _register_cli(app: Flask) -> None:
-    """Maintenance commands, e.g. inside the container:
-    docker compose -f docker-compose.prod.yml --env-file .env.prod exec app flask --app wsgi set-email admin you@example.com
-    """
-    import click
-
-    @app.cli.command("set-email")
-    @click.argument("username")
-    @click.argument("email")
-    def set_email(username: str, email: str) -> None:
-        """Change a user's email (e.g. give the admin a real inbox for sign-in codes)."""
-        from . import models
-        from .auth.routes import EMAIL_RE
-        email = email.strip().lower()
-        if not EMAIL_RE.match(email):
-            raise click.ClickException("That doesn't look like an email address.")
-        user = models.get_user_by_username(username)
-        if user is None:
-            raise click.ClickException(f"No user named {username!r}.")
-        other = models.get_user_by_email(email)
-        if other is not None and other["id"] != user["id"]:
-            raise click.ClickException("Another account already uses that email.")
-        models.set_user_email(user["id"], email)
-        models.audit(user["id"], "email_changed_by_cli", f"email={email}")
-        click.echo(f"{username}: email set to {email}")

@@ -785,39 +785,3 @@ def avatar_urls(user_ids) -> dict[int, str]:
     ).fetchall()
     return {r["user_id"]: f"/api/avatars/{r['user_id']}?v="
             + "".join(ch for ch in r["updated_at"] if ch.isdigit()) for r in rows}
-
-
-# ========================================================= email sign-in codes ==
-def set_login_code(user_id: int, code_hash: str, ttl: int) -> None:
-    """Store (replace) the user's single active sign-in code."""
-    db = get_db()
-    db.execute(
-        """INSERT INTO login_codes (user_id, code_hash, expires_at, attempts, created_at)
-           VALUES (?, ?, ?, 0, datetime('now'))
-           ON CONFLICT(user_id) DO UPDATE SET code_hash=excluded.code_hash,
-             expires_at=excluded.expires_at, attempts=0, created_at=excluded.created_at""",
-        (user_id, code_hash, _iso(_now() + timedelta(seconds=ttl))),
-    )
-    db.commit()
-
-
-def check_login_code(user_id: int, code_hash: str, max_attempts: int = 5) -> str:
-    """'ok' (and burns the code), 'wrong', 'expired' (none / timed out / too many tries)."""
-    import hmac as _hmac
-    db = get_db()
-    row = db.execute("SELECT * FROM login_codes WHERE user_id=?", (user_id,)).fetchone()
-    if row is None or row["expires_at"] < _iso(_now()) or row["attempts"] >= max_attempts:
-        return "expired"
-    if _hmac.compare_digest(row["code_hash"], code_hash):
-        db.execute("DELETE FROM login_codes WHERE user_id=?", (user_id,))
-        db.commit()
-        return "ok"
-    db.execute("UPDATE login_codes SET attempts=attempts+1 WHERE user_id=?", (user_id,))
-    db.commit()
-    return "wrong"
-
-
-def set_user_email(user_id: int, email: str) -> None:
-    db = get_db()
-    db.execute("UPDATE users SET email=?, email_verified=0 WHERE id=?", (email, user_id))
-    db.commit()

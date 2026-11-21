@@ -10,7 +10,7 @@ import re
 from flask import (Blueprint, current_app, g, jsonify, make_response, redirect,
                    render_template, request, url_for)
 
-from .. import limiter, mailer, models
+from .. import limiter, models
 from ..security import (decode_token, hash_password, hash_token, issue_token,
                         new_id, new_totp_secret, totp_uri, totp_verify,
                         verify_password)
@@ -74,33 +74,6 @@ def _password_problem(pw: str) -> str | None:
     return None
 
 
-def _email_otp_enabled() -> bool:
-    """Sign-in needs a code emailed to the account address (see MYCTF_LOGIN_EMAIL_OTP)."""
-    mode = current_app.config["LOGIN_EMAIL_OTP"]
-    if mode in {"1", "true", "yes", "on", "always"}:
-        return True
-    if mode in {"0", "false", "no", "off"}:
-        return False
-    return bool(current_app.config["SMTP_HOST"])  # "auto"
-
-
-def _login_code_hash(user_id: int, code: str) -> str:
-    return hash_token(f"login:{user_id}:{code}", current_app.config["SECRET_KEY"])
-
-
-def _send_login_code(user):
-    """Email a fresh 6-digit code. Returns a 429 response if too many were requested."""
-    import secrets
-    if not limiter.allow(f"otp-send:{user['id']}", 5, 900):
-        return _fail("Too many codes requested. Try again in 15 minutes.", {}, 429)
-    code = f"{secrets.randbelow(10**6):06d}"
-    ttl = current_app.config["LOGIN_CODE_TTL"]
-    models.set_login_code(user["id"], _login_code_hash(user["id"], code), ttl)
-    mailer.send_login_code(user["email"], user["display_name"] or user["username"], code, ttl // 60)
-    models.audit(user["id"], "login_code_sent", ip=request.remote_addr or "")
-    return None
-
-
 def _issue_login(user, remember: bool = True):
     session_id = new_id()
     ttl = current_app.config["SESSION_TTL"]
@@ -155,11 +128,6 @@ def register():
     models.grant_achievement(user_id, "welcome")
 
     user = models.get_user_by_id(user_id)
-    if _email_otp_enabled():
-        # Sign-in (which emails a code) proves the address before the first session.
-        if _wants_json():
-            return jsonify({"ok": True, "verify_required": True, "user": _public_user(user)}), 201
-        return redirect(url_for("auth.login_page"))
     token, ttl = _issue_login(user)
     verify_link = url_for("auth.verify_email", token=raw, _external=False)
 
@@ -220,28 +188,6 @@ def login():
             models.audit(user["id"], "login_otp_fail", ip=request.remote_addr or "")
             return _fail("Invalid 2FA code.", data, 401)
         limiter.reset(otp_key)
-    elif _email_otp_enabled():
-        if not otp:
-            blocked = _send_login_code(user)
-            if blocked:
-                return blocked
-            if _wants_json():
-                return jsonify({"error": "email_otp_required",
-                                "email_hint": mailer.mask_email(user["email"])}), 401
-            return render_template("auth/login.html", otp_required=True, email_otp=True,
-                                   form=data, errors=[]), 401
-        result = models.check_login_code(user["id"], _login_code_hash(user["id"], otp))
-        if result != "ok":
-            models.audit(user["id"], "login_code_fail", ip=request.remote_addr or "")
-            message = ("Wrong code. Check the email and try again." if result == "wrong"
-                       else "That code has expired. Request a new one.")
-            if _wants_json():
-                return jsonify({"error": message, "code": f"code_{result}"}), 401
-            return render_template("auth/login.html", otp_required=True, email_otp=True,
-                                   form=data, errors=[message]), 401
-        if not user["email_verified"]:
-            models.set_email_verified(user["id"], True)  # the code proved the address
-            user = models.get_user_by_id(user["id"])
 
     token, ttl = _issue_login(user)
     models.audit(user["id"], "login", ip=request.remote_addr or "")
@@ -307,22 +253,19 @@ def forgot_password():
     email = _s(data, "email", 254).lower()
     user = models.get_user_by_email(email)
     link = None
-    # Do not reveal whether the email exists: same message either way, and the
-    # email is sent in the background so timing doesn't tell either.
-    if user and limiter.allow(f"forgot-email:{email}", 3, 3600):
+    if user:  # do not reveal whether the email exists in the message
         raw = new_id()
         models.create_onetime_token(
             user["id"], "reset_password",
             hash_token(raw, current_app.config["SECRET_KEY"]), ttl=60 * 30)
         models.audit(user["id"], "password_reset_requested")
         link = url_for("auth.reset_password", token=raw, _external=False)
-        mailer.send_reset_link(user["email"], user["display_name"] or user["username"],
-                               f"{mailer.public_url()}/reset/{raw}", 30)
-    # Dev only (MYCTF_EXPOSE_DEV_LINKS): also surface the link in the response.
-    # On a public site this MUST stay off or anyone could reset anyone's password.
+    # Dev only (MYCTF_EXPOSE_DEV_LINKS): surface the link because there is no
+    # mailer yet. On a public site this MUST stay off or anyone could reset
+    # anyone's password.
     if not current_app.config["EXPOSE_DEV_LINKS"]:
         link = None
-    msg = "If an account uses that email, we've sent a reset link. Check your inbox (and spam)."
+    msg = "If that email exists, a reset link was sent."
     if _wants_json():
         body = {"ok": True, "message": msg}
         if current_app.config["EXPOSE_DEV_LINKS"]:

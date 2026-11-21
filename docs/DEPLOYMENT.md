@@ -149,28 +149,11 @@ cd frontend && npm install && npm run dev
 Open http://localhost:5173. The `admin` password is printed once in terminal 1 on the very first start
 (or set `MYCTF_ADMIN_PASSWORD` before starting).
 
-To try the emailed sign-in codes locally, start the API with `MYCTF_LOGIN_EMAIL_OTP=1`. With no
-SMTP server configured, every email (codes and reset links) is printed in terminal 1.
-
 ## 5. Things to know before going public
 
-- **Email (sign-in codes and password reset).** Set the `MYCTF_SMTP_*` values in
-  `.env.prod` (any provider works: a Gmail/Google Workspace *app password*, Brevo,
-  Resend, Amazon SES, Zoho, Mailgun). Then run `make prod-up`. From then on:
-  - **Forgot password** emails a one-time link (valid 30 minutes) to `MYCTF_PUBLIC_URL/reset/…`.
-  - **Every sign-in** asks for a 6-digit code emailed to the account (valid 10 minutes,
-    5 tries, at most 5 codes per 15 minutes). Accounts that turned on an authenticator
-    app use that instead. New accounts confirm their email with the same code.
-  - **Before you turn it on, give the admin a real inbox**, or the admin can't sign in:
-    ```bash
-    docker compose -f docker-compose.prod.yml --env-file .env.prod exec app flask --app wsgi set-email admin you@yourdomain.com
-    ```
-    The same command fixes any player who registered with a fake address.
-  - To turn the sign-in codes off, set `MYCTF_LOGIN_EMAIL_OTP=0`. Without SMTP, emails
-    are only printed to the server log (`make prod-logs`): fine for local testing, but
-    real users never receive them.
-  - Add SPF/DKIM records for your sending domain (your provider shows them) so the
-    emails don't land in spam.
+- **No email yet.** Password reset and email verification need a mailer. On a public
+  site the reset link is (correctly) **not** returned by the API, so "forgot password"
+  cannot complete until you add SMTP. An admin can't reset passwords from the UI either.
 - **One worker, SQLite.** Lab state and rate limiting live in process memory, so the
   container runs one gunicorn worker with 8 threads. Restarting the container stops any
   running labs (users just click Start again). Don't raise `--workers` without moving
