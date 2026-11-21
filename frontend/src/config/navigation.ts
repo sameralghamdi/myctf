@@ -1,10 +1,8 @@
 import {
-  Award,
   BookOpen,
   Flag,
   LayoutDashboard,
   ListChecks,
-  Route,
   Shield,
   Trophy,
   UserRound,
@@ -20,13 +18,6 @@ export const navigation: NavSection[] = [
       { label: "Scoreboard", href: "/leaderboard", icon: Trophy },
       { label: "Profile", href: "/profile", icon: UserRound },
       { label: "Docs", href: "/docs", icon: BookOpen },
-    ],
-  },
-  {
-    title: "Learn",
-    items: [
-      { label: "Learning Paths", href: "/paths", icon: Route },
-      { label: "Achievements", href: "/achievements", icon: Award },
     ],
   },
   {

@@ -276,12 +276,7 @@ export function DashboardPage() {
 
       {data.achievements.length > 0 && (
         <Card {...reveal(9)} className={cn(reveal(9).className, "flex flex-col gap-4")}>
-          <div className="flex items-center justify-between">
-            <SectionLabel>Recent achievements</SectionLabel>
-            <Link to="/achievements" className={cn("rounded text-xs text-gray-400 transition-colors hover:text-brand-400", focusRing)}>
-              View all →
-            </Link>
-          </div>
+          <SectionLabel>Recent achievements</SectionLabel>
           <div className="flex flex-wrap gap-4">
             {data.achievements.map((achievement, index) => (
               <div
