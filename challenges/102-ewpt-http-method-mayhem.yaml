@@ -5,6 +5,7 @@ difficulty: easy
 lab_kind: ewpt_102
 est_minutes: 15
 sort: 102
+published: false
 description: |-
   You have permission to investigate this isolated environment. Explore what is available and recover the flag.
 

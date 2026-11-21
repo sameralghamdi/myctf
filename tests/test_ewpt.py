@@ -197,3 +197,40 @@ def test_options_shows_allow_header_without_dash_i(client, user):
     token = user['token']
     iid = start_lab(client, token, 'ewpt-http-method-mayhem')
     assert 'PUT' in sh(client, token, iid, 'curl -X OPTIONS target.lab.local/uploads/')
+
+
+def test_dirb_and_gobuster_use_the_lab_wordlist(client, user):
+    token = user['token']
+    iid = start_lab(client, token, 'ewpt-ssh-key-leak')
+    out = sh(client, token, iid, 'gobuster dir -u http://target.lab.local -w wordlist.txt')
+    assert '/backup/' in out and 'Status: 200' in out
+    out = sh(client, token, iid, 'dirb http://target.lab.local/ wordlist.txt')
+    assert '+ http://target.lab.local/backup/id_rsa (CODE:200' in out
+    iid = start_lab(client, token, 'ewpt-api-endpoint-fuzzing')
+    out = sh(client, token, iid, 'gobuster dir -u http://target.lab.local/api -w api-wordlist.txt')
+    assert '/debug' in out and 'Status: 403' in out
+    # Labs without a word list don't get the tools.
+    iid = start_lab(client, token, 'ewpt-http-trace-leak')
+    assert 'command not found' in client.post(f'/labs/{iid}/shell', headers=auth_headers(token),
+                                              json={'command': 'gobuster dir'}).get_json()['stderr']
+
+
+def test_key_saved_with_echo_and_chmod_modes(client, user):
+    token = user['token']
+    iid = start_lab(client, token, 'ewpt-ssh-key-leak')
+    key = sh(client, token, iid, 'curl http://target.lab.local/backup/id_rsa')
+    flat = ' '.join(key.split())  # what a paste into the one-line prompt looks like
+    sh(client, token, iid, f'echo "{flat}" > id_rsa')
+    sh(client, token, iid, 'chmod +x id_rsa')
+    r = client.post(f'/labs/{iid}/shell', headers=auth_headers(token),
+                    json={'command': 'ssh -i id_rsa ctf@target.lab.local'}).get_json()
+    assert 'too open' in r['stderr']  # 0755 is readable by others
+    sh(client, token, iid, 'chmod go-rwx id_rsa')
+    assert FLAG.search(sh(client, token, iid, 'ssh -i id_rsa ctf@target.lab.local cat /home/ctf/flag.txt'))
+
+
+def test_flags_are_plain_random_tokens(client, user):
+    token = user['token']
+    iid = start_lab(client, token, 'ewpt-http-trace-leak')
+    flag = FLAG.search(sh(client, token, iid, 'curl -i -X TRACE target.lab.local/')).group()
+    assert re.fullmatch(r'MYCTF\{[0-9a-f]{24}\}', flag)

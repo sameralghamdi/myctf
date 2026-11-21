@@ -66,6 +66,26 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   return data as T;
 }
 
+/** POST a single file as multipart/form-data under `field`. */
+export async function uploadFile<T>(path: string, field: string, file: Blob, filename: string): Promise<T> {
+  const form = new FormData();
+  form.append(field, file, filename);
+  const response = await fetch(path, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { Accept: "application/json" },
+    body: form,
+  });
+  let data: unknown = null;
+  try {
+    data = await response.json();
+  } catch {
+    // Empty or non-JSON body.
+  }
+  if (!response.ok) throw new ApiError(errorMessage(data, response.status), response.status, data);
+  return data as T;
+}
+
 /** Message suitable for showing to the user. */
 export function toMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Something went wrong.";

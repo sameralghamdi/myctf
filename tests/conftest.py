@@ -76,7 +76,10 @@ def user(client):
     return {"username": username, "token": token}
 
 
-WITHDRAWN_SLUGS = ("ewpt-vendor-osint", "ewpt-tomcat-weak-creds", "ewpt-xrdp-exposure")
+WITHDRAWN_SLUGS = ("ewpt-vendor-osint", "ewpt-tomcat-weak-creds", "ewpt-xrdp-exposure",
+                   "ewpt-http-method-mayhem", "ewpt-dns-enumeration",
+                   "ewpt-password-reset-step-skip", "ewpt-architecture-mapping-quiz",
+                   "ewpt-log-analysis-fuzzing")
 
 
 @pytest.fixture()

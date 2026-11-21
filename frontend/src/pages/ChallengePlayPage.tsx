@@ -361,7 +361,7 @@ function PlayScreen({ slug }: { slug: string }) {
                     Running
                   </span>
                   <span className="font-mono text-gray-300">{lab.instance_id.slice(0, 8)}</span>
-                  <span className="text-gray-400">Expires {formatDateTime(lab.expires_at)} (SA time)</span>
+                  <span className="text-gray-400">Expires {formatDateTime(lab.expires_at)}</span>
                   <span className="flex min-w-0 basis-full items-center gap-2">
                     <span className="text-gray-400">URL</span>
                     <code className="min-w-0 select-all truncate rounded bg-gray-950 px-2 py-0.5 font-mono text-xs text-gray-200">

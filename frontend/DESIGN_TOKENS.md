@@ -44,7 +44,7 @@ Dark-only theme. Tokens live in `tailwind.config.ts`; components use Tailwind cl
 
 ## Structure
 - `components/ui/` — Button, Card, Badge, ChallengeBadges, Avatar, ScoreChip, Alert, Field (Input/Select/Textarea),
-  StatCard, ProgressBar, ProgressRing, AnimatedNumber, Skeleton, SpotlightCard, TypingTerminal, Kbd, Table, Tabs,
+  StatCard, ProgressBar, ProgressRing, AnimatedNumber, AvatarUploader, Skeleton, SpotlightCard, TypingTerminal, Kbd, Table, Tabs,
   EmptyState, PageLoader, SectionLabel
 - `components/feedback/` — Toast (provider + `useToast`), `celebrate()` confetti
 - `components/charts/` — ScoreRace, ActivityHeatmap

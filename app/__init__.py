@@ -142,7 +142,8 @@ def _register_security_headers(app: Flask) -> None:
             h.setdefault("Content-Security-Policy",
                          "default-src 'none'; frame-ancestors 'none'")
             h["X-Frame-Options"] = "DENY"
-            h["Cache-Control"] = "no-store"
+            if not path.startswith("/api/avatars/"):
+                h["Cache-Control"] = "no-store"
         elif path.startswith("/labs/"):
             h.setdefault("Cache-Control", "no-store")
             h.setdefault("Content-Security-Policy", "frame-ancestors 'self'")

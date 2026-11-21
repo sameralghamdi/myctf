@@ -7,6 +7,7 @@ difficulty: easy
 lab_kind: ewpt_118
 est_minutes: 15
 sort: 118
+published: false
 description: |-
   You have permission to investigate this isolated environment. Explore what is available and recover the flag.
 

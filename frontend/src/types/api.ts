@@ -11,6 +11,8 @@ export interface SessionUser {
   role: UserRole;
   email_verified: boolean;
   two_factor: boolean;
+  /** Versioned URL of the uploaded profile photo, or null. */
+  avatar_url?: string | null;
 }
 
 export interface SessionResponse {
@@ -141,6 +143,7 @@ export interface LeaderboardRow {
   solves: number;
   first_bloods?: number;
   last_solve?: string | null;
+  avatar_url?: string | null;
 }
 
 export interface LeaderboardInsights {
@@ -154,6 +157,7 @@ export interface LeaderboardInsights {
   feed: {
     username: string;
     display_name: string;
+    avatar_url?: string | null;
     challenge: string;
     public_slug: string;
     points: number;

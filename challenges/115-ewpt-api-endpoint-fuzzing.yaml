@@ -18,6 +18,9 @@ hints:
 - level: 2
   cost: 0
   body: "Some protected routes only trust requests that look as if they came from the machine itself."
+- level: 3
+  cost: 0
+  body: "Servers behind a proxy often learn the client's address from the X-Forwarded-For header. What happens if you set that header yourself?"
 remediation: Do not trust forwarding headers; disable debug endpoints; authenticate APIs.
 walkthrough: 'ffuf -u http://target.lab.local/api/FUZZ -w api-wordlist.txt -mc 200,403 reveals /api/debug
   with 403. curl -H "X-Forwarded-For: 127.0.0.1" http://target.lab.local/api/debug returns the flag.'

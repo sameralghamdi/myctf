@@ -12,10 +12,10 @@ description: |-
 hints:
 - level: 1
   cost: 0
-  body: "Servers can describe the methods they support."
+  body: "Servers can describe the methods they support. Send an OPTIONS request and read the Allow header."
 - level: 2
   cost: 0
-  body: "One diagnostic method echoes back what it receives. See what it echoes."
+  body: "If TRACE is in that list, try it: this diagnostic method echoes back what it receives. See what it echoes."
 remediation: Disable TRACE; harden web server methods.
 walkthrough: 'curl -X OPTIONS http://target.lab.local/ lists TRACE. curl -X TRACE http://target.lab.local/
   -H ''X-Test: flag'' reflects the flag in the body.'
