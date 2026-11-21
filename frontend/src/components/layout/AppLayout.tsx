@@ -72,7 +72,7 @@ export function AppLayout({ sections = navigation }: AppLayoutProps) {
   }, [signOut, navigate]);
 
   const summary: UserSummary | null = useMemo(
-    () => (user ? { username: user.display_name, role: user.role, score, rank } : null),
+    () => (user ? { username: user.display_name, avatarUrl: user.avatar_url, role: user.role, score, rank } : null),
     [user, score, rank],
   );
   const breadcrumbs = crumbOverride ?? defaultCrumbs(location.pathname, sections);

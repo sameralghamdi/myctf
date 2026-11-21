@@ -1,4 +1,4 @@
-import { Crown, Droplet, Flag, Radio, Search, Trophy, UserRound } from "lucide-react";
+import { Crown, Droplet, Flag, Search, Trophy, UserRound } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ScoreRace } from "../components/charts/ScoreRace";
@@ -44,6 +44,7 @@ function Podium({ rows, me }: { rows: LeaderboardRow[]; me?: string }) {
               )}
               <Avatar
                 name={row.display_name}
+                src={row.avatar_url}
                 size={row.rank === 1 ? "xl" : "lg"}
                 className={cn("ring-4 ring-offset-4 ring-offset-gray-900", medal.ring)}
               />
@@ -91,7 +92,6 @@ export function LeaderboardPage() {
   const board = useApi<LeaderboardRow[]>("/api/leaderboard");
   const insights = useApi<LeaderboardInsights>("/api/leaderboard/insights");
   const [query, setQuery] = useState("");
-  const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [now, setNow] = useState(Date.now());
   const [flashed, setFlashed] = useState<Set<string>>(new Set());
   // Rows fade in on the first paint only, not on every live refresh.
@@ -122,7 +122,6 @@ export function LeaderboardPage() {
       setFlashed(changed);
     }
     previous.current = current;
-    setUpdatedAt(Date.now());
   }, [board.data]);
 
   const rows = board.data ?? [];
@@ -134,16 +133,6 @@ export function LeaderboardPage() {
     return q ? rows.filter((row) => `${row.display_name} ${row.username}`.toLowerCase().includes(q)) : rows;
   }, [rows, query]);
 
-  const liveLabel = (
-    <span className="flex items-center gap-2 text-xs text-gray-400">
-      <span className="relative flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
-      </span>
-      Live · updated {timeAgo(new Date(updatedAt).toISOString(), now)}
-    </span>
-  );
-
   if (board.loading && !board.data) {
     return (
       <PageContainer>
@@ -154,11 +143,7 @@ export function LeaderboardPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Scoreboard"
-        description="Every flag counts. Climb the ranks, chase first bloods, and watch the race unfold live."
-        actions={liveLabel}
-      />
+      <PageHeader title="Scoreboard" />
 
       {!board.data ? (
         <ErrorState message={board.error ?? "Could not load the scoreboard."} onRetry={board.reload} />
@@ -190,7 +175,7 @@ export function LeaderboardPage() {
               {mine ? (
                 <div className="flex flex-1 flex-col gap-4">
                   <div className="flex items-center gap-4">
-                    <Avatar name={mine.display_name} size="lg" />
+                    <Avatar name={mine.display_name} src={mine.avatar_url} size="lg" />
                     <div className="flex flex-col">
                       <span className="font-mono text-4xl font-bold text-gray-50">#{mine.rank}</span>
                       <span className="text-sm text-gray-400">
@@ -255,10 +240,7 @@ export function LeaderboardPage() {
 
           {insights.data && insights.data.race.length > 0 && (
             <Card {...reveal(3)} className={cn(reveal(3).className, "flex flex-col gap-4")}>
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <SectionLabel>Score race · top players</SectionLabel>
-                <span className="text-xs text-gray-400">Hover the chart to compare scores at any moment</span>
-              </div>
+              <SectionLabel>Score race · top players</SectionLabel>
               <ScoreRace series={insights.data.race} />
             </Card>
           )}
@@ -312,7 +294,7 @@ export function LeaderboardPage() {
                           </td>
                           <td className="h-14 border-b border-gray-800 px-4">
                             <span className="flex items-center gap-4">
-                              <Avatar name={row.display_name} size="md" className="transition-transform duration-200 group-hover:scale-110" />
+                              <Avatar name={row.display_name} src={row.avatar_url} size="md" className="transition-transform duration-200 group-hover:scale-110" />
                               <span className="flex flex-col">
                                 <span className="font-medium text-gray-50">
                                   {row.display_name}
@@ -347,10 +329,7 @@ export function LeaderboardPage() {
             </Card>
 
             <Card {...reveal(5)} className={cn(reveal(5).className, "flex flex-col gap-4")}>
-              <div className="flex items-center justify-between">
-                <SectionLabel>Live feed</SectionLabel>
-                <Radio aria-hidden="true" className="h-4 w-4 text-green-400" />
-              </div>
+              <SectionLabel>Live feed</SectionLabel>
               {insights.data && insights.data.feed.length > 0 ? (
                 <ol className="flex flex-col gap-2" aria-live="polite">
                   {insights.data.feed.map((item, index) => (
@@ -363,7 +342,7 @@ export function LeaderboardPage() {
                         to={`/challenges/${item.public_slug}`}
                         className={cn("flex items-start gap-4 rounded-lg p-2 transition-colors duration-200 hover:bg-gray-800/50", focusRing)}
                       >
-                        <Avatar name={item.display_name} size="sm" className="mt-1" />
+                        <Avatar name={item.display_name} src={item.avatar_url} size="sm" className="mt-1" />
                         <span className="flex min-w-0 flex-1 flex-col">
                           <span className="text-sm text-gray-300">
                             <span className="font-medium text-gray-50">{item.display_name}</span> solved{" "}

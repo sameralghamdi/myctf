@@ -560,7 +560,7 @@ def score_timeline(user_ids: list[int]) -> dict[int, list[dict]]:
 def recent_solves_feed(limit: int = 12):
     """Latest solves across the platform (non-admin players), newest first."""
     return get_db().execute(
-        """SELECT s.created_at, s.points_awarded, s.first_blood, s.challenge_id,
+        """SELECT s.created_at, s.points_awarded, s.first_blood, s.challenge_id, s.user_id,
                   c.name AS challenge, u.username, u.display_name
            FROM solves s JOIN users u ON u.id=s.user_id
            JOIN challenges c ON c.id=s.challenge_id
@@ -747,3 +747,41 @@ def platform_stats() -> dict:
         "SELECT COUNT(*) AS n FROM lab_instances WHERE state='running'"
     ).fetchone()["n"]
     return {"users": users, "challenges": chals, "solves": solves, "running_labs": labs}
+
+
+# ============================================================ profile photos ==
+def get_avatar(user_id: int):
+    return get_db().execute(
+        "SELECT mime, data, updated_at FROM user_avatars WHERE user_id=?", (user_id,)
+    ).fetchone()
+
+
+def set_avatar(user_id: int, mime: str, data: bytes) -> None:
+    db = get_db()
+    db.execute(
+        """INSERT INTO user_avatars (user_id, mime, data, updated_at)
+           VALUES (?, ?, ?, datetime('now'))
+           ON CONFLICT(user_id) DO UPDATE SET mime=excluded.mime, data=excluded.data,
+                                              updated_at=excluded.updated_at""",
+        (user_id, mime, data),
+    )
+    db.commit()
+
+
+def delete_avatar(user_id: int) -> None:
+    db = get_db()
+    db.execute("DELETE FROM user_avatars WHERE user_id=?", (user_id,))
+    db.commit()
+
+
+def avatar_urls(user_ids) -> dict[int, str]:
+    """user id -> versioned photo URL, for users who uploaded one."""
+    ids = list({int(i) for i in user_ids})
+    if not ids:
+        return {}
+    marks = ",".join("?" * len(ids))
+    rows = get_db().execute(
+        f"SELECT user_id, updated_at FROM user_avatars WHERE user_id IN ({marks})", ids
+    ).fetchall()
+    return {r["user_id"]: f"/api/avatars/{r['user_id']}?v="
+            + "".join(ch for ch in r["updated_at"] if ch.isdigit()) for r in rows}

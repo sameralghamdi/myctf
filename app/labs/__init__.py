@@ -27,11 +27,6 @@ class LabError(Exception):
         self.status = status
 
 
-def _flag_label(challenge) -> str:
-    # Neutral on purpose: slugs name the technique (and the track), flags must not.
-    return f"case_{challenge['id']}"
-
-
 def start(user_id: int, challenge) -> dict:
     """Start (or return the existing) lab instance for this user+challenge."""
     kind = challenge["lab_kind"]
@@ -51,7 +46,8 @@ def start(user_id: int, challenge) -> dict:
         raise LabError("Too many running labs. Stop one first.", 429)
 
     instance_id = new_id(16)
-    flag = random_flag(_flag_label(challenge))
+    # No label: a flag must not name the challenge, its technique or its number.
+    flag = random_flag()
     ttl = current_app.config["LAB_TTL"]
     lab_url = f"/labs/{instance_id}/"
     models.create_lab_instance(instance_id, challenge["id"], user_id, flag, ttl,

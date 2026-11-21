@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { cn } from "../../lib/cn";
 
 interface AvatarProps {
   name: string;
+  /** Uploaded profile photo; falls back to initials if missing or broken. */
+  src?: string | null;
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
 }
@@ -31,8 +34,21 @@ const sizes = {
   xl: "h-20 w-20 text-3xl",
 } as const;
 
-export function Avatar({ name, size = "md", className }: AvatarProps) {
+export function Avatar({ name, src, size = "md", className }: AvatarProps) {
   const initial = (name.trim()[0] ?? "?").toUpperCase();
+  const [broken, setBroken] = useState<string | null>(null);
+  if (src && broken !== src) {
+    return (
+      <img
+        src={src}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        onError={() => setBroken(src)}
+        className={cn("shrink-0 rounded-full bg-gray-800 object-cover shadow-sm", sizes[size], className)}
+      />
+    );
+  }
   return (
     <span
       aria-hidden="true"

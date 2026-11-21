@@ -242,9 +242,14 @@ class FakeShell:
         return "Linux", "", cwd
 
     def _cmd_echo(self, cwd, args, stdin, as_root):
-        if args and args[0] == "-n":
+        escapes = False
+        while args and args[0] in ("-n", "-e", "-E", "-ne", "-en"):
+            escapes = escapes or ("e" in args[0] and args[0] != "-E")
             args = args[1:]
-        return " ".join(args), "", cwd
+        text = " ".join(args)
+        if escapes:
+            text = text.replace("\\n", "\n").replace("\\t", "\t")
+        return text, "", cwd
 
     def _cmd_help(self, cwd, args, stdin, as_root):
         extra = sorted(posixpath.basename(p) for p in self.programs)

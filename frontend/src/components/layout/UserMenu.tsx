@@ -34,7 +34,7 @@ export function UserMenu({ user, profileHref, onSignOut }: UserMenuProps) {
         onClick={() => setOpen((value) => !value)}
         className={cn("rounded-full transition-opacity duration-200 hover:opacity-80", focusRing)}
       >
-        <Avatar name={user.username} />
+        <Avatar name={user.username} src={user.avatarUrl} />
       </button>
 
       {open && (

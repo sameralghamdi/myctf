@@ -151,7 +151,7 @@ def test_browser_owner_isolation_reset_and_no_auth_leak(client, user):
 def test_neutral_briefs_public_urls_and_no_objectives_resources(client, user):
     token = user['token']; headers = auth_headers(token)
     rows = client.get('/api/challenges', headers=headers).get_json()
-    assert len(rows) == 32  # five challenges withdrawn from the catalogue
+    assert len(rows) == 27  # ten challenges withdrawn from the catalogue
     for row in rows:
         assert row['public_slug'] == row['slug'] == f"case-{row['id']}"
         assert row['lab_kind'] in ('web', 'web_terminal', 'terminal')

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 
-from flask import (Blueprint, abort, current_app, jsonify, redirect,
+from flask import (Blueprint, Response, abort, current_app, jsonify, redirect,
                    render_template, request, url_for)
 
 from .. import labs, limiter, models
@@ -301,11 +301,13 @@ def api_unlock_hint(slug, level):
 def api_leaderboard():
     rows = models.leaderboard(100)
     extras = models.leaderboard_extras([r["id"] for r in rows])
+    photos = models.avatar_urls([r["id"] for r in rows])
     return jsonify([{"rank": i, "username": r["username"],
                      "display_name": r["display_name"] or r["username"],
                      "score": r["score"], "solves": r["solves"],
                      "first_bloods": extras.get(r["id"], {}).get("first_bloods", 0),
-                     "last_solve": r["last_solve"]}
+                     "last_solve": r["last_solve"],
+                     "avatar_url": photos.get(r["id"])}
                     for i, r in enumerate(rows, 1)])
 
 
@@ -330,10 +332,13 @@ def api_leaderboard_insights():
         race.append({"username": r["username"], "rank": board.index(r) + 1,
                      "display_name": r["display_name"] or r["username"],
                      "is_me": r["id"] == user["id"], "points": points})
+    feed_rows = models.recent_solves_feed(12)
+    photos = models.avatar_urls([f["user_id"] for f in feed_rows])
     feed = [{"display_name": f["display_name"] or f["username"], "username": f["username"],
+             "avatar_url": photos.get(f["user_id"]),
              "challenge": f["challenge"], "public_slug": f"case-{f['challenge_id']}",
              "points": f["points_awarded"], "first_blood": bool(f["first_blood"]),
-             "at": f["created_at"]} for f in models.recent_solves_feed(12)]
+             "at": f["created_at"]} for f in feed_rows]
     return jsonify({"race": race, "feed": feed, "players": len(board)})
 
 
@@ -367,6 +372,49 @@ def api_profile():
         "achievements": [_serialize_achievement(a, earned=True)
                          for a in models.user_achievements(user["id"])],
     })
+
+
+@bp.post("/api/profile/avatar")
+@login_required
+def api_upload_avatar():
+    """Upload (or replace) your profile photo: multipart field `avatar`, PNG or JPEG."""
+    from ..images import ImageError, MAX_BYTES, sanitize_avatar
+    user = current_user()
+    if not limiter.allow(f"avatar:{user['id']}", 20, 3600):
+        return jsonify({"error": "Too many uploads. Try again later."}), 429
+    upload = request.files.get("avatar")
+    if upload is None:
+        return jsonify({"error": "Choose an image to upload."}), 400
+    data = upload.stream.read(MAX_BYTES + 1)
+    try:
+        mime, clean = sanitize_avatar(data)
+    except ImageError as exc:
+        return jsonify({"error": str(exc)}), 400
+    models.set_avatar(user["id"], mime, clean)
+    models.audit(user["id"], "avatar_upload", f"bytes={len(clean)}")
+    return jsonify({"ok": True, "avatar_url": models.avatar_urls([user["id"]]).get(user["id"])})
+
+
+@bp.delete("/api/profile/avatar")
+@login_required
+def api_delete_avatar():
+    user = current_user()
+    models.delete_avatar(user["id"])
+    return jsonify({"ok": True, "avatar_url": None})
+
+
+@bp.get("/api/avatars/<int:user_id>")
+@login_required
+def api_avatar(user_id: int):
+    """A player's profile photo (signed-in players only; shown on the scoreboard)."""
+    row = models.get_avatar(user_id)
+    if row is None:
+        return jsonify({"error": "No photo."}), 404
+    resp = Response(bytes(row["data"]), mimetype=row["mime"])
+    resp.headers["Content-Disposition"] = 'inline; filename="avatar"'
+    # The URL carries a version (?v=…), so a changed photo gets a new URL.
+    resp.headers["Cache-Control"] = "private, max-age=86400"
+    return resp
 
 
 @bp.get("/api/paths")

@@ -2,7 +2,7 @@ import { Droplet, Flag, Medal, ShieldCheck, Star, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PageContainer } from "../components/layout/PageContainer";
 import { AnimatedNumber } from "../components/ui/AnimatedNumber";
-import { Avatar } from "../components/ui/Avatar";
+import { AvatarUploader } from "../components/ui/AvatarUploader";
 import { Badge } from "../components/ui/Badge";
 import { Card } from "../components/ui/Card";
 import { DifficultyBadge } from "../components/ui/ChallengeBadges";
@@ -11,6 +11,7 @@ import { ErrorState } from "../components/ui/PageLoader";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { SectionLabel } from "../components/ui/SectionLabel";
 import { PageSkeleton } from "../components/ui/Skeleton";
+import { useAuth } from "../context/AuthContext";
 import { useApi } from "../hooks/useApi";
 import { cn, focusRing } from "../lib/cn";
 import { percent, timeAgo } from "../lib/format";
@@ -31,6 +32,7 @@ function Stat({ label, value, icon: Icon, accent = false }: { label: string; val
 
 export function ProfilePage() {
   const { data, error, loading, reload } = useApi<ProfileData>("/api/profile");
+  const { refresh } = useAuth();
 
   if (loading && !data) {
     return (
@@ -57,9 +59,16 @@ export function ProfilePage() {
         <div aria-hidden="true" className="h-28 bg-gradient-to-r from-brand-700/40 via-orange-600/20 to-gray-900" />
         <div aria-hidden="true" className="bg-grid absolute inset-x-0 top-0 h-28 opacity-60" />
         <div className="relative flex flex-col gap-6 px-6 pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="-mt-10 flex items-end gap-4">
-            <Avatar name={user.display_name} size="xl" className="ring-4 ring-gray-900" />
-            <div className="flex flex-col gap-2 pb-1">
+          <div className="-mt-10 flex items-start gap-4">
+            <AvatarUploader
+              name={user.display_name}
+              src={user.avatar_url}
+              onChange={async () => {
+                await refresh(); // top-bar avatar
+                reload();
+              }}
+            />
+            <div className="flex flex-col gap-2 pt-12">
               <h1 className="text-2xl font-semibold tracking-tight text-gray-50">{user.display_name}</h1>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge>{user.role}</Badge>

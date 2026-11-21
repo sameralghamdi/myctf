@@ -7,6 +7,7 @@ export type UserRole = "student" | "instructor" | "administrator";
 
 export interface UserSummary {
   username: string;
+  avatarUrl?: string | null;
   role: UserRole;
   score: number;
   /** null when the user has no rank yet. */

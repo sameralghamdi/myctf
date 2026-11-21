@@ -392,7 +392,8 @@ def _public_user(user) -> dict:
     return {"id": user["id"], "username": user["username"], "email": user["email"],
             "display_name": user["display_name"] or user["username"],
             "role": user["role"], "email_verified": bool(user["email_verified"]),
-            "two_factor": bool(user["totp_secret"])}
+            "two_factor": bool(user["totp_secret"]),
+            "avatar_url": models.avatar_urls([user["id"]]).get(user["id"])}
 
 
 def _set_cookie(resp, token: str, ttl: int) -> None:

@@ -9,6 +9,8 @@ description: |-
   You have permission to investigate this isolated environment. Explore what is available and recover the flag.
 
   Scope: target.lab.local
+
+  Username: ctf
 hints:
 - level: 1
   cost: 0

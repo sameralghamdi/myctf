@@ -23,6 +23,14 @@ CREATE TABLE IF NOT EXISTS users (
 );
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 
+-- Optional profile photo, validated and stripped of metadata on upload (app/images.py).
+CREATE TABLE IF NOT EXISTS user_avatars (
+    user_id         INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    mime            TEXT    NOT NULL CHECK (mime IN ('image/png', 'image/jpeg')),
+    data            BLOB    NOT NULL,
+    updated_at      TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Server-side sessions so tokens can be revoked (logout / forced expiry).
 CREATE TABLE IF NOT EXISTS sessions (
     id          TEXT    PRIMARY KEY,           -- random token id (jti)

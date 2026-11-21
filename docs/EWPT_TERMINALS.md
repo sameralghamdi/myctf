@@ -96,6 +96,14 @@ target used by the web interface. Supported options: `-u`, `-w`, `-X`, `-d`, `-H
 `-mc`, `-fc`, `-fs`, `-ms`. There is one `FUZZ` keyword and a cap of 256 wordlist
 entries per invocation.
 
+Labs that ship a word list (`wordlist.txt` or `api-wordlist.txt`) also provide
+`gobuster dir -u URL -w LIST` (`-s`, `-b` status filters) and `dirb URL LIST`, with
+the same 256-entry cap. They are not mentioned in hints or descriptions.
+
+`chmod` accepts numeric (`600`) and symbolic (`+x`, `go-rwx`) modes; `ssh -i` refuses a
+key that group/other can read. The key check ignores whitespace, so a key pasted with
+`echo "..." > id_rsa` works. The shell supports one trailing `>` / `>>` redirect.
+
 Relevant scenarios also provide `dig`, `nmap`, `ssh`, `chmod`, `xfreerdp`, `unzip`,
 `awk`, `sort`, `uniq` or an `answer` reporting command. Discovery evidence is
 inside each assigned environment. The log-analysis awk implementation supports

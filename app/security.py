@@ -88,9 +88,10 @@ def new_id(nbytes: int = 16) -> str:
     return secrets.token_hex(nbytes)
 
 
-def random_flag(label: str) -> str:
-    """Per-session flag, e.g. MYCTF{sqli_login_7f3a9c...}."""
-    return "MYCTF{%s_%s}" % (label, secrets.token_hex(8))
+def random_flag(label: str = "") -> str:
+    """Per-session flag. Without a label (the default for labs): MYCTF{9f2c41...}."""
+    token = secrets.token_hex(12)
+    return "MYCTF{%s_%s}" % (label, token) if label else "MYCTF{%s}" % token
 
 
 def hash_token(raw: str, secret: str) -> str:

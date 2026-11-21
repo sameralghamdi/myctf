@@ -367,6 +367,49 @@ def build_runtime(number, flag):
         except (ValueError, StopIteration) as exc:
             return '', 'wget: ' + (str(exc) or 'missing option value')
 
+    def _discover(shell, base, wordfile, root, tool):
+        content, err = shell._read(shell.program_cwd, wordfile, root, tool)
+        if err: return None, err
+        words = [line.strip() for line in content.splitlines() if line.strip() and not line.startswith('#')]
+        base = base if '://' in base else 'http://' + base
+        rows = []
+        for word in words[:256]:
+            url = base.rstrip('/') + '/' + quote(word.lstrip('/'), safe='/')
+            status, _, body = target(Request(url=url))
+            rows.append((word.lstrip('/'), url, status, len(body.encode())))
+        return rows, None
+
+    def gobuster(shell, args, stdin, root):
+        usage = 'usage: gobuster dir -u http://target -w wordlist.txt'
+        try:
+            if not args or args[0] != 'dir': raise ValueError(usage)
+            it, url, wordfile, show, hide = iter(args[1:]), '', '', None, {'404'}
+            for a in it:
+                if a in ('-u', '--url'): url = next(it)
+                elif a in ('-w', '--wordlist'): wordfile = next(it)
+                elif a in ('-s', '--status-codes'): show = set(next(it).split(','))
+                elif a in ('-b', '--status-codes-blacklist'): hide = set(next(it).split(','))
+                elif a in ('-q', '--quiet', '-k', '--no-tls-validation', '-e', '--expanded'): pass
+                elif a in ('-t', '--threads', '-x', '--extensions'): next(it)
+                else: raise ValueError('unsupported gobuster option: ' + a)
+            if not url or not wordfile: raise ValueError(usage)
+            rows, err = _discover(shell, url, wordfile, root, 'gobuster')
+            if err: return '', err
+            found = [r for r in rows if (str(r[2]) in show if show else str(r[2]) not in hide)]
+            return '\n'.join(f'/{w:<24} (Status: {st}) [Size: {size}]' for w, _, st, size in found) or 'No results.', ''
+        except (ValueError, StopIteration) as exc:
+            return '', 'gobuster: ' + (str(exc) or 'missing option value')
+
+    def dirb(shell, args, stdin, root):
+        positional = [a for a in args if not a.startswith('-')]
+        if not positional: return '', 'usage: dirb http://target wordlist.txt'
+        url, wordfile = positional[0], (positional[1] if len(positional) > 1 else 'wordlist.txt')
+        rows, err = _discover(shell, url, wordfile, root, 'dirb')
+        if err: return '', err
+        found = [f'+ {u} (CODE:{st}|SIZE:{size})' for _, u, st, size in rows if st != 404]
+        header = '---- Scanning URL: ' + (url if '://' in url else 'http://' + url) + ' ----'
+        return header + '\n' + ('\n'.join(found) or '(no results)'), ''
+
     def ffuf(shell, args, stdin, root):
         options, it = {}, iter(args)
         try:
@@ -421,10 +464,26 @@ def build_runtime(number, flag):
         return ';; status: NXDOMAIN', ''
 
     def chmod(shell, args, stdin, root):
-        if len(args) != 2 or args[0] != '600': return '', 'usage: chmod 600 <keyfile>'
-        p = file_path(shell, args[1])
-        if p not in shell.files: return '', 'chmod: No such file'
-        state['modes'][p] = '600'
+        if len(args) < 2: return '', 'usage: chmod <mode> <file>   e.g. chmod 600 id_rsa, chmod +x run.sh'
+        spec, names = args[0], args[1:]
+        for name in names:
+            p = file_path(shell, name)
+            if p not in shell.files: return '', f"chmod: cannot access '{name}': No such file or directory"
+            mode = state['modes'].get(p, 0o644)
+            if re.fullmatch(r'[0-7]{3,4}', spec):
+                mode = int(spec, 8) & 0o777
+            else:
+                for clause in spec.split(','):
+                    m = re.fullmatch(r'([ugoa]*)([-+=])([rwx]*)', clause)
+                    if not m: return '', f"chmod: invalid mode: '{spec}'"
+                    who, op, perms = m.groups()
+                    who = 'ugo' if (not who or 'a' in who) else who
+                    shifts = [{'u': 6, 'g': 3, 'o': 0}[w] for w in who]
+                    bits = sum({'r': 4, 'w': 2, 'x': 1}[ch] << sh for sh in shifts for ch in perms)
+                    if op == '+': mode |= bits
+                    elif op == '-': mode &= ~bits
+                    else: mode = (mode & ~sum(7 << sh for sh in shifts)) | bits
+            state['modes'][p] = mode & 0o777
         return '', ''
 
     def ssh(shell, args, stdin, root):
@@ -433,8 +492,13 @@ def build_runtime(number, flag):
             destination = next((value for value in args if value in ('ctf@target.lab.local', 'ctf@ssh.lab.local')), None)
             if not destination: return '', 'ssh: target must match the assigned host and account'
             p = file_path(shell, key)
-            if shell.files.get(p, '').strip() != state['key']: return '', 'ssh: Permission denied (publickey)'
-            if state['modes'].get(p) != '600': return '', 'ssh: UNPROTECTED PRIVATE KEY FILE! Use chmod 600.'
+            # Whitespace-insensitive, so a key pasted with `echo "..." > id_rsa` (the single-line
+            # prompt flattens newlines into spaces) still matches.
+            if ''.join(shell.files.get(p, '').split()) != ''.join(state['key'].split()):
+                return '', 'ssh: Permission denied (publickey)'
+            mode = state['modes'].get(p, 0o644)
+            if mode & 0o077:
+                return '', f"ssh: UNPROTECTED PRIVATE KEY FILE! Permissions {mode:04o} for '{key}' are too open. Use chmod 600 {key}"
             shell.files['/home/ctf/flag.txt'] = flag
             # The simulated remote home maps to this terminal's home after login.
             shell.host = host
@@ -485,6 +549,7 @@ def build_runtime(number, flag):
 
     result = {'nmap': nmap}
     if number not in (110, 112, 117, 118): result.update(curl=curl, ffuf=ffuf, wget=wget)
+    if number in WORDLIST_LABS | API_WORDLIST_LABS: result.update(dirb=dirb, gobuster=gobuster)
     if number == 110: result['dig'] = dig
     if number == 111: result.update(chmod=chmod, ssh=ssh)
     if number == 112: result['xfreerdp'] = rdp
