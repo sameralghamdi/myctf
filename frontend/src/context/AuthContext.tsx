@@ -17,7 +17,8 @@ interface AuthContextValue {
   score: number;
   rank: number | null;
   signIn: (identifier: string, password: string, otp?: string) => Promise<void>;
-  signUp: (username: string, email: string, password: string) => Promise<void>;
+  /** Resolves with verifyRequired=true when the account must confirm an emailed code before signing in. */
+  signUp: (username: string, email: string, password: string) => Promise<{ verifyRequired: boolean }>;
   signOut: () => Promise<void>;
   /** Re-read score/rank, e.g. after solving a challenge. */
   refresh: () => Promise<void>;
@@ -69,8 +70,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = useCallback(
     async (username: string, email: string, password: string) => {
-      await api("/api/auth/register", { method: "POST", body: { username, email, password } });
+      const result = await api<{ verify_required?: boolean }>("/api/auth/register", {
+        method: "POST",
+        body: { username, email, password },
+      });
+      if (result.verify_required) return { verifyRequired: true };
       await refresh();
+      return { verifyRequired: false };
     },
     [refresh],
   );
