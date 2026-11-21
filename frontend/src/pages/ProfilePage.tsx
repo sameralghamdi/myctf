@@ -146,12 +146,7 @@ export function ProfilePage() {
           </Card>
 
           <Card {...reveal(3)} className={cn(reveal(3).className, "flex flex-col gap-4")}>
-            <div className="flex items-center justify-between">
-              <SectionLabel>Badges</SectionLabel>
-              <Link to="/achievements" className={cn("rounded text-xs text-gray-400 hover:text-brand-400", focusRing)}>
-                All →
-              </Link>
-            </div>
+            <SectionLabel>Badges</SectionLabel>
             {data.achievements.length > 0 ? (
               <div className="grid grid-cols-2 gap-2">
                 {data.achievements.map((achievement) => (

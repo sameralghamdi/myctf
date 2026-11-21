@@ -60,8 +60,8 @@ const features = [
   },
   {
     icon: Rocket,
-    title: "Guided paths",
-    body: "Structured learning paths take you from your first HTTP request to multi-step exploitation, one flag at a time.",
+    title: "From basics to advanced",
+    body: "Start with your first HTTP request and work up to multi-step exploitation, with free hints whenever you're stuck.",
   },
 ];
 

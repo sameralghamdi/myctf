@@ -4,7 +4,6 @@ import { RequireAdmin, RequireAuth } from "./components/layout/RouteGuards";
 import { ToastProvider } from "./components/feedback/Toast";
 import { Spinner } from "./components/ui/PageLoader";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { AchievementsPage } from "./pages/AchievementsPage";
 import { AdminChallengeNewPage } from "./pages/admin/AdminChallengeNewPage";
 import { AdminChallengesPage } from "./pages/admin/AdminChallengesPage";
 import { AdminOverviewPage } from "./pages/admin/AdminOverviewPage";
@@ -19,7 +18,6 @@ import { DocsPage } from "./pages/DocsPage";
 import { LandingPage } from "./pages/Landing";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-import { PathsPage } from "./pages/PathsPage";
 import { ProfilePage } from "./pages/ProfilePage";
 
 /** Waits for the first /api/session answer so signed-in users never see a login flash. */
@@ -53,8 +51,6 @@ function AppRoutes() {
           <Route path="/challenges/:slug" element={<ChallengePlayPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/paths" element={<PathsPage />} />
-          <Route path="/achievements" element={<AchievementsPage />} />
 
           <Route element={<RequireAdmin />}>
             <Route path="/admin" element={<AdminOverviewPage />} />
