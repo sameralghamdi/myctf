@@ -97,6 +97,13 @@ export interface Achievement {
 export interface DashboardData {
   score: number;
   rank: number;
+  /** Ranked players on the scoreboard. */
+  players: number;
+  first_bloods: number;
+  /** The player directly above you (or the last ranked player if you are unranked). */
+  next_target: { display_name: string; rank: number; gap: number } | null;
+  /** Oldest-first, one entry per UTC day. */
+  activity: { date: string; solves: number }[];
   streak: number;
   completed: number;
   total: number;
@@ -132,6 +139,28 @@ export interface LeaderboardRow {
   display_name: string;
   score: number;
   solves: number;
+  first_bloods: number;
+  last_solve: string | null;
+}
+
+export interface LeaderboardInsights {
+  race: {
+    username: string;
+    display_name: string;
+    rank: number;
+    is_me: boolean;
+    points: { at: string; score: number }[];
+  }[];
+  feed: {
+    username: string;
+    display_name: string;
+    challenge: string;
+    public_slug: string;
+    points: number;
+    first_blood: boolean;
+    at: string;
+  }[];
+  players: number;
 }
 
 export interface LearningPath {

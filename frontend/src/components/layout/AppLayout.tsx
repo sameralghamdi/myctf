@@ -4,6 +4,7 @@ import { navigation } from "../../config/navigation";
 import { BreadcrumbContext } from "../../context/BreadcrumbContext";
 import { useAuth } from "../../context/AuthContext";
 import type { Breadcrumb, NavSection, UserSummary } from "../../types/navigation";
+import { CommandPalette } from "./CommandPalette";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
@@ -30,6 +31,23 @@ export function AppLayout({ sections = navigation }: AppLayoutProps) {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [crumbOverride, setCrumbOverride] = useState<Breadcrumb[] | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const openPalette = useCallback(() => setPaletteOpen(true), []);
+  const closePalette = useCallback(() => setPaletteOpen(false), []);
+
+  // ⌘K / Ctrl+K anywhere, or "/" when not typing, opens the command palette.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const typing = target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+      if ((event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) || (event.key === "/" && !typing)) {
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
 
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
   const toggleDrawer = useCallback(() => setDrawerOpen((open) => !open), []);
@@ -76,6 +94,8 @@ export function AppLayout({ sections = navigation }: AppLayoutProps) {
           role={user?.role ?? "student"}
           open={drawerOpen}
           onNavigate={closeDrawer}
+          user={summary}
+          onSearch={openPalette}
         />
 
         <div className="flex min-w-0 flex-1 flex-col">
@@ -85,12 +105,23 @@ export function AppLayout({ sections = navigation }: AppLayoutProps) {
             menuOpen={drawerOpen}
             onMenuToggle={toggleDrawer}
             onSignOut={handleSignOut}
+            onSearch={openPalette}
           />
           <main className="flex flex-1 flex-col">
-            <Outlet />
+            {/* Re-keyed per route so every page fades in. */}
+            <div key={location.pathname} className="flex flex-1 animate-fade-in flex-col">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>
+      <CommandPalette
+        open={paletteOpen}
+        onClose={closePalette}
+        sections={sections}
+        role={user?.role ?? "student"}
+        signedIn={Boolean(user)}
+      />
     </BreadcrumbContext.Provider>
   );
 }

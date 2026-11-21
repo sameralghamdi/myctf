@@ -98,7 +98,7 @@ function UsersTab({ users }: { users: AdminOverview["users"] }) {
   return (
     <div className="flex flex-col gap-4">
       {notice && <Alert tone={notice.tone}>{notice.text}</Alert>}
-      <Card className="overflow-hidden p-0">
+      <Card flush className="overflow-hidden">
         <Table>
           <thead>
             <tr>
@@ -214,7 +214,7 @@ function AuditTab() {
   if (!data) return <ErrorState message={error ?? "Could not load the audit log."} onRetry={reload} />;
 
   return (
-    <Card className="overflow-hidden p-0">
+    <Card flush className="overflow-hidden">
       <Table>
         <thead>
           <tr>

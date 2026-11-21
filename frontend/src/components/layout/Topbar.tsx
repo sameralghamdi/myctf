@@ -1,8 +1,9 @@
-import { Menu } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn, focusRing } from "../../lib/cn";
 import type { Breadcrumb, UserSummary } from "../../types/navigation";
 import { Button } from "../ui/Button";
+import { Kbd } from "../ui/Kbd";
 import { ScoreChip } from "../ui/ScoreChip";
 import { UserMenu } from "./UserMenu";
 
@@ -12,9 +13,10 @@ interface TopbarProps {
   menuOpen: boolean;
   onMenuToggle: () => void;
   onSignOut: () => void;
+  onSearch?: () => void;
 }
 
-export function Topbar({ breadcrumbs, user, menuOpen, onMenuToggle, onSignOut }: TopbarProps) {
+export function Topbar({ breadcrumbs, user, menuOpen, onMenuToggle, onSignOut, onSearch }: TopbarProps) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-gray-800 bg-gray-950/80 px-6 backdrop-blur lg:px-8">
       <div className="flex items-center gap-4">
@@ -62,6 +64,21 @@ export function Topbar({ breadcrumbs, user, menuOpen, onMenuToggle, onSignOut }:
       </div>
 
       <div className="flex items-center gap-4">
+        {onSearch && (
+          <button
+            type="button"
+            onClick={onSearch}
+            aria-label="Search pages and challenges"
+            className={cn(
+              "flex h-8 items-center gap-2 rounded-full border border-gray-800 bg-gray-900 px-2 text-sm text-gray-400 transition-colors duration-200 hover:border-gray-700 hover:text-gray-200 md:pl-4",
+              focusRing,
+            )}
+          >
+            <Search aria-hidden="true" className="h-4 w-4" />
+            <span className="hidden md:inline">Search</span>
+            <span className="hidden md:inline-flex"><Kbd>⌘K</Kbd></span>
+          </button>
+        )}
         {user ? (
           <>
             <ScoreChip score={user.score} rank={user.rank} />

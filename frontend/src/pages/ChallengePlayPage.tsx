@@ -19,6 +19,8 @@ import { LabTerminal } from "../components/terminal/LabTerminal";
 import { Markdown } from "../components/ui/Markdown";
 import { ErrorState, PageLoader } from "../components/ui/PageLoader";
 import { SectionLabel } from "../components/ui/SectionLabel";
+import { celebrate } from "../components/feedback/celebrate";
+import { useToast } from "../components/feedback/Toast";
 import { useAuth } from "../context/AuthContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { useApi } from "../hooks/useApi";
@@ -79,6 +81,8 @@ function PlayScreen({ slug }: { slug: string }) {
   const [labBusy, setLabBusy] = useState(false);
   const [labError, setLabError] = useState<string | null>(null);
   const [frameUrl, setFrameUrl] = useState<string | null>(null);
+  const flagForm = useRef<HTMLFormElement>(null);
+  const toast = useToast();
   const instanceId = challenge?.lab?.instance_id ?? null;
 
   // Close the lab automatically when leaving the page (route change or tab close).
@@ -111,6 +115,8 @@ function PlayScreen({ slug }: { slug: string }) {
       setLabError(null);
       try {
         await api(action, { method: "POST" });
+        const verb = action.endsWith("/stop") ? "stopped" : action.endsWith("/reset") ? "restarted with a fresh flag" : "is starting";
+        toast({ tone: action.endsWith("/stop") ? "info" : "success", title: `Lab ${verb}` });
         reload();
       } catch (caught) {
         setLabError(toMessage(caught));
@@ -118,7 +124,7 @@ function PlayScreen({ slug }: { slug: string }) {
         setLabBusy(false);
       }
     },
-    [reload],
+    [reload, toast],
   );
 
   if (loading && !challenge) return <PageLoader />;
@@ -146,11 +152,28 @@ function PlayScreen({ slug }: { slug: string }) {
       });
       setResult({ tone: "success", text: response.message });
       setFlag("");
+      if (response.correct && !response.already_solved) {
+        celebrate();
+        toast({
+          tone: "success",
+          title: response.first_blood ? `First blood! +${response.awarded} pts` : `Flag captured! +${response.awarded} pts`,
+          description: challenge?.name,
+          duration: 6000,
+        });
+      }
       if (!response.already_solved) await refresh(); // score + rank in the top bar
       reload();
     } catch (caught) {
       const tone: AlertTone = caught instanceof ApiError && caught.status === 429 ? "warning" : "danger";
       setResult({ tone, text: toMessage(caught) });
+      reload(); // refresh the attempt counter
+      // Nudge the flag box (skipped for reduced-motion visitors).
+      if (!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+        flagForm.current?.animate(
+          [{ transform: "translateX(0)" }, { transform: "translateX(-6px)" }, { transform: "translateX(6px)" }, { transform: "translateX(0)" }],
+          { duration: 360, easing: "ease-in-out" },
+        );
+      }
     } finally {
       setSubmitting(false);
     }
@@ -292,7 +315,7 @@ function PlayScreen({ slug }: { slug: string }) {
 
             {/* Sticky flag submission */}
             <div className="sticky bottom-0 mt-auto flex flex-col gap-2 border-t border-gray-800 bg-gray-900 p-4">
-              <form onSubmit={handleSubmit} className="flex gap-2">
+              <form ref={flagForm} onSubmit={handleSubmit} className="flex gap-2">
                 <SearchInput
                   aria-label="Flag"
                   placeholder="MYCTF{...}"
@@ -348,7 +371,9 @@ function PlayScreen({ slug }: { slug: string }) {
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        void navigator.clipboard?.writeText(frameUrl ?? `${window.location.origin}${lab.url}`)
+                        void navigator.clipboard
+                          ?.writeText(frameUrl ?? `${window.location.origin}${lab.url}`)
+                          .then(() => toast({ tone: "success", title: "Lab URL copied", duration: 2000 }))
                       }
                     >
                       Copy

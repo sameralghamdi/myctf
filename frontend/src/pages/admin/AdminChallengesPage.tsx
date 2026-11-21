@@ -99,7 +99,7 @@ export function AdminChallengesPage() {
       ) : !data ? (
         <ErrorState message={error ?? "Could not load challenges."} onRetry={reload} />
       ) : (
-        <Card className="overflow-hidden p-0">
+        <Card flush className="overflow-hidden">
           <Table>
             <thead>
               <tr>

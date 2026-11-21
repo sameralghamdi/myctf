@@ -23,7 +23,8 @@ type ButtonAsLink = BaseProps &
 export type ButtonProps = ButtonAsButton | ButtonAsLink;
 
 const variants: Record<Variant, string> = {
-  primary: "bg-brand-600 text-white shadow-sm hover:bg-brand-700",
+  primary:
+    "bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-sm shadow-brand-900/40 hover:from-brand-500 hover:to-brand-700 hover:shadow-md hover:shadow-brand-900/50",
   secondary: "border border-gray-800 bg-gray-900 text-gray-200 shadow-sm hover:bg-gray-800",
   ghost: "text-gray-300 hover:bg-gray-800 hover:text-gray-50",
   danger: "border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20",
@@ -38,7 +39,7 @@ const sizes: Record<Size, string> = {
 export function Button(props: ButtonProps) {
   const { variant = "primary", size = "md", className, children } = props;
   const classes = cn(
-    "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors duration-200",
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-all duration-200 active:scale-[0.97]",
     "disabled:pointer-events-none disabled:opacity-50",
     focusRing,
     variants[variant],

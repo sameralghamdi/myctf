@@ -525,6 +525,69 @@ def leaderboard(limit: int = 100):
     ).fetchall()
 
 
+def leaderboard_extras(user_ids: list[int]) -> dict[int, dict]:
+    """First-blood counts per user (read-only, for the scoreboard)."""
+    if not user_ids:
+        return {}
+    marks = ",".join("?" * len(user_ids))
+    rows = get_db().execute(
+        f"SELECT user_id, SUM(first_blood) AS fb FROM solves WHERE user_id IN ({marks}) "
+        "GROUP BY user_id", user_ids,
+    ).fetchall()
+    return {r["user_id"]: {"first_bloods": int(r["fb"] or 0)} for r in rows}
+
+
+def score_timeline(user_ids: list[int]) -> dict[int, list[dict]]:
+    """Point-changing events per user, oldest first: solves (+) and paid hints (-)."""
+    if not user_ids:
+        return {}
+    marks = ",".join("?" * len(user_ids))
+    db = get_db()
+    rows = db.execute(
+        f"""SELECT user_id, created_at AS at, points_awarded AS delta FROM solves
+            WHERE user_id IN ({marks})
+            UNION ALL
+            SELECT user_id, created_at AS at, -cost_paid AS delta FROM hint_unlocks
+            WHERE user_id IN ({marks}) AND cost_paid > 0
+            ORDER BY at""", [*user_ids, *user_ids],
+    ).fetchall()
+    out: dict[int, list[dict]] = {uid: [] for uid in user_ids}
+    for r in rows:
+        out[r["user_id"]].append({"at": r["at"], "delta": int(r["delta"])})
+    return out
+
+
+def recent_solves_feed(limit: int = 12):
+    """Latest solves across the platform (non-admin players), newest first."""
+    return get_db().execute(
+        """SELECT s.created_at, s.points_awarded, s.first_blood, s.challenge_id,
+                  c.name AS challenge, u.username, u.display_name
+           FROM solves s JOIN users u ON u.id=s.user_id
+           JOIN challenges c ON c.id=s.challenge_id
+           WHERE u.role != 'administrator' AND c.published=1
+           ORDER BY s.created_at DESC, s.id DESC LIMIT ?""",
+        (limit,),
+    ).fetchall()
+
+
+def daily_solve_counts(user_id: int, days: int = 112) -> dict[str, int]:
+    """Solves per UTC day over the last `days` days (for the activity heatmap)."""
+    rows = get_db().execute(
+        """SELECT date(created_at) AS d, COUNT(*) AS n FROM solves
+           WHERE user_id=? AND created_at >= datetime('now', ?)
+           GROUP BY d""",
+        (user_id, f"-{int(days)} days"),
+    ).fetchall()
+    return {r["d"]: int(r["n"]) for r in rows}
+
+
+def user_first_bloods(user_id: int) -> int:
+    row = get_db().execute(
+        "SELECT COALESCE(SUM(first_blood),0) AS n FROM solves WHERE user_id=?", (user_id,)
+    ).fetchone()
+    return int(row["n"])
+
+
 def user_rank(user_id: int) -> int:
     rows = leaderboard(100000)
     for i, r in enumerate(rows, start=1):
