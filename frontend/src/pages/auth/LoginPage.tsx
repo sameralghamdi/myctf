@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { CodeStep } from "../../components/auth/CodeStep";
 import { AuthLayout, AuthLink } from "../../components/layout/AuthLayout";
 import { Alert } from "../../components/ui/Alert";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Field";
 import { useAuth } from "../../context/AuthContext";
-import { ApiError, toMessage } from "../../lib/api";
+import { toMessage } from "../../lib/api";
+import { secondStepFrom, type SecondStep } from "../../lib/authSteps";
 
 /** Only same-site relative paths, so ?next= can't redirect off-site. */
 function safeNext(value: string | null): string {
@@ -18,8 +20,7 @@ export function LoginPage() {
   const [params] = useSearchParams();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState("");
-  const [needOtp, setNeedOtp] = useState(false);
+  const [step, setStep] = useState<SecondStep>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -31,23 +32,35 @@ export function LoginPage() {
     setBusy(true);
     setError(null);
     try {
-      await signIn(identifier.trim(), password, needOtp ? otp.trim() : undefined);
+      await signIn(identifier.trim(), password);
       navigate(next, { replace: true });
     } catch (caught) {
-      if (caught instanceof ApiError && caught.message === "otp_required") {
-        setNeedOtp(true);
-      } else {
-        setError(toMessage(caught));
-      }
+      const needed = secondStepFrom(caught);
+      if (needed) setStep(needed);
+      else setError(toMessage(caught));
     } finally {
       setBusy(false);
     }
   }
 
+  // Asking again without a code makes the server email a fresh one.
+  async function resend() {
+    try {
+      await signIn(identifier.trim(), password);
+    } catch (caught) {
+      const needed = secondStepFrom(caught);
+      if (needed?.kind === "email") {
+        setStep(needed);
+        return;
+      }
+      throw caught;
+    }
+  }
+
   return (
     <AuthLayout
-      title="Sign in"
-      description="Welcome back. Pick up where you left off."
+      title={step ? "Check your code" : "Sign in"}
+      description={step ? undefined : "Welcome back. Pick up where you left off."}
       footer={
         <>
           <AuthLink to="/register">Create account</AuthLink>
@@ -55,43 +68,43 @@ export function LoginPage() {
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        {error && <Alert tone="danger">{error}</Alert>}
-        {needOtp && <Alert>Enter the 6-digit code from your authenticator app.</Alert>}
-        <Input
-          id="identifier"
-          label="Username or email"
-          autoComplete="username"
-          autoFocus
-          required
-          value={identifier}
-          onChange={(event) => setIdentifier(event.target.value)}
+      {step ? (
+        <CodeStep
+          kind={step.kind}
+          emailHint={step.kind === "email" ? step.emailHint : undefined}
+          onSubmit={async (code) => {
+            await signIn(identifier.trim(), password, code);
+            navigate(next, { replace: true });
+          }}
+          onResend={step.kind === "email" ? resend : undefined}
+          onBack={() => setStep(null)}
         />
-        <Input
-          id="password"
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-        />
-        {needOtp && (
+      ) : (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          {error && <Alert tone="danger">{error}</Alert>}
           <Input
-            id="otp"
-            label="2FA code"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            placeholder="123456"
+            id="identifier"
+            label="Username or email"
+            autoComplete="username"
+            autoFocus
             required
-            value={otp}
-            onChange={(event) => setOtp(event.target.value)}
+            value={identifier}
+            onChange={(event) => setIdentifier(event.target.value)}
           />
-        )}
-        <Button type="submit" disabled={busy} className="w-full">
-          {busy ? "Signing in…" : "Sign in"}
-        </Button>
-      </form>
+          <Input
+            id="password"
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          <Button type="submit" disabled={busy} className="w-full">
+            {busy ? "Signing in…" : "Sign in"}
+          </Button>
+        </form>
+      )}
     </AuthLayout>
   );
 }
