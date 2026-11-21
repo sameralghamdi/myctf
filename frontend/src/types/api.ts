@@ -97,13 +97,13 @@ export interface Achievement {
 export interface DashboardData {
   score: number;
   rank: number;
-  /** Ranked players on the scoreboard. */
-  players: number;
-  first_bloods: number;
+  /** Ranked players on the scoreboard. (Optional: older API servers omit the new fields.) */
+  players?: number;
+  first_bloods?: number;
   /** The player directly above you (or the last ranked player if you are unranked). */
-  next_target: { display_name: string; rank: number; gap: number } | null;
+  next_target?: { display_name: string; rank: number; gap: number } | null;
   /** Oldest-first, one entry per UTC day. */
-  activity: { date: string; solves: number }[];
+  activity?: { date: string; solves: number }[];
   streak: number;
   completed: number;
   total: number;
@@ -139,8 +139,8 @@ export interface LeaderboardRow {
   display_name: string;
   score: number;
   solves: number;
-  first_bloods: number;
-  last_solve: string | null;
+  first_bloods?: number;
+  last_solve?: string | null;
 }
 
 export interface LeaderboardInsights {

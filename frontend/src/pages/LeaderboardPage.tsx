@@ -201,7 +201,7 @@ export function LeaderboardPage() {
                   <dl className="grid grid-cols-3 gap-2 text-center">
                     {[
                       ["Solves", String(mine.solves)],
-                      ["First bloods", String(mine.first_bloods)],
+                      ["First bloods", String(mine.first_bloods ?? 0)],
                       ["Last solve", timeAgo(mine.last_solve, now)],
                     ].map(([label, value]) => (
                       <div key={label} className="rounded-lg bg-gray-950/60 px-2 py-2">
@@ -329,7 +329,7 @@ export function LeaderboardPage() {
                           </td>
                           <td className="hidden h-14 border-b border-gray-800 px-4 text-right font-mono text-gray-300 sm:table-cell">{row.solves}</td>
                           <td className="hidden h-14 border-b border-gray-800 px-4 text-right font-mono md:table-cell">
-                            {row.first_bloods > 0 ? <span className="text-red-300">{row.first_bloods}</span> : <span className="text-gray-600">0</span>}
+                            {(row.first_bloods ?? 0) > 0 ? <span className="text-red-300">{row.first_bloods}</span> : <span className="text-gray-600">0</span>}
                           </td>
                           <td className="hidden h-14 border-b border-gray-800 px-4 text-right text-xs text-gray-400 md:table-cell">
                             {timeAgo(row.last_solve, now)}

@@ -65,6 +65,9 @@ export function DashboardPage() {
   }
 
   const next = data.in_progress ?? data.recommended;
+  // Older API servers don't send these yet; degrade gracefully instead of crashing.
+  const activity = data.activity ?? [];
+  const firstBloods = data.first_bloods ?? 0;
   const name = user?.display_name ?? "hacker";
   const skills = Object.entries(data.skills).sort(
     ([, a], [, b]) => percent(b.solved, b.total) - percent(a.solved, a.total),
@@ -142,12 +145,12 @@ export function DashboardPage() {
           label="Global rank"
           value={data.rank ? `#${data.rank}` : "—"}
           icon={Medal}
-          sub={data.rank ? `of ${data.players} ranked players` : "solve a challenge to rank"}
+          sub={data.rank ? (data.players ? `of ${data.players} ranked players` : "on the scoreboard") : "solve a challenge to rank"}
         />
         <StatCard
           {...reveal(3)}
           label="First bloods"
-          value={data.first_bloods}
+          value={firstBloods}
           tone="success"
           icon={Droplet}
           sub="first to solve a challenge"
@@ -169,7 +172,11 @@ export function DashboardPage() {
             <SectionLabel>Activity · last 16 weeks</SectionLabel>
             <CalendarDays aria-hidden="true" className="h-4 w-4 text-gray-400" />
           </div>
-          <ActivityHeatmap days={data.activity} />
+          {activity.length > 0 ? (
+            <ActivityHeatmap days={activity} />
+          ) : (
+            <p className="text-sm text-gray-400">Your solve activity will appear here.</p>
+          )}
         </Card>
 
         <Card {...reveal(6)} className={cn(reveal(6).className, "relative flex flex-col gap-4 overflow-hidden")}>
