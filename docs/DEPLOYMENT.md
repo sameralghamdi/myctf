@@ -174,6 +174,20 @@ Open http://localhost:5173. The `admin` password is printed once in terminal 1 o
   hashes — this signs everyone out and **invalidates static flag hashes**, so only do it
   before launch) and `MYCTF_ORIGIN_SECRET` (update Pages too).
 
+## 5c. Reset every player's progress
+
+Wipes all submitted flags, solves, points, hint unlocks and earned achievements
+(except "Welcome Aboard") for **all** players. Accounts, profile photos and challenges stay;
+the scoreboard starts empty.
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.prod exec app flask --app wsgi reset-progress
+```
+
+It lists what will be deleted, asks you to type `RESET`, and first saves a copy of the
+database to `instance/backups/before-reset-<date>.sqlite3` (inside the `myctf_instance`
+volume). To undo, stop the stack, copy that file over `instance/myctf.sqlite3`, and start it again.
+
 ## 5a. Configuration files at a glance
 
 | File | Where it lives | Contains | In git? |

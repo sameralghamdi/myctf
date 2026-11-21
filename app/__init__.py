@@ -41,6 +41,7 @@ def create_app(config: type[Config] | None = None) -> Flask:
     _register_blueprints(app)
     _register_jinja(app)
     _register_errors(app)
+    _register_cli(app)
 
     from .seed import seed_all
     seed_all(app)
@@ -233,3 +234,58 @@ def _register_errors(app: Flask) -> None:
         if _is_json():
             return jsonify({"error": "internal server error"}), 500
         return render_template("error.html", code=500, message="Server error"), 500
+
+
+def _register_cli(app: Flask) -> None:
+    """Maintenance commands. In production, run them inside the container:
+    docker compose -f docker-compose.prod.yml --env-file .env.prod exec app flask --app wsgi <command>
+    """
+    import click
+
+    @app.cli.command("reset-progress")
+    @click.option("--yes", is_flag=True, help="Skip the confirmation prompt.")
+    @click.option("--no-backup", is_flag=True, help="Don't copy the database first (not recommended).")
+    def reset_progress(yes: bool, no_backup: bool) -> None:
+        """Wipe every player's submitted flags, solves, points, hint unlocks and earned
+        achievements (except "Welcome Aboard"). Accounts, photos and challenges stay."""
+        from . import models
+        db = models.get_db()
+        tables = {
+            "submissions": "SELECT COUNT(*) FROM submissions",
+            "solves": "SELECT COUNT(*) FROM solves",
+            "hint unlocks": "SELECT COUNT(*) FROM hint_unlocks",
+            "competition score events": "SELECT COUNT(*) FROM score_events",
+            "earned achievements": ("SELECT COUNT(*) FROM user_achievements ua JOIN achievements a "
+                                    "ON a.id=ua.achievement_id WHERE a.slug != 'welcome'"),
+        }
+        counts = {name: db.execute(sql).fetchone()[0] for name, sql in tables.items()}
+        click.echo("This permanently deletes, for ALL players:")
+        for name, n in counts.items():
+            click.echo(f"  {n:>7}  {name}")
+        click.echo("Accounts, profile photos and challenges are kept. Scores restart at 0.")
+        if not yes:
+            typed = click.prompt('Type RESET to continue', default="", show_default=False)
+            if typed.strip() != "RESET":
+                raise click.ClickException("Cancelled. Nothing was changed.")
+
+        path = app.config["DB_PATH"]
+        if not no_backup and path != ":memory:":
+            import os
+            import sqlite3
+            from datetime import datetime
+            folder = os.path.join(os.path.dirname(os.path.abspath(path)), "backups")
+            os.makedirs(folder, exist_ok=True)
+            target = os.path.join(folder, f"before-reset-{datetime.now():%Y%m%d-%H%M%S}.sqlite3")
+            with sqlite3.connect(target) as copy:
+                db.backup(copy)
+            click.echo(f"Backup saved: {target}")
+
+        db.execute("DELETE FROM submissions")
+        db.execute("DELETE FROM solves")
+        db.execute("DELETE FROM hint_unlocks")
+        db.execute("DELETE FROM score_events")
+        db.execute("DELETE FROM user_achievements WHERE achievement_id IN "
+                   "(SELECT id FROM achievements WHERE slug != 'welcome')")
+        db.commit()
+        models.audit(None, "reset_progress", ", ".join(f"{k}={v}" for k, v in counts.items()))
+        click.echo("Done. Every player's progress is reset.")
