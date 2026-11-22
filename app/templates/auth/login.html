@@ -16,7 +16,7 @@
     <label>Password</label>
     <input name="password" type="password" required>
     {% if otp_required %}
-    <label>2FA code</label>
+    <label>{{ 'Code we emailed you (re-enter your password too)' if email_otp else '2FA code' }}</label>
     <input name="otp" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" required>
     {% endif %}
     <button class="btn" style="width:100%;margin-top:16px" type="submit">Sign in</button>

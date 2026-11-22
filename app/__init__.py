@@ -289,3 +289,23 @@ def _register_cli(app: Flask) -> None:
         db.commit()
         models.audit(None, "reset_progress", ", ".join(f"{k}={v}" for k, v in counts.items()))
         click.echo("Done. Every player's progress is reset.")
+
+    @app.cli.command("set-email")
+    @click.argument("username")
+    @click.argument("email")
+    def set_email(username: str, email: str) -> None:
+        """Change a user's email (e.g. give the admin a real inbox for sign-in codes)."""
+        from . import models
+        from .auth.routes import EMAIL_RE
+        email = email.strip().lower()
+        if not EMAIL_RE.match(email):
+            raise click.ClickException("That doesn't look like an email address.")
+        user = models.get_user_by_username(username)
+        if user is None:
+            raise click.ClickException(f"No user named {username!r}.")
+        other = models.get_user_by_email(email)
+        if other is not None and other["id"] != user["id"]:
+            raise click.ClickException("Another account already uses that email.")
+        models.set_user_email(user["id"], email)
+        models.audit(user["id"], "email_changed_by_cli", f"email={email}")
+        click.echo(f"{username}: email set to {email}")
